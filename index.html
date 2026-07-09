@@ -796,12 +796,9 @@ function closeFormModal(){
     document.body.style.overflow = '';
 }
 
-async function handleSubmit(e){
+function handleSubmit(e){
     e.preventDefault();
     var btn = document.getElementById('formSubmitBtn');
-    btn.disabled = true;
-    btn.textContent = 'SENDING...';
-
     var form = document.getElementById('contactForm');
     var data = new FormData(form);
     var name = data.get('name') || '';
@@ -810,21 +807,26 @@ async function handleSubmit(e){
     var service = data.get('service') || '';
     var message = data.get('message') || '';
 
-    // Send via FormSubmit.co
-    fetch('https://formsubmit.co/ajax/kylemheler02@gmail.com', {
-        method: 'POST',
-        headers: { 'Accept': 'application/json' },
-        body: data
-    }).catch(function(){});
+    btn.disabled = true;
+    btn.textContent = 'SENDING...';
 
-    // Show success
+    // Build mailto link with all form data
+    var subject = encodeURIComponent('New Project Inquiry: ' + name);
+    var body = encodeURIComponent(
+        'Name: ' + name + '\n' +
+        'Email: ' + email + '\n' +
+        'Phone: ' + phone + '\n' +
+        'Service Needed: ' + service + '\n\n' +
+        'Project Details:\n' + message
+    );
+    var mailtoLink = 'mailto:kylemheler02@gmail.com?subject=' + subject + '&body=' + body;
+
+    // Show success immediately
     document.getElementById('formContent').style.display = 'none';
     document.getElementById('formSuccess').style.display = 'block';
 
-    // Also open email as backup
-    var subject = 'New Project Inquiry: ' + name;
-    var bodyText = 'Name: ' + name + '%0D%0AEmail: ' + email + '%0D%0APhone: ' + phone + '%0D%0AService Needed: ' + service + '%0D%0A%0D%0A' + encodeURIComponent(message);
-    window.open('https://mail.google.com/mail/?view=cm&fs=1&to=kylemheler02@gmail.com&su=' + encodeURIComponent(subject) + '&body=' + bodyText, '_blank');
+    // Open default email client
+    window.location.href = mailtoLink;
 
     btn.disabled = false;
     btn.textContent = 'Send Message';
