@@ -420,12 +420,25 @@
             background: var(--gold);
             box-shadow: 0 0 18px var(--gold-glow), 0 0 36px var(--gold-glow);
         }
+        /* ── MOBILE OPTIMIZATION ── */
         @media (pointer: coarse) {
             body { cursor: auto; }
             .cursor-dot, .cursor-ring { display: none; }
         }
-
         button { cursor: pointer; }
+
+        /* Hamburger menu */
+        .hamburger {
+            display:none; flex-direction:column; gap:5px; cursor:pointer;
+            z-index:1001; background:none; border:none; padding:4px;
+        }
+        .hamburger span {
+            display:block; width:24px; height:2px; background:var(--accent);
+            transition:all 0.3s; border-radius:1px;
+        }
+        .hamburger.open span:nth-child(1) { transform:rotate(45deg) translate(5px,5px); }
+        .hamburger.open span:nth-child(2) { opacity:0; }
+        .hamburger.open span:nth-child(3) { transform:rotate(-45deg) translate(5px,-5px); }
 
         @media (max-width:1100px) {
             .device-desktop { width:400px; } .desktop-screen-wrap iframe { transform:scale(0.24); }
@@ -433,21 +446,108 @@
             .device-mobile { width:145px; } .mobile-screen-wrap iframe { transform:scale(0.337); }
             .modal-devices { gap:1rem; }
         }
-        @media (max-width:750px) {
-            .modal-devices { flex-direction:column; align-items:center; gap:2rem; }
-            .device-desktop { width:90vw; max-width:400px; }
-            .device-tablet { width:220px; } .device-mobile { width:155px; }
-            .projects-grid { grid-template-columns:1fr 1fr; }
-            .services-grid { grid-template-columns:1fr 1fr; }
-            .process-timeline { grid-template-columns:1fr 1fr; }
-            .about-grid { grid-template-columns:1fr; }
-            .nav-links { display:none; }
-        }
-        @media (max-width:500px) {
-            .projects-grid, .services-grid, .expertise-grid, .process-timeline { grid-template-columns:1fr; }
-            .about-highlights { grid-template-columns:1fr; }
-            .hero-stats { gap:1.5rem; }
+        @media (max-width:850px) {
+            /* Nav hamburger */
+            .nav-inner { height:56px; padding:0 0.5rem; }
+            .nav-logo img { height:28px; }
+            .hamburger { display:flex; }
+            .nav-links {
+                display:flex; flex-direction:column; gap:0;
+                position:fixed; top:56px; left:0; right:0;
+                background:rgba(0,0,0,0.95); backdrop-filter:blur(20px);
+                border-bottom:1px solid rgba(0,255,136,0.12);
+                padding:0; max-height:0; overflow:hidden;
+                transition:max-height 0.4s ease, padding 0.4s ease;
+            }
+            .nav-links.open { max-height:420px; padding:0.5rem 0; }
+            .nav-links li { padding:0; }
+            .nav-links a {
+                display:block; padding:0.8rem 2rem; font-size:0.95rem;
+                border-bottom:1px solid rgba(255,255,255,0.03);
+            }
+            .nav-cta { padding:0.35rem 1rem; font-size:0.7rem; }
+
+            /* Hero */
+            .hero { min-height:55vh; padding:5rem 1rem 1rem; }
+            .hero h1 { font-size:1.9rem; }
+            .hero p.subtitle { font-size:0.82rem; }
+            .hero-stats { gap:1rem; }
+            .hero-stat .num { font-size:1.5rem; }
+            .hero-stat .label { font-size:0.65rem; }
+            .btn, button.btn, .nav-cta { padding:0.6rem 1.4rem; font-size:0.72rem; letter-spacing:1px; }
+            .hero-buttons { flex-direction:column; align-items:center; }
+
+            /* Sections */
+            section { padding:1.5rem 1rem 0; }
+            .section-title { font-size:1.5rem; }
+            .section-subtitle { font-size:0.75rem; margin-bottom:1rem; }
+
+            /* All grids → single column */
+            .about-grid, .services-grid, .expertise-grid, .projects-grid,
+            .process-timeline, .about-highlights {
+                grid-template-columns:1fr; gap:0.8rem; padding:4px; margin:-4px;
+            }
+
+            /* Cards */
+            .about-card { padding:1.3rem; }
+            .about-card h3 { font-size:1.05rem; }
+            .about-card p { font-size:0.8rem; }
+            .expertise-card, .service-card, .process-step, .highlight-item { padding:1.3rem 1rem; }
+            .expertise-icon, .service-icon { font-size:2rem; }
+            .expertise-card h4, .service-card h4 { font-size:0.9rem; }
+            .expertise-card p, .service-card p { font-size:0.72rem; }
+            .expertise-tags span { font-size:0.58rem; padding:0.15rem 0.4rem; }
+            .project-card { margin:2px; }
+            .project-image { height:150px; }
+            .project-info { padding:0.9rem; }
+            .project-info h4 { font-size:0.88rem; }
+            .project-info p { font-size:0.73rem; }
+            .project-info .domain { font-size:0.68rem; }
+
+            /* Process */
+            .process-num { width:40px; height:40px; font-size:1rem; }
+            .process-step h4 { font-size:0.85rem; }
+            .process-step p { font-size:0.7rem; }
+
+            /* Contact */
+            .contact-section { padding:1.5rem 1rem; margin:0 auto 2.5rem; }
+            .contact-section h2 { font-size:1.3rem; }
+            .contact-section .lead { font-size:0.78rem; margin-bottom:1rem; }
+            .contact-benefits { gap:0.5rem; margin-bottom:1rem; }
+            .benefit-item { font-size:0.68rem; padding:0.25rem 0.6rem; }
+            .contact-info-row { gap:0.8rem; margin-top:1rem; padding-top:1rem; }
+            .contact-item { font-size:0.7rem; }
+
+            /* Footer */
+            footer { padding:1rem; font-size:0.68rem; }
+
+            /* Modal devices */
+            .modal-devices { flex-direction:column; align-items:center; gap:1.5rem; }
+            .device-desktop { width:88vw; max-width:360px; }
+            .desktop-screen-wrap iframe { transform:scale(0.21); }
+            .device-tablet { width:190px; }
+            .tablet-screen-wrap iframe { transform:scale(0.22); }
+            .device-mobile { width:130px; }
+            .mobile-screen-wrap iframe { transform:scale(0.28); }
             .modal-header { flex-direction:column; align-items:flex-start; }
+
+            /* Form modal */
+            .form-modal { padding:1.5rem; width:92vw; }
+            .form-modal h3 { font-size:1.1rem; }
+            .form-modal .form-sub { font-size:0.68rem; margin-bottom:1.2rem; }
+            .form-modal .form-group { margin-bottom:0.9rem; }
+            .form-modal label { font-size:0.62rem; letter-spacing:1px; }
+            .form-modal input, .form-modal textarea, .form-modal select {
+                padding:0.6rem 0.8rem; font-size:0.78rem;
+            }
+            .form-modal .form-submit { padding:0.7rem; font-size:0.78rem; }
+        }
+        @media (max-width:400px) {
+            .hero h1 { font-size:1.6rem; }
+            .hero p.subtitle { font-size:0.72rem; }
+            .hero-stats { gap:0.8rem; }
+            .hero-stat .num { font-size:1.3rem; }
+            .section-title { font-size:1.3rem; }
         }
     </style>
 </head>
@@ -471,7 +571,8 @@
 <nav>
     <div class="nav-inner">
         <div class="nav-logo"><img src="favicon.png" alt="KMM"></div>
-        <ul class="nav-links">
+        <button class="hamburger" id="hamburgerBtn" aria-label="Menu"><span></span><span></span><span></span></button>
+        <ul class="nav-links" id="navMenu">
             <li><a href="#about">About</a></li><li><a href="#services">Services</a></li><li><a href="#expertise">Expertise</a></li><li><a href="#projects">Projects</a></li><li><a href="#process">Process</a></li><li><a href="#contact">Contact</a></li>
         </ul>
         <button class="nav-cta" onclick="openFormModal()" style="font-family:inherit;font-size:inherit;">[ Connect ]</button>
@@ -849,6 +950,24 @@
         } else {
             nav.style.transform = `translateZ(0) scale(1)`;
         }
+    });
+})();
+
+
+/* ── MOBILE MENU ── */
+(function(){
+    var btn = document.getElementById('hamburgerBtn');
+    var menu = document.getElementById('navMenu');
+    if(!btn || !menu) return;
+    btn.addEventListener('click', function(){
+        btn.classList.toggle('open');
+        menu.classList.toggle('open');
+    });
+    menu.querySelectorAll('a').forEach(function(a){
+        a.addEventListener('click', function(){
+            btn.classList.remove('open');
+            menu.classList.remove('open');
+        });
     });
 })();
 
