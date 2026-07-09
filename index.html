@@ -127,15 +127,15 @@
         .nav-cta { background:transparent; color:var(--accent); border:1px solid var(--accent); padding:0.45rem 1.2rem; border-radius:2px; font-weight:600; font-size:0.8rem; font-family:var(--font-mono); letter-spacing:1px; text-transform:uppercase; transition:all 0.25s; text-decoration:none; cursor:pointer; }
         .nav-cta:hover { background:var(--accent); color:#000; box-shadow:0 0 40px var(--accent-glow), 0 0 80px var(--accent-glow); }
 
-        .hero { min-height:90vh; display:flex; align-items:center; justify-content:center; padding:6rem 2rem 1rem; position:relative; transform-style:preserve-3d; }
-        .hero::before { content:''; position:absolute; width:700px; height:700px; background:radial-gradient(circle, rgba(0,255,136,0.06), transparent 70%); top:-300px; right:-100px; border-radius:50%; pointer-events:none; }
-        .hero::after { content:''; position:absolute; width:500px; height:500px; background:radial-gradient(circle, rgba(212,160,23,0.04), transparent 70%); bottom:-150px; left:-100px; border-radius:50%; pointer-events:none; }
+        .hero { min-height:70vh; display:flex; align-items:center; justify-content:center; padding:5rem 2rem 0; position:relative; transform-style:preserve-3d; }
+        .hero::before { display:none; }
+        .hero::after { display:none; }
         .hero-content { max-width:800px; text-align:center; position:relative; z-index:1; }
         .hero-badge { display:none; }
-        .hero h1 { font-size:clamp(2.5rem,6vw,4.2rem); font-weight:800; line-height:1.1; margin-bottom:0.5rem; letter-spacing:-1px; }
+        .hero h1 { font-size:clamp(2rem,5vw,3.4rem); font-weight:800; line-height:1.1; margin-bottom:0.2rem; letter-spacing:-1px; }
         .hero h1 .name { color:var(--accent); text-shadow:0 0 30px var(--accent-glow); }
         .hero h1 .gold-dot { color:var(--gold); text-shadow:0 0 20px var(--gold-glow); }
-        .hero p.subtitle { font-size:1.15rem; color:var(--text2); font-family:var(--font-mono); letter-spacing:1px; margin-bottom:2.5rem; }
+        .hero p.subtitle { font-size:1rem; color:var(--text2); font-family:var(--font-mono); letter-spacing:1px; margin-bottom:1rem; }
         .hero p.subtitle .cursor {
             display:inline-block; width:2px; height:1.2em;
             background:var(--accent);
@@ -146,11 +146,11 @@
             0%,100% { opacity:1; }
             50% { opacity:0; }
         }
-        .hero-stats { display:flex; gap:3rem; justify-content:center; flex-wrap:wrap; margin:2rem 0; }
+        .hero-stats { display:flex; gap:2rem; justify-content:center; flex-wrap:wrap; margin:1rem 0; }
         .hero-stat { text-align:center; }
-        .hero-stat .num { font-size:2.2rem; font-weight:800; font-family:var(--font-mono); color:var(--accent); text-shadow:0 0 16px var(--accent-glow); }
+        .hero-stat .num { font-size:1.8rem; font-weight:800; font-family:var(--font-mono); color:var(--accent); text-shadow:0 0 16px var(--accent-glow); }
         .hero-stat:nth-child(2) .num { color:var(--gold); text-shadow:0 0 16px var(--gold-glow); }
-        .hero-stat .label { font-size:0.78rem; color:var(--text2); font-family:var(--font-mono); letter-spacing:1px; }
+        .hero-stat .label { font-size:0.7rem; color:var(--text2); font-family:var(--font-mono); letter-spacing:1px; }
         .hero-buttons { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
         .btn, button.btn, .nav-cta { padding:0.8rem 2rem; border-radius:2px; font-weight:600; font-size:0.85rem; text-decoration:none; display:inline-block; transition:all 0.25s; font-family:var(--font-mono); letter-spacing:2px; text-transform:uppercase; }
         .btn-primary { background:var(--accent); color:#000; border:none; clip-path:polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); }
@@ -158,20 +158,20 @@
         .btn-outline { background:transparent; color:var(--gold); border:1px solid var(--gold); clip-path:polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); }
         .btn-outline:hover { border-color:var(--accent); color:var(--accent); box-shadow:0 0 40px var(--accent-glow); }
 
-        section { padding:3rem 2rem 0; max-width:1200px; margin:0 auto; position:relative; z-index:1; scroll-margin-top:80px; transform-style:preserve-3d; }
-        .section-title { font-size:2rem; font-weight:800; text-align:center; margin-bottom:0.3rem; font-family:var(--font-mono); letter-spacing:-0.5px; }
+        section { padding:2rem 2rem 0; max-width:1200px; margin:0 auto; position:relative; z-index:1; scroll-margin-top:80px; transform-style:preserve-3d; }
+        .section-title { font-size:1.8rem; font-weight:800; text-align:center; margin-bottom:0.2rem; font-family:var(--font-mono); letter-spacing:-0.5px; }
         .section-title .green { color:var(--accent); text-shadow:0 0 20px var(--accent-glow); }
         .section-title .gold { color:var(--gold); text-shadow:0 0 20px var(--gold-glow); }
-        .section-subtitle { text-align:center; color:var(--text2); margin-bottom:2rem; font-size:0.9rem; font-family:var(--font-mono); letter-spacing:1px; }
+        .section-subtitle { text-align:center; color:var(--text2); margin-bottom:1.2rem; font-size:0.85rem; font-family:var(--font-mono); letter-spacing:1px; }
         .corner-deco { position:absolute; width:30px; height:30px; border-color:rgba(0,255,136,0.3); border-style:solid; pointer-events:none; transition:all 0.6s; }
         .corner-tl { top:0; left:0; border-width:2px 0 0 2px; }
         .corner-br { bottom:0; right:0; border-width:0 2px 2px 0; }
 
-        .about-grid { display:grid; grid-template-columns:1fr 1fr; gap:3rem; align-items:start; }
-        .about-card { background:var(--surface); border-radius:var(--radius); padding:2.5rem; border:var(--border); position:relative; box-shadow:0 0 40px rgba(0,255,136,0.08); transition:transform 0.4s; }
+        .about-grid { display:grid; grid-template-columns:1fr 1fr; gap:2rem; align-items:start; }
+        .about-card { background:var(--surface); border-radius:var(--radius); padding:1.8rem; border:var(--border); position:relative; box-shadow:0 0 40px rgba(0,255,136,0.08); transition:transform 0.4s; }
         .about-card:hover { transform:translateZ(20px); }
-        .about-card h3 { font-size:1.4rem; margin-bottom:1.2rem; color:var(--accent); font-family:var(--font-mono); letter-spacing:2px; }
-        .about-card p { color:var(--text2); margin-bottom:1rem; font-size:0.92rem; line-height:1.7; }
+        .about-card h3 { font-size:1.2rem; margin-bottom:0.8rem; color:var(--accent); font-family:var(--font-mono); letter-spacing:2px; }
+        .about-card p { color:var(--text2); margin-bottom:0.6rem; font-size:0.85rem; line-height:1.6; }
         .about-highlights { display:grid; grid-template-columns:1fr 1fr; gap:1rem; padding:6px; margin:-6px; }
         .highlight-item { background:var(--surface); border-radius:var(--radius); padding:1.5rem; border:var(--border); text-align:center; transition:all 0.4s; transform-style:preserve-3d; }
         .highlight-item:hover { border-color:var(--accent); box-shadow:0 0 20px rgba(0,255,136,0.08); transform:translateY(-6px) rotateX(3deg) rotateY(-3deg); }
@@ -182,6 +182,34 @@
         .highlight-item:nth-child(3) h4 { color:var(--accent); }
         .highlight-item:nth-child(4) h4 { color:var(--gold); }
         .highlight-item p { font-size:0.78rem; color:var(--text2); }
+
+        /* ── Expertise Cards ── */
+        .expertise-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:1.5rem; padding:6px; margin:-6px; }
+        .expertise-card {
+            background:var(--surface); border-radius:var(--radius); padding:2rem 1.5rem;
+            border:var(--border); text-align:center; transition:all 0.4s;
+            transform-style:preserve-3d; position:relative;
+        }
+        .expertise-card:hover {
+            border-color:var(--accent); box-shadow:0 0 30px rgba(0,255,136,0.12);
+            transform:translateY(-8px) rotateX(3deg);
+        }
+        .expertise-icon { font-size:2.8rem; margin-bottom:0.8rem; transition:transform 0.4s; }
+        .expertise-card:hover .expertise-icon { transform:translateZ(25px) scale(1.15); }
+        .expertise-card h4 { font-size:1.05rem; margin-bottom:0.4rem; font-family:var(--font-mono); letter-spacing:0.5px; }
+        .expertise-card:nth-child(1) h4 { color:var(--accent); }
+        .expertise-card:nth-child(2) h4 { color:var(--gold); }
+        .expertise-card:nth-child(3) h4 { color:var(--accent); }
+        .expertise-card p { font-size:0.82rem; color:var(--text2); line-height:1.6; }
+        .expertise-tags { display:flex; flex-wrap:wrap; gap:0.4rem; justify-content:center; margin-top:0.8rem; }
+        .expertise-tags span {
+            font-family:var(--font-mono); font-size:0.62rem; letter-spacing:1px;
+            color:var(--accent); border:1px solid rgba(0,255,136,0.2);
+            padding:0.2rem 0.6rem; border-radius:2px; transition:all 0.2s;
+        }
+        .expertise-card:hover .expertise-tags span {
+            border-color:rgba(0,255,136,0.5); background:rgba(0,255,136,0.04);
+        }
 
         .services-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:1.2rem; padding:8px; margin:-8px; }
         .service-card { background:var(--surface); border-radius:var(--radius); padding:2rem 1.2rem; border:var(--border); text-align:center; transition:all 0.4s; position:relative; transform-style:preserve-3d; }
@@ -416,7 +444,7 @@
             .nav-links { display:none; }
         }
         @media (max-width:500px) {
-            .projects-grid, .services-grid, .process-timeline { grid-template-columns:1fr; }
+            .projects-grid, .services-grid, .expertise-grid, .process-timeline { grid-template-columns:1fr; }
             .about-highlights { grid-template-columns:1fr; }
             .hero-stats { gap:1.5rem; }
             .modal-header { flex-direction:column; align-items:flex-start; }
@@ -444,7 +472,7 @@
     <div class="nav-inner">
         <div class="nav-logo"><img src="favicon.png" alt="KMM"></div>
         <ul class="nav-links">
-            <li><a href="#about">About</a></li><li><a href="#services">Services</a></li><li><a href="#projects">Projects</a></li><li><a href="#process">Process</a></li><li><a href="#contact">Contact</a></li>
+            <li><a href="#about">About</a></li><li><a href="#services">Services</a></li><li><a href="#expertise">Expertise</a></li><li><a href="#projects">Projects</a></li><li><a href="#process">Process</a></li><li><a href="#contact">Contact</a></li>
         </ul>
         <button class="nav-cta" onclick="openFormModal()" style="font-family:inherit;font-size:inherit;">[ Connect ]</button>
     </div>
@@ -493,6 +521,37 @@
         <div class="service-card"><div class="service-icon">⬡</div><h4>Web Development</h4><p>High-performance responsive websites built with modern technologies.</p></div>
         <div class="service-card"><div class="service-icon">◈</div><h4>SEO Optimization</h4><p>Strategic search optimization to boost your online visibility.</p></div>
         <div class="service-card"><div class="service-icon">⬡</div><h4>Branding</h4><p>Compelling brand identity that resonates with your audience.</p></div>
+    </div>
+</section>
+
+<section id="expertise">
+    <h2 class="section-title reveal">&lt;<span class="green">Expertise</span>/&gt;</h2>
+    <p class="section-subtitle reveal">// Specialized platforms and custom solutions</p>
+    <div class="expertise-grid reveal-stagger">
+        <div class="expertise-card">
+            <div class="expertise-icon">🛒</div>
+            <h4>Shopify Development</h4>
+            <p>Custom Shopify stores, theme customization, app integration, and conversion-optimized e-commerce solutions that drive sales.</p>
+            <div class="expertise-tags">
+                <span>Shopify</span><span>Liquid</span><span>Shopify Plus</span><span>E-commerce</span>
+            </div>
+        </div>
+        <div class="expertise-card">
+            <div class="expertise-icon">📝</div>
+            <h4>WordPress Development</h4>
+            <p>Custom themes, plugin development, WooCommerce stores, and high-performance WordPress sites tailored to your brand.</p>
+            <div class="expertise-tags">
+                <span>WordPress</span><span>WooCommerce</span><span>Elementor</span><span>PHP</span>
+            </div>
+        </div>
+        <div class="expertise-card">
+            <div class="expertise-icon">⚡</div>
+            <h4>Custom Development</h4>
+            <p>Full-stack web applications, custom CMS, API integrations, and bespoke solutions built with modern technologies.</p>
+            <div class="expertise-tags">
+                <span>HTML/CSS</span><span>JavaScript</span><span>Python</span><span>React</span>
+            </div>
+        </div>
     </div>
 </section>
 
@@ -742,7 +801,7 @@
 
 /* -- 3D PARALLAX EFFECT -- */
 (function(){
-    const cards = document.querySelectorAll('.project-card, .service-card, .highlight-item, .process-step');
+    const cards = document.querySelectorAll('.project-card, .service-card, .expertise-card, .highlight-item, .process-step');
     cards.forEach(card => {
         card.addEventListener('mouseenter', function(){
             card.style.transition = 'all 0.4s cubic-bezier(0.22,0.61,0.36,1)';
@@ -825,7 +884,7 @@
     animateRing();
 
     // Cursor grows on interactive elements
-    const hoverTargets = document.querySelectorAll('a, button, .project-card, .service-card, .highlight-item, .process-step, .btn, .nav-cta, .benefit-item');
+    const hoverTargets = document.querySelectorAll('a, button, .project-card, .service-card, .expertise-card, .highlight-item, .process-step, .btn, .nav-cta, .benefit-item');
     hoverTargets.forEach(el => {
         el.addEventListener('mouseenter', function(){
             dot.classList.add('hovering');
