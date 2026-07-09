@@ -108,14 +108,18 @@
         .reveal-stagger.visible > *:nth-child(9) { transition-delay:0.96s; opacity:1; transform:translateY(0); }
         .reveal-stagger.visible > *:nth-child(10) { transition-delay:1.08s; opacity:1; transform:translateY(0); }
 
-        nav { position:fixed; top:0; left:0; right:0; z-index:1000; background:rgba(0,0,0,0.9); backdrop-filter:blur(20px); border-bottom:1px solid rgba(0,255,136,0.12); padding:0 2rem; }
+        nav { position:fixed; top:0; left:0; right:0; z-index:1000; background:rgba(0,0,0,0.9); backdrop-filter:blur(20px); border-bottom:1px solid rgba(0,255,136,0.12); padding:0 2rem; transform-style:preserve-3d; transition:transform 0.3s; }
+        nav::after { content:''; position:absolute; bottom:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,var(--accent),transparent); opacity:0; transition:opacity 0.6s; }
+        nav:hover::after { opacity:1; }
+        nav:hover { transform:translateZ(15px); box-shadow:0 4px 40px rgba(0,255,136,0.1); }
         .nav-inner { max-width:1200px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; height:64px; }
         .nav-logo { display:flex; align-items:center; }
         .nav-logo img { height:36px; width:auto; filter:drop-shadow(0 0 8px rgba(0,255,136,0.5)); transition:transform 0.5s; }
         .nav-logo:hover img { transform: rotateY(360deg); transition:transform 1s; }
         .nav-links { display:flex; gap:2rem; list-style:none; }
-        .nav-links a { color:var(--text2); text-decoration:none; font-size:0.85rem; font-weight:500; font-family:var(--font-mono); letter-spacing:1px; transition:color 0.2s, text-shadow 0.2s; text-transform:uppercase; }
-        .nav-links a:hover { color:var(--accent); text-shadow:0 0 10px var(--accent-glow); }
+        .nav-links a { color:var(--text2); text-decoration:none; font-size:0.85rem; font-weight:500; font-family:var(--font-mono); letter-spacing:1px; transition:all 0.3s; text-transform:uppercase; display:inline-block; }
+        .nav-links a:hover { color:var(--accent); text-shadow:0 0 10px var(--accent-glow); transform:translateZ(15px) scale(1.08); }
+        
         .nav-cta { background:transparent; color:var(--accent); border:1px solid var(--accent); padding:0.45rem 1.2rem; border-radius:2px; font-weight:600; font-size:0.8rem; cursor:pointer; font-family:var(--font-mono); letter-spacing:1px; text-transform:uppercase; transition:all 0.25s; text-decoration:none; }
         .nav-cta:hover { background:var(--accent); color:#000; box-shadow:0 0 24px var(--accent-glow); transform:translateZ(20px); }
 
@@ -212,7 +216,7 @@
         .contact-item:hover { color:var(--accent); transform:translateZ(10px); }
         .contact-item .icon-text { font-size:1.1rem; }
 
-        footer { text-align:center; padding:2rem; color:var(--text2); font-size:0.78rem; border-top:1px solid rgba(0,255,136,0.06); font-family:var(--font-mono); letter-spacing:1px; }
+        footer { text-align:center; padding:1.5rem 2rem; margin:0; color:var(--text2); font-size:0.78rem; border-top:1px solid rgba(0,255,136,0.06); font-family:var(--font-mono); letter-spacing:1px; }
 
         /* ── 3D Edge Glow on border ── */
         @keyframes borderPulse {
@@ -321,7 +325,7 @@
         <p class="subtitle reveal">[ Full Stack Developer ] [ Web Designer ] [ UI/UX Engineer ]</p>
         <div class="hero-stats reveal">
             <div class="hero-stat"><div class="num">5+</div><div class="label">Years Exp</div></div>
-            <div class="hero-stat"><div class="num">09</div><div class="label">Projects</div></div>
+            <div class="hero-stat"><div class="num">30+</div><div class="label">Projects</div></div>
             <div class="hero-stat"><div class="num">334</div><div class="label">Network</div></div>
         </div>
         <div class="hero-buttons reveal">
@@ -548,6 +552,22 @@
             const factor = (i + 1) * 0.5;
             orb.style.transform = `translate(${x * factor}px, ${y * factor}px)`;
         });
+    });
+})();
+
+/* ── 3D NAV ON SCROLL ── */
+(function(){
+    const nav = document.querySelector('nav');
+    let lastScroll = 0;
+    window.addEventListener('scroll', function(){
+        const scrollY = window.scrollY;
+        const delta = scrollY - lastScroll;
+        lastScroll = scrollY;
+        if (scrollY > 100) {
+            nav.style.transform = `translateZ(-5px) scale(0.98)`;
+        } else {
+            nav.style.transform = `translateZ(0) scale(1)`;
+        }
     });
 })();
 
