@@ -293,7 +293,11 @@
         @keyframes pulse { 0%,100% { opacity:0.25; } 50% { opacity:1; } }
 
         /* ── Custom Cursor ── */
-        body { cursor: none; }
+        *, html, body, a, button, input, textarea, select, .btn, .btn-primary, .btn-outline, .nav-cta, .project-card, .service-card, .highlight-item, .process-step, .benefit-item, [onclick], [role="button"] {
+            cursor: none !important;
+            -webkit-user-select: none;
+            user-select: none;
+        }
         .cursor-dot {
             position: fixed; z-index: 99999; pointer-events: none;
             width: 8px; height: 8px;
@@ -732,6 +736,12 @@
     let ringX = -100, ringY = -100;
 
     document.addEventListener('mousemove', function(e){
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        dot.style.left = mouseX + 'px';
+        dot.style.top = mouseY + 'px';
+    });
+    document.addEventListener('pointerdown', function(e){
         mouseX = e.clientX;
         mouseY = e.clientY;
         dot.style.left = mouseX + 'px';
