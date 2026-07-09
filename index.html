@@ -864,41 +864,24 @@ function closeFormModal(){
 
 function handleFormSubmit(e){
     e.preventDefault();
-    var btn = document.getElementById('formSubmitBtn');
     var form = document.getElementById('contactForm');
     var data = new FormData(form);
+    var name = data.get('name') || '';
+    var email = data.get('email') || '';
+    var phone = data.get('phone') || '';
+    var service = data.get('service') || '';
+    var message = data.get('message') || '';
 
-    btn.disabled = true;
-    btn.textContent = 'SENDING...';
+    // Show success instantly — no waiting
+    document.getElementById('formContent').style.display = 'none';
+    document.getElementById('formSuccess').style.display = 'block';
 
-    // Use fetch to POST to FormSubmit.co hidden iframe style
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'https://formsubmit.co/kylemheler02@gmail.com', true);
-    xhr.setRequestHeader('Accept', 'application/json');
+    // Open email client immediately
+    var mailto = 'mailto:kylemheler02@gmail.com?subject=' + encodeURIComponent('Project Inquiry: ' + name) + '&body=' + encodeURIComponent(
+        'Name: ' + name + '\nEmail: ' + email + '\nPhone: ' + phone + '\nService Needed: ' + service + '\n\n' + message
+    );
+    window.location.href = mailto;
 
-    xhr.onload = function(){
-        // Show success regardless
-        document.getElementById('formContent').style.display = 'none';
-        document.getElementById('formSuccess').style.display = 'block';
-        btn.disabled = false;
-        btn.textContent = 'Send Message';
-    };
-
-    xhr.onerror = function(){
-        // Fallback: open email
-        var name = data.get('name') || '';
-        var email = data.get('email') || '';
-        var phone = data.get('phone') || '';
-        var service = data.get('service') || '';
-        var message = data.get('message') || '';
-        window.location.href = 'mailto:kylemheler02@gmail.com?subject=' + encodeURIComponent('Project Inquiry: ' + name) + '&body=' + encodeURIComponent('Name: ' + name + '\nEmail: ' + email + '\nPhone: ' + phone + '\nService: ' + service + '\n\n' + message);
-        document.getElementById('formContent').style.display = 'none';
-        document.getElementById('formSuccess').style.display = 'block';
-        btn.disabled = false;
-        btn.textContent = 'Send Message';
-    };
-
-    xhr.send(data);
     return false;
 }
 
@@ -946,11 +929,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
             <h3>&gt; Start Your Project</h3>
             <p class="form-sub">Fill out the form and I'll get back to you within 24 hours</p>
 
-            <form id="contactForm" action="https://formsubmit.co/kylemheler02@gmail.com" method="POST" onsubmit="return handleFormSubmit(event)">
-                <input type="hidden" name="_subject" value="New Project Inquiry">
-                <input type="hidden" name="_captcha" value="false">
-                <input type="hidden" name="_next" value="">
-                <input type="text" name="_honey" style="display:none">
+            <form id="contactForm" onsubmit="return handleFormSubmit(event)">
                 <div class="form-group">
                     <label>Name *</label>
                     <input type="text" name="name" placeholder="Your full name" required>
