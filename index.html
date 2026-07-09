@@ -293,10 +293,10 @@
         @keyframes pulse { 0%,100% { opacity:0.25; } 50% { opacity:1; } }
 
         /* ── Custom Cursor ── */
-        *, html, body, a, button, .btn, .btn-primary, .btn-outline, .nav-cta, .project-card, .service-card, .highlight-item, .process-step, .benefit-item, [onclick] {
+        html, body, a, button, .btn, .btn-primary, .btn-outline, .nav-cta, .project-card, .service-card, .highlight-item, .process-step, .benefit-item {
             cursor: none !important;
         }
-        .form-modal input, .form-modal textarea, .form-modal select, .form-modal .form-submit, .form-modal .form-close {
+        .form-modal input, .form-modal textarea, .form-modal select, .form-modal .form-submit, .form-modal .form-close, .form-modal-overlay, .form-modal {
             cursor: auto !important;
         }
         .cursor-dot {
@@ -380,7 +380,7 @@
         <ul class="nav-links">
             <li><a href="#about">About</a></li><li><a href="#services">Services</a></li><li><a href="#projects">Projects</a></li><li><a href="#process">Process</a></li><li><a href="#contact">Contact</a></li>
         </ul>
-        <a class="nav-cta" onclick="openFormModal()">[ Connect ]</a>
+        <a class="nav-cta" href="#" onclick="event.preventDefault();openFormModal()">[ Connect ]</a>
     </div>
 </nav>
 
@@ -395,7 +395,7 @@
         </div>
         <div class="hero-buttons reveal">
             <a href="#projects" class="btn btn-primary">▶ View Projects</a>
-            <a class="btn btn-outline" onclick="openFormModal()">◇ Get In Touch</a>
+            <a class="btn btn-outline" href="#" onclick="event.preventDefault();openFormModal()">◇ Get In Touch</a>
         </div>
     </div>
 </section>
@@ -506,7 +506,7 @@
             <div class="benefit-item"><span class="check">✓</span> SEO optimization & performance</div>
             <div class="benefit-item"><span class="check">✓</span> Ongoing support & maintenance</div>
         </div>
-        <a class="btn btn-primary" style="font-size:1rem; padding:1rem 2.5rem;" onclick="openFormModal()">▶ Start Your Project</a>
+        <a class="btn btn-primary" style="font-size:1rem; padding:1rem 2.5rem;" href="#" onclick="event.preventDefault();openFormModal()">▶ Start Your Project</a>
         <div class="contact-info-row">
             <div class="contact-item"><span class="icon-text">◆</span> kylemheler02@gmail.com</div>
             <div class="contact-item"><span class="icon-text">◆</span> +63 919 782 6561</div>
