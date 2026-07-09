@@ -20,13 +20,12 @@
         body {
             font-family:'Segoe UI',system-ui,sans-serif;
             background:var(--bg); color:var(--text);
-            line-height:1.6; overflow-x:hidden; margin:0; padding:0;
+            line-height:1.6; margin:0; padding:0;
         }
         .perspective-wrap {
             perspective: 1200px;
             transform-style: preserve-3d;
             position: relative; z-index: 1;
-            overflow: clip;
         }
 
         .grid-bg {
@@ -123,7 +122,7 @@
         .nav-cta { background:transparent; color:var(--accent); border:1px solid var(--accent); padding:0.45rem 1.2rem; border-radius:2px; font-weight:600; font-size:0.8rem; cursor:pointer; font-family:var(--font-mono); letter-spacing:1px; text-transform:uppercase; transition:all 0.25s; text-decoration:none; }
         .nav-cta:hover { background:var(--accent); color:#000; box-shadow:0 0 24px var(--accent-glow); transform:translateZ(20px); }
 
-        .hero { min-height:90vh; display:flex; align-items:center; justify-content:center; padding:6rem 2rem 1rem; position:relative; overflow:hidden; transform-style:preserve-3d; }
+        .hero { min-height:90vh; display:flex; align-items:center; justify-content:center; padding:6rem 2rem 1rem; position:relative; transform-style:preserve-3d; }
         .hero::before { content:''; position:absolute; width:700px; height:700px; background:radial-gradient(circle, rgba(0,255,136,0.06), transparent 70%); top:-300px; right:-100px; border-radius:50%; pointer-events:none; }
         .hero::after { content:''; position:absolute; width:500px; height:500px; background:radial-gradient(circle, rgba(212,160,23,0.04), transparent 70%); bottom:-150px; left:-100px; border-radius:50%; pointer-events:none; }
         .hero-content { max-width:800px; text-align:center; position:relative; z-index:1; }
@@ -168,7 +167,7 @@
         .about-card:hover { transform:translateZ(20px); }
         .about-card h3 { font-size:1.4rem; margin-bottom:1.2rem; color:var(--accent); font-family:var(--font-mono); letter-spacing:2px; }
         .about-card p { color:var(--text2); margin-bottom:1rem; font-size:0.92rem; line-height:1.7; }
-        .about-highlights { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+        .about-highlights { display:grid; grid-template-columns:1fr 1fr; gap:1rem; padding:6px; margin:-6px; }
         .highlight-item { background:var(--surface); border-radius:var(--radius); padding:1.5rem; border:var(--border); text-align:center; transition:all 0.4s; transform-style:preserve-3d; }
         .highlight-item:hover { border-color:var(--accent); box-shadow:0 0 20px rgba(0,255,136,0.08); transform:translateY(-6px) rotateX(3deg) rotateY(-3deg); }
         .highlight-item .icon { font-size:2rem; margin-bottom:0.5rem; }
@@ -179,7 +178,7 @@
         .highlight-item:nth-child(4) h4 { color:var(--gold); }
         .highlight-item p { font-size:0.78rem; color:var(--text2); }
 
-        .services-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:1.2rem; }
+        .services-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:1.2rem; padding:8px; margin:-8px; }
         .service-card { background:var(--surface); border-radius:var(--radius); padding:2rem 1.2rem; border:var(--border); text-align:center; transition:all 0.4s; position:relative; transform-style:preserve-3d; }
         .service-card:hover { border-color:var(--accent); box-shadow:0 0 24px rgba(0,255,136,0.1); transform:translateY(-8px) rotateX(4deg); }
         .service-icon { font-size:2.5rem; margin-bottom:1rem; transition:transform 0.4s; }
@@ -187,7 +186,7 @@
         .service-card h4 { font-size:1rem; margin-bottom:0.5rem; font-family:var(--font-mono); letter-spacing:0.5px; }
         .service-card p { font-size:0.8rem; color:var(--text2); }
 
-        .process-timeline { display:grid; grid-template-columns:repeat(4, 1fr); gap:1.2rem; }
+        .process-timeline { display:grid; grid-template-columns:repeat(4, 1fr); gap:1.2rem; padding:6px; margin:-6px; }
         .process-step { background:var(--surface); border-radius:var(--radius); padding:2rem 1.2rem; border:var(--border); text-align:center; transition:all 0.4s; }
         .process-step:hover { border-color:var(--gold); box-shadow:0 0 24px var(--gold-glow); transform:translateY(-6px) rotateX(3deg); }
         .process-num { width:48px; height:48px; background:#000; border:2px solid var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.2rem; margin:0 auto 1rem; font-family:var(--font-mono); color:var(--accent); text-shadow:0 0 10px var(--accent-glow); box-shadow:0 0 12px rgba(0,255,136,0.15); transition:all 0.4s; }
@@ -196,10 +195,10 @@
         .process-step h4 { font-size:0.95rem; margin-bottom:0.5rem; font-family:var(--font-mono); letter-spacing:0.5px; }
         .process-step p { font-size:0.8rem; color:var(--text2); }
 
-        .projects-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:1.5rem; transform-style:preserve-3d; }
-        .project-card { background:var(--surface); border-radius:var(--radius); overflow:hidden; border:var(--border); transition:all 0.5s; cursor:pointer; transform-style:preserve-3d; }
+        .projects-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:1.5rem; transform-style:preserve-3d; padding:8px; margin:-8px; }
+        .project-card { background:var(--surface); border-radius:var(--radius); border:var(--border); transition:all 0.5s; cursor:pointer; transform-style:preserve-3d; margin:4px; }
         .project-card:hover { transform:translateY(-10px) rotateX(2deg) rotateY(-2deg); border-color:var(--accent); box-shadow:0 20px 60px rgba(0,255,136,0.15); }
-        .project-image { height:200px; position:relative; overflow:hidden; border-bottom:1px solid rgba(0,255,136,0.08); background-size:cover; background-position:center top; background-repeat:no-repeat; transition:transform 0.5s; }
+        .project-image { height:200px; position:relative; overflow:hidden; border-radius:var(--radius) var(--radius) 0 0; border-bottom:1px solid rgba(0,255,136,0.08); background-size:cover; background-position:center top; background-repeat:no-repeat; transition:transform 0.5s; }
         .project-card:hover .project-image { transform:scale(1.05); }
         .project-image::before { content:''; position:absolute; inset:0; background:rgba(0,0,0,0.3); z-index:1; transition:background 0.3s; }
         .project-card:hover .project-image::before { background:rgba(0,0,0,0.55); }
@@ -585,12 +584,12 @@
             const y = e.clientY - rect.top;
             const centerX = rect.width / 2;
             const centerY = rect.height / 2;
-            const rotateY = ((x - centerX) / centerX) * 8;  // max ±8 deg
-            const rotateX = ((centerY - y) / centerY) * 6;  // max ±6 deg
-            card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
+            const rotateY = ((x - centerX) / centerX) * 5;
+            const rotateX = ((centerY - y) / centerY) * 4;
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(5px)`;
         });
         card.addEventListener('mouseleave', function(){
-            card.style.transform = 'perspective(800px) rotateX(0) rotateY(0) translateZ(0)';
+            card.style.transform = '';
         });
     });
 })();
