@@ -312,11 +312,11 @@
         .mobile-screen-wrap { position:relative; width:100%; aspect-ratio:9/19.5; border-radius:3px; overflow:hidden; border:1px solid #111; background:#000; }
         .mobile-screen-wrap iframe { position:absolute; top:0; left:0; width:390px; height:844px; border:none; transform:scale(0.4077); transform-origin:top left; }
 
-        .frame-fallback { position:absolute; inset:0; background:#0a0a0a; display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:10; padding:1rem; text-align:center; pointer-events:auto; }
-        .frame-fallback .fallback-icon { font-size:2.5rem; margin-bottom:0.8rem; opacity:0.6; }
-        .frame-fallback .fallback-msg { font-family:var(--font-mono); color:var(--text2); font-size:0.65rem; letter-spacing:1px; margin-bottom:0.8rem; }
-        .frame-fallback .fallback-link { font-family:var(--font-mono); color:var(--accent); font-size:0.6rem; letter-spacing:1px; text-decoration:none; border:1px solid var(--accent); padding:0.3rem 0.8rem; border-radius:2px; transition:all 0.2s; cursor:pointer; }
-        .frame-fallback .fallback-link:hover { background:var(--accent); color:#000; box-shadow:0 0 12px var(--accent-glow); }
+        .frame-fallback { position:absolute; inset:0; background:linear-gradient(135deg,#0a0a0a,#0d1510); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:10; padding:1rem; text-align:center; pointer-events:auto; }
+        .frame-fallback .fallback-icon { font-size:2rem; margin-bottom:0.6rem; opacity:0.7; }
+        .frame-fallback .fallback-msg { font-family:var(--font-mono); color:var(--text2); font-size:0.62rem; letter-spacing:1px; margin-bottom:0.6rem; line-height:1.4; max-width:80%; }
+        .frame-fallback .fallback-link { font-family:var(--font-mono); color:#000; font-size:0.6rem; letter-spacing:1px; text-decoration:none; background:var(--accent); padding:0.35rem 0.9rem; border-radius:2px; transition:all 0.2s; cursor:pointer; font-weight:600; }
+        .frame-fallback .fallback-link:hover { background:var(--gold); box-shadow:0 0 16px var(--gold-glow); }
         .modal-loading { position:absolute; inset:0; background:#000; display:flex; align-items:center; justify-content:center; z-index:8; pointer-events:none; }
         .modal-loading .pulse-text { font-family:var(--font-mono); color:var(--accent); font-size:0.7rem; letter-spacing:3px; animation:pulse 2s infinite; }
         @keyframes rippleOut {
@@ -776,7 +776,7 @@
             <div class="device-wrapper">
                 <div class="device-desktop"><div class="desktop-frame"><div class="desktop-screen-wrap" id="desktopScreenWrap">
                     <div class="modal-loading"><span class="pulse-text">LOADING</span></div>
-                    <div class="frame-fallback" id="desktopFallback" style="display:none;"><div class="fallback-icon">🖥️</div><div class="fallback-msg">Preview blocked by site</div><a class="fallback-link" id="desktopFallbackLink" href="#" target="_blank" rel="noopener">↗ Open in new tab</a></div>
+                    <div class="frame-fallback" id="desktopFallback" style="display:none;"><div class="fallback-icon">🖥️</div><div class="fallback-msg">This site blocks embedded previews</div><a class="fallback-link" id="desktopFallbackLink" href="#" target="_blank" rel="noopener">↗ Open in new tab</a></div>
                     <iframe id="iframeDesktop" src="" title="Desktop Preview" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-top-navigation"></iframe>
                 </div><div class="desktop-stand"></div><div class="desktop-base"></div></div></div>
                 <div class="device-label-row">◈ DESKTOP ◈</div>
@@ -784,7 +784,7 @@
             <div class="device-wrapper">
                 <div class="device-tablet"><div class="tablet-frame"><div class="tablet-screen-wrap" id="tabletScreenWrap">
                     <div class="modal-loading"><span class="pulse-text">LOADING</span></div>
-                    <div class="frame-fallback" id="tabletFallback" style="display:none;"><div class="fallback-icon">📱</div><div class="fallback-msg">Preview blocked by site</div><a class="fallback-link" id="tabletFallbackLink" href="#" target="_blank" rel="noopener">↗ Open in new tab</a></div>
+                    <div class="frame-fallback" id="tabletFallback" style="display:none;"><div class="fallback-icon">📱</div><div class="fallback-msg">This site blocks embedded previews</div><a class="fallback-link" id="tabletFallbackLink" href="#" target="_blank" rel="noopener">↗ Open in new tab</a></div>
                     <iframe id="iframeTablet" src="" title="Tablet Preview" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-top-navigation"></iframe>
                 </div><div class="tablet-home"></div></div></div>
                 <div class="device-label-row">◈ TABLET ◈</div>
@@ -792,7 +792,7 @@
             <div class="device-wrapper">
                 <div class="device-mobile"><div class="mobile-frame"><div class="mobile-notch"></div><div class="mobile-screen-wrap" id="mobileScreenWrap">
                     <div class="modal-loading"><span class="pulse-text">LOADING</span></div>
-                    <div class="frame-fallback" id="mobileFallback" style="display:none;"><div class="fallback-icon">📲</div><div class="fallback-msg">Preview blocked by site</div><a class="fallback-link" id="mobileFallbackLink" href="#" target="_blank" rel="noopener">↗ Open in new tab</a></div>
+                    <div class="frame-fallback" id="mobileFallback" style="display:none;"><div class="fallback-icon">📲</div><div class="fallback-msg">This site blocks embedded previews</div><a class="fallback-link" id="mobileFallbackLink" href="#" target="_blank" rel="noopener">↗ Open in new tab</a></div>
                     <iframe id="iframeMobile" src="" title="Mobile Preview" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-top-navigation"></iframe>
                 </div></div></div>
                 <div class="device-label-row">◈ MOBILE ◈</div>
@@ -1116,23 +1116,58 @@ document.addEventListener('keydown', function(e){
 /* ── MODAL ── */
 let iframeTimers={};
 function openPreview(url,name,domain){
-    const modal=document.getElementById('previewModal');
+    var modal=document.getElementById('previewModal');
     document.getElementById('modalProjectName').innerHTML='◈ <span class="gold">'+name+'</span> ◈';
     document.getElementById('modalProjectUrl').textContent=domain;
     document.getElementById('modalVisitBtn').href=url;
-    ['desktopFallbackLink','tabletFallbackLink','mobileFallbackLink'].forEach(id=>document.getElementById(id).href=url);
-    ['Desktop','Tablet','Mobile'].forEach(d=>{
-        const iframe=document.getElementById('iframe'+d);
-        const fallback=document.getElementById(d.toLowerCase()+'Fallback');
-        const loader=iframe.parentElement.querySelector('.modal-loading');
-        if(iframeTimers[d])clearTimeout(iframeTimers[d]);
-        iframe.src='';if(loader)loader.style.display='flex';if(fallback)fallback.style.display='none';
-        iframe.src=url;
-        iframeTimers[d]=setTimeout(()=>{if(loader)loader.style.display='none';if(fallback)fallback.style.display='flex';},8000);
-        iframe.onload=function(){clearTimeout(iframeTimers[d]);if(loader)loader.style.display='none';try{const doc=iframe.contentDocument||iframe.contentWindow.document;if(!doc||doc.location.href==='about:blank'||doc.body.innerHTML.trim()===''){if(fallback)fallback.style.display='flex';}}catch(e){}}
-        iframe.onerror=function(){clearTimeout(iframeTimers[d]);if(loader)loader.style.display='none';if(fallback)fallback.style.display='flex';}
+    ['desktopFallbackLink','tabletFallbackLink','mobileFallbackLink'].forEach(function(id){document.getElementById(id).href=url;});
+
+    // Shopify sites block iframes — show fallback immediately
+    var isShopify = url.indexOf('myshopify.com') > -1 || 
+                    ['giantexhaust.com','zalynartenails.com','mamicurvesofficial.com','ipartyrentalandmore.com','usstrut.com'].some(function(d){return url.indexOf(d) > -1;});
+
+    ['Desktop','Tablet','Mobile'].forEach(function(d){
+        var iframe = document.getElementById('iframe'+d);
+        var fallback = document.getElementById(d.toLowerCase()+'Fallback');
+        var loader = iframe.parentElement.querySelector('.modal-loading');
+        if(iframeTimers[d]) clearTimeout(iframeTimers[d]);
+        
+        iframe.src = '';
+        if(loader) loader.style.display = 'flex';
+        if(fallback) fallback.style.display = 'none';
+        
+        if(isShopify){
+            // Known blockers — show fallback after 1.5s
+            iframeTimers[d] = setTimeout(function(){
+                if(loader) loader.style.display = 'none';
+                if(fallback) fallback.style.display = 'flex';
+            }, 1500);
+        } else {
+            iframeTimers[d] = setTimeout(function(){
+                if(loader) loader.style.display = 'none';
+                if(fallback) fallback.style.display = 'flex';
+            }, 5000);
+        }
+        
+        iframe.src = url;
+        iframe.onload = function(){
+            clearTimeout(iframeTimers[d]);
+            if(loader) loader.style.display = 'none';
+            try {
+                var doc = iframe.contentDocument || iframe.contentWindow.document;
+                if(!doc || doc.location.href === 'about:blank' || doc.body.innerHTML.trim() === ''){
+                    if(fallback) fallback.style.display = 'flex';
+                }
+            } catch(e){}
+        };
+        iframe.onerror = function(){
+            clearTimeout(iframeTimers[d]);
+            if(loader) loader.style.display = 'none';
+            if(fallback) fallback.style.display = 'flex';
+        };
     });
-    modal.classList.add('active');document.body.style.overflow='hidden';
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
 }
 function closePreview(){
     document.getElementById('previewModal').classList.remove('active');document.body.style.overflow='';
