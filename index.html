@@ -336,8 +336,10 @@
         .form-modal {
             background:#0d0d0d; border:1px solid rgba(0,255,136,0.2);
             border-radius:6px; padding:2.5rem; width:90vw; max-width:480px;
+            max-height:90vh; overflow-y:auto;
             position:relative; box-shadow:0 0 60px rgba(0,255,136,0.08);
             transform:translateY(20px); transition:transform 0.4s cubic-bezier(0.22,0.61,0.36,1);
+            margin:auto; -webkit-overflow-scrolling:touch;
         }
         .form-modal-overlay.active .form-modal { transform:translateY(0); }
         .form-modal .form-close {
@@ -544,7 +546,7 @@
             .modal-header { flex-direction:column; align-items:flex-start; }
 
             /* Form modal */
-            .form-modal { padding:1.5rem; width:92vw; }
+            .form-modal { padding:1.3rem; width:94vw; max-height:82vh; overflow-y:auto; -webkit-overflow-scrolling:touch; }
             .form-modal h3 { font-size:1.1rem; }
             .form-modal .form-sub { font-size:0.68rem; margin-bottom:1.2rem; }
             .form-modal .form-group { margin-bottom:0.9rem; }
@@ -1040,10 +1042,11 @@
 
 /* ── CONTACT FORM MODAL ── */
 function openFormModal(){
-    const modal = document.getElementById('formModal');
+    var modal = document.getElementById('formModal');
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
-    // Reset to form view if previously submitted
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
     document.getElementById('formContent').style.display = 'block';
     document.getElementById('formSuccess').style.display = 'none';
     document.getElementById('contactForm').reset();
@@ -1051,6 +1054,8 @@ function openFormModal(){
 function closeFormModal(){
     document.getElementById('formModal').classList.remove('active');
     document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
 }
 
 function handleFormSubmit(e){
@@ -1100,6 +1105,11 @@ function handleFormSubmit(e){
 document.addEventListener('keydown', function(e){
     if(e.key === 'Escape' && document.getElementById('formModal').classList.contains('active')){
         closeFormModal();
+    }
+});
+document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && document.getElementById('previewModal').classList.contains('active')){
+        closePreview();
     }
 });
 
