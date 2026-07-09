@@ -22,6 +22,11 @@
             background:var(--bg); color:var(--text);
             line-height:1.6; margin:0; padding:0;
         }
+        /* Matrix code rain canvas */
+        #codeRain {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            opacity: 0.07;
+        }
         .perspective-wrap {
             perspective: 1200px;
             transform-style: preserve-3d;
@@ -309,6 +314,8 @@
 </head>
 <body>
 
+<canvas id="codeRain"></canvas>
+
 <!-- Floating orbs -->
 <div class="orb orb-1"></div>
 <div class="orb orb-2"></div>
@@ -507,6 +514,59 @@
 </div>
 
 <script>
+
+/* ── MATRIX CODE RAIN ── */
+(function(){
+    const canvas = document.getElementById('codeRain');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789{}[]<>/\|&!?#@%=+-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const fontSize = 14;
+    let columns, drops;
+
+    function init(){
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        columns = Math.floor(canvas.width / fontSize);
+        drops = new Array(columns).fill(0);
+    }
+    init();
+    window.addEventListener('resize', init);
+
+    function draw(){
+        ctx.fillStyle = 'rgba(0,0,0,0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        for(let i = 0; i < drops.length; i++){
+            const char = chars[Math.floor(Math.random() * chars.length)];
+            const x = i * fontSize;
+            const y = drops[i] * fontSize;
+
+            // Green chars with slight color variation
+            const r = Math.floor(Math.random() * 40);
+            const g = 200 + Math.floor(Math.random() * 55);
+            const b = Math.floor(Math.random() * 60);
+            ctx.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')';
+            ctx.font = fontSize + 'px monospace';
+            ctx.fillText(char, x, y);
+
+            // Gold accent columns
+            if(Math.random() < 0.15){
+                ctx.fillStyle = 'rgba(212,160,23,0.8)';
+                ctx.fillText(char, x, y);
+            }
+
+            // Reset drop when it reaches bottom or randomly
+            if(y > canvas.height && Math.random() > 0.975){
+                drops[i] = 0;
+            }
+            drops[i]++;
+        }
+    }
+
+    setInterval(draw, 70);
+})();
+
 /* ── TYPING ANIMATION ── */
 (function(){
     const texts = [
