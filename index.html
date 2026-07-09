@@ -124,7 +124,7 @@
         .nav-links a { color:var(--text2); text-decoration:none; font-size:0.85rem; font-weight:500; font-family:var(--font-mono); letter-spacing:1px; transition:all 0.3s; text-transform:uppercase; display:inline-block; }
         .nav-links a:hover { color:var(--accent); text-shadow:0 0 15px var(--accent-glow); }
         
-        .nav-cta { background:transparent; color:var(--accent); border:1px solid var(--accent); padding:0.45rem 1.2rem; border-radius:2px; font-weight:600; font-size:0.8rem; cursor:pointer; font-family:var(--font-mono); letter-spacing:1px; text-transform:uppercase; transition:all 0.25s; text-decoration:none; }
+        .nav-cta { background:transparent; color:var(--accent); border:1px solid var(--accent); padding:0.45rem 1.2rem; border-radius:2px; font-weight:600; font-size:0.8rem; font-family:var(--font-mono); letter-spacing:1px; text-transform:uppercase; transition:all 0.25s; text-decoration:none; cursor:pointer; }
         .nav-cta:hover { background:var(--accent); color:#000; box-shadow:0 0 40px var(--accent-glow), 0 0 80px var(--accent-glow); }
 
         .hero { min-height:90vh; display:flex; align-items:center; justify-content:center; padding:6rem 2rem 1rem; position:relative; transform-style:preserve-3d; }
@@ -152,7 +152,7 @@
         .hero-stat:nth-child(2) .num { color:var(--gold); text-shadow:0 0 16px var(--gold-glow); }
         .hero-stat .label { font-size:0.78rem; color:var(--text2); font-family:var(--font-mono); letter-spacing:1px; }
         .hero-buttons { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
-        .btn { padding:0.8rem 2rem; border-radius:2px; font-weight:600; font-size:0.85rem; cursor:none; text-decoration:none; display:inline-block; transition:all 0.25s; font-family:var(--font-mono); letter-spacing:2px; text-transform:uppercase; }
+        .btn, button.btn, .nav-cta { padding:0.8rem 2rem; border-radius:2px; font-weight:600; font-size:0.85rem; text-decoration:none; display:inline-block; transition:all 0.25s; font-family:var(--font-mono); letter-spacing:2px; text-transform:uppercase; }
         .btn-primary { background:var(--accent); color:#000; border:none; clip-path:polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); }
         .btn-primary:hover { background:#00ffaa; box-shadow:0 0 50px var(--gold-glow), 0 0 100px var(--gold-glow), inset 0 0 30px rgba(212,160,23,0.3); }
         .btn-outline { background:transparent; color:var(--gold); border:1px solid var(--gold); clip-path:polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); }
@@ -293,11 +293,9 @@
         @keyframes pulse { 0%,100% { opacity:0.25; } 50% { opacity:1; } }
 
         /* ── Custom Cursor ── */
-        html, body, a, button, .btn, .btn-primary, .btn-outline, .nav-cta, .project-card, .service-card, .highlight-item, .process-step, .benefit-item {
-            cursor: none !important;
-        }
-        .form-modal input, .form-modal textarea, .form-modal select, .form-modal .form-submit, .form-modal .form-close, .form-modal-overlay, .form-modal {
-            cursor: auto !important;
+        html { cursor: none; }
+        .form-modal input, .form-modal textarea, .form-modal select, .form-modal .form-submit, .form-modal .form-close {
+            cursor: auto;
         }
         .cursor-dot {
             position: fixed; z-index: 99999; pointer-events: none;
@@ -332,6 +330,8 @@
             body { cursor: auto; }
             .cursor-dot, .cursor-ring { display: none; }
         }
+
+        button { cursor: pointer; }
 
         @media (max-width:1100px) {
             .device-desktop { width:400px; } .desktop-screen-wrap iframe { transform:scale(0.24); }
@@ -380,7 +380,7 @@
         <ul class="nav-links">
             <li><a href="#about">About</a></li><li><a href="#services">Services</a></li><li><a href="#projects">Projects</a></li><li><a href="#process">Process</a></li><li><a href="#contact">Contact</a></li>
         </ul>
-        <a class="nav-cta" href="#" onclick="event.preventDefault();openFormModal()">[ Connect ]</a>
+        <button class="nav-cta" onclick="openFormModal()" style="font-family:inherit;font-size:inherit;">[ Connect ]</button>
     </div>
 </nav>
 
@@ -395,7 +395,7 @@
         </div>
         <div class="hero-buttons reveal">
             <a href="#projects" class="btn btn-primary">▶ View Projects</a>
-            <a class="btn btn-outline" href="#" onclick="event.preventDefault();openFormModal()">◇ Get In Touch</a>
+            <button class="btn btn-outline" onclick="openFormModal()" style="font-family:inherit;font-size:inherit;">◇ Get In Touch</button>
         </div>
     </div>
 </section>
@@ -506,7 +506,7 @@
             <div class="benefit-item"><span class="check">✓</span> SEO optimization & performance</div>
             <div class="benefit-item"><span class="check">✓</span> Ongoing support & maintenance</div>
         </div>
-        <a class="btn btn-primary" style="font-size:1rem; padding:1rem 2.5rem;" href="#" onclick="event.preventDefault();openFormModal()">▶ Start Your Project</a>
+        <button class="btn btn-primary" onclick="openFormModal()" style="font-size:1rem; padding:1rem 2.5rem; font-family:inherit;">▶ Start Your Project</button>
         <div class="contact-info-row">
             <div class="contact-item"><span class="icon-text">◆</span> kylemheler02@gmail.com</div>
             <div class="contact-item"><span class="icon-text">◆</span> +63 919 782 6561</div>
