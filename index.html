@@ -16,17 +16,16 @@
         }
         * { margin:0; padding:0; box-sizing:border-box; }
         html { scroll-behavior:smooth; margin:0; padding:0; height:100%; }
+
         body {
             font-family:'Segoe UI',system-ui,sans-serif;
             background:var(--bg); color:var(--text);
             line-height:1.6; overflow-x:hidden; margin:0; padding:0;
             perspective: 1200px;
-            display:flex; flex-direction:column; min-height:100vh;
         }
         .perspective-wrap {
             transform-style: preserve-3d;
             position: relative; z-index: 1;
-            flex:1 0 auto;
         }
 
         .grid-bg {
@@ -226,7 +225,7 @@
         .contact-item:hover { color:var(--accent); transform:translateZ(10px); }
         .contact-item .icon-text { font-size:1.1rem; }
 
-        footer { text-align:center; padding:0.6rem 2rem; margin:0; color:var(--text2); font-size:0.78rem; border-top:1px solid rgba(0,255,136,0.06); font-family:var(--font-mono); letter-spacing:1px; flex-shrink:0; }
+        footer { text-align:center; padding:0.5rem 2rem; margin:0; color:var(--text2); font-size:0.78rem; border-top:1px solid rgba(0,255,136,0.06); font-family:var(--font-mono); letter-spacing:1px; }
         footer p { margin:0; padding:0; line-height:1; }
 
         /* ── 3D Edge Glow on border ── */
