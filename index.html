@@ -129,9 +129,31 @@
         .hero-content { max-width:800px; text-align:center; position:relative; z-index:1; }
         .hero-badge { display:none; }
         .hero h1 { font-size:clamp(2.5rem,6vw,4.2rem); font-weight:800; line-height:1.1; margin-bottom:0.5rem; letter-spacing:-1px; }
-        .hero h1 .name { color:var(--accent); text-shadow:0 0 30px var(--accent-glow); }
+        .hero h1 .name { color:var(--accent); text-shadow:0 0 30px var(--accent-glow); position:relative; display:inline-block; }
+        .hero h1 .name::before {
+            content:'';
+            position:absolute; top:0; left:0; width:100%; height:2px;
+            background:var(--accent);
+            box-shadow:0 0 10px var(--accent-glow), 0 0 30px var(--accent-glow);
+            animation: scanLine 2s linear infinite;
+        }
+        @keyframes scanLine {
+            0% { top:0; opacity:1; }
+            50% { top:100%; opacity:0.5; }
+            100% { top:0; opacity:1; }
+        }
         .hero h1 .gold-dot { color:var(--gold); text-shadow:0 0 20px var(--gold-glow); }
         .hero p.subtitle { font-size:1.15rem; color:var(--text2); font-family:var(--font-mono); letter-spacing:1px; margin-bottom:2.5rem; }
+        .hero p.subtitle .cursor {
+            display:inline-block; width:2px; height:1.2em;
+            background:var(--accent);
+            margin-left:4px; vertical-align:text-bottom;
+            animation: cursorBlink 0.8s steps(2) infinite;
+        }
+        @keyframes cursorBlink {
+            0%,100% { opacity:1; }
+            50% { opacity:0; }
+        }
         .hero-stats { display:flex; gap:3rem; justify-content:center; flex-wrap:wrap; margin:2rem 0; }
         .hero-stat { text-align:center; }
         .hero-stat .num { font-size:2.2rem; font-weight:800; font-family:var(--font-mono); color:var(--accent); text-shadow:0 0 16px var(--accent-glow); }
@@ -216,7 +238,8 @@
         .contact-item:hover { color:var(--accent); transform:translateZ(10px); }
         .contact-item .icon-text { font-size:1.1rem; }
 
-        footer { text-align:center; padding:1.5rem 2rem; margin:0; color:var(--text2); font-size:0.78rem; border-top:1px solid rgba(0,255,136,0.06); font-family:var(--font-mono); letter-spacing:1px; }
+        footer { text-align:center; padding:1.2rem 2rem; margin:0; color:var(--text2); font-size:0.78rem; border-top:1px solid rgba(0,255,136,0.06); font-family:var(--font-mono); letter-spacing:1px; }
+        footer p { margin:0; padding:0; }
 
         /* ── 3D Edge Glow on border ── */
         @keyframes borderPulse {
@@ -322,7 +345,7 @@
 <section class="hero" id="home">
     <div class="hero-content">
         <h1 class="reveal">Hi, I'm <span class="name">Kyle Mheler Mungcal</span><span class="gold-dot">.</span></h1>
-        <p class="subtitle reveal">[ Full Stack Developer ] [ Web Designer ] [ UI/UX Engineer ]</p>
+        <p class="subtitle reveal" id="typingText"><span class="cursor"></span></p>
         <div class="hero-stats reveal">
             <div class="hero-stat"><div class="num">5+</div><div class="label">Years Exp</div></div>
             <div class="hero-stat"><div class="num">30+</div><div class="label">Projects</div></div>
@@ -497,6 +520,58 @@
 </div>
 
 <script>
+/* ── TYPING ANIMATION ── */
+(function(){
+    const texts = [
+        '&lt;<span style="color:var(--accent)"> Full Stack Developer </span>/&gt;',
+        '&lt;<span style="color:var(--gold)"> Web Designer </span>/&gt;',
+        '&lt;<span style="color:var(--accent)"> UI/UX Engineer </span>/&gt;',
+        '&lt;<span style="color:var(--gold)"> WordPress Expert </span>/&gt;',
+        '&lt;<span style="color:var(--accent)"> SEO Specialist </span>/&gt;'
+    ];
+    const el = document.getElementById('typingText');
+    if(!el) return;
+    const cursor = el.querySelector('.cursor');
+
+    let textIndex = 0;
+    let charIndex = 0;
+    let isDeleting = false;
+    let currentText = '';
+
+    function type(){
+        const fullText = texts[textIndex];
+        const speed = isDeleting ? 40 : 80;
+
+        if(!isDeleting && charIndex < fullText.length){
+            currentText = fullText.substring(0, charIndex + 1);
+            el.innerHTML = currentText + '<span class="cursor"></span>';
+            charIndex++;
+            setTimeout(type, speed);
+        } else if(!isDeleting && charIndex >= fullText.length){
+            // Pause at end
+            setTimeout(() => { isDeleting = true; type(); }, 2500);
+        } else if(isDeleting && charIndex > 0){
+            currentText = fullText.substring(0, charIndex - 1);
+            el.innerHTML = currentText + '<span class="cursor"></span>';
+            charIndex--;
+            setTimeout(type, speed);
+        } else {
+            isDeleting = false;
+            textIndex = (textIndex + 1) % texts.length;
+            setTimeout(type, 400);
+        }
+    }
+
+    // Start typing once revealed
+    const obs = new IntersectionObserver((entries) => {
+        if(entries[0].isIntersecting){
+            obs.disconnect();
+            setTimeout(type, 600);
+        }
+    }, { threshold: 0.5 });
+    obs.observe(el);
+})();
+
 /* ── SCROLL REVEAL ── */
 (function(){
     const observer = new IntersectionObserver((entries) => {
