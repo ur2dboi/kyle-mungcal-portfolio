@@ -862,7 +862,7 @@ function closeFormModal(){
     document.body.style.overflow = '';
 }
 
-function handleSubmit(e){
+async function handleSubmit(e){
     e.preventDefault();
     var btn = document.getElementById('formSubmitBtn');
     var form = document.getElementById('contactForm');
@@ -876,23 +876,24 @@ function handleSubmit(e){
     btn.disabled = true;
     btn.textContent = 'SENDING...';
 
-    // Build mailto link with all form data
-    var subject = encodeURIComponent('New Project Inquiry: ' + name);
-    var body = encodeURIComponent(
-        'Name: ' + name + '\n' +
-        'Email: ' + email + '\n' +
-        'Phone: ' + phone + '\n' +
-        'Service Needed: ' + service + '\n\n' +
-        'Project Details:\n' + message
-    );
-    var mailtoLink = 'mailto:kylemheler02@gmail.com?subject=' + subject + '&body=' + body;
-
-    // Show success immediately
-    document.getElementById('formContent').style.display = 'none';
-    document.getElementById('formSuccess').style.display = 'block';
-
-    // Open default email client
-    window.location.href = mailtoLink;
+    try {
+        var response = await fetch('https://formsubmit.co/ajax/kylemheler02@gmail.com', {
+            method: 'POST',
+            headers: { 'Accept': 'application/json' },
+            body: data
+        });
+        // FormSubmit.co accepted
+        document.getElementById('formContent').style.display = 'none';
+        document.getElementById('formSuccess').style.display = 'block';
+    } catch(err) {
+        // Fallback: open email client
+        var mailtoLink = 'mailto:kylemheler02@gmail.com?subject=' + encodeURIComponent('New Project Inquiry: ' + name) + '&body=' + encodeURIComponent(
+            'Name: ' + name + '\nEmail: ' + email + '\nPhone: ' + phone + '\nService Needed: ' + service + '\n\n' + message
+        );
+        document.getElementById('formContent').style.display = 'none';
+        document.getElementById('formSuccess').style.display = 'block';
+        window.location.href = mailtoLink;
+    }
 
     btn.disabled = false;
     btn.textContent = 'Send Message';
