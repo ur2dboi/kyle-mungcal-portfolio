@@ -15,12 +15,16 @@
             --font-mono: 'Courier New', 'Fira Code', 'JetBrains Mono', monospace;
         }
         * { margin:0; padding:0; box-sizing:border-box; }
-        html { scroll-behavior:smooth; margin:0; padding:0; }
+        html { scroll-behavior:smooth; margin:0; padding:0; -webkit-overflow-scrolling:touch; }
+        @media (max-width:850px) { html { scroll-behavior:auto; } }
 
         body {
             font-family:'Segoe UI',system-ui,sans-serif;
             background:var(--bg); color:var(--text);
             line-height:1.6; margin:0; padding:0;
+            -webkit-overflow-scrolling: touch;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
         /* Matrix code rain canvas */
         #codeRain {
@@ -31,6 +35,8 @@
             perspective: 1200px;
             transform-style: preserve-3d;
             position: relative; z-index: 1;
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
         }
 
         .grid-bg {
@@ -393,11 +399,12 @@
         .form-success h3 { margin-bottom:0.5rem; }
         .form-success p { color:var(--text2); font-size:0.85rem; font-family:var(--font-mono); }
 
-        /* ── Custom Cursor ── */
-        html { cursor: none; }
+        /* ── Custom Cursor (desktop only) ── */
+        @media (pointer: fine) { html { cursor: none; } }
         .form-modal input, .form-modal textarea, .form-modal select, .form-modal .form-submit, .form-modal .form-close {
             cursor: auto;
         }
+        body.no-scroll { position:fixed; width:100%; overflow:hidden; overscroll-behavior:none; }
         .cursor-dot {
             position: fixed; z-index: 99999; pointer-events: none;
             width: 8px; height: 8px;
@@ -914,10 +921,11 @@
     });
 })();
 
-/* -- 3D PARALLAX EFFECT -- */
+/* -- 3D PARALLAX EFFECT (desktop only) -- */
 (function(){
-    const cards = document.querySelectorAll('.project-card, .service-card, .expertise-card, .highlight-item, .process-step');
-    cards.forEach(card => {
+    if('ontouchstart' in window) return;
+    var cards = document.querySelectorAll('.project-card, .service-card, .expertise-card, .highlight-item, .process-step');
+    cards.forEach(function(card){
         card.addEventListener('mouseenter', function(){
             card.style.transition = 'all 0.4s cubic-bezier(0.22,0.61,0.36,1)';
             card.style.transform = 'perspective(1000px) rotateX(2deg) rotateY(2deg) translateZ(8px) scale(1.02)';
@@ -930,25 +938,27 @@
 
 /* ── PARALLAX GRID SCROLL ── */
 (function(){
-    const grid = document.getElementById('parallaxGrid');
-    if(grid){
+    var grid = document.getElementById('parallaxGrid');
+    if(grid && !('ontouchstart' in window)){
         window.addEventListener('scroll', function(){
-            const scrollY = window.scrollY;
-            grid.style.transform = `translateZ(-100px) scale(1.2) translateY(${scrollY * 0.05}px)`;
-        });
+            var scrollY = window.scrollY;
+            grid.style.transform = 'translateZ(-100px) scale(1.2) translateY(' + (scrollY * 0.05) + 'px)';
+        }, {passive: true});
     }
 })();
 
 /* ── PARALLAX ORBS ON MOUSE MOVE ── */
 (function(){
-    document.addEventListener('mousemove', function(e){
-        const x = (e.clientX / window.innerWidth - 0.5) * 30;
-        const y = (e.clientY / window.innerHeight - 0.5) * 30;
-        document.querySelectorAll('.orb').forEach((orb, i) => {
-            const factor = (i + 1) * 0.5;
-            orb.style.transform = `translate(${x * factor}px, ${y * factor}px)`;
-        });
-    });
+    if(!('ontouchstart' in window)){
+        document.addEventListener('mousemove', function(e){
+            var x = (e.clientX / window.innerWidth - 0.5) * 30;
+            var y = (e.clientY / window.innerHeight - 0.5) * 30;
+            document.querySelectorAll('.orb').forEach(function(orb, i){
+                var factor = (i + 1) * 0.5;
+                orb.style.transform = 'translate(' + (x * factor) + 'px, ' + (y * factor) + 'px)';
+            });
+        }, {passive: true});
+    }
 })();
 
 
@@ -986,10 +996,11 @@
 
 
 
-/* ── CUSTOM CURSOR ── */
+/* ── CUSTOM CURSOR (desktop only) ── */
 (function(){
-    const dot = document.getElementById('cursorDot');
-    const ring = document.getElementById('cursorRing');
+    if('ontouchstart' in window) return;
+    var dot = document.getElementById('cursorDot');
+    var ring = document.getElementById('cursorRing');
     if(!dot || !ring) return;
 
     let mouseX = -100, mouseY = -100;
@@ -1044,18 +1055,14 @@
 function openFormModal(){
     var modal = document.getElementById('formModal');
     modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
-    document.body.style.position = 'fixed';
-    document.body.style.width = '100%';
+    document.body.classList.add('no-scroll');
     document.getElementById('formContent').style.display = 'block';
     document.getElementById('formSuccess').style.display = 'none';
     document.getElementById('contactForm').reset();
 }
 function closeFormModal(){
     document.getElementById('formModal').classList.remove('active');
-    document.body.style.overflow = '';
-    document.body.style.position = '';
-    document.body.style.width = '';
+    document.body.classList.remove('no-scroll');
 }
 
 function handleFormSubmit(e){
@@ -1170,7 +1177,7 @@ function openPreview(url,name,domain){
     document.body.style.overflow = 'hidden';
 }
 function closePreview(){
-    document.getElementById('previewModal').classList.remove('active');document.body.style.overflow='';
+    document.getElementById('previewModal').classList.remove('active');document.body.classList.remove('no-scroll');
     Object.keys(iframeTimers).forEach(k=>clearTimeout(iframeTimers[k]));
     setTimeout(()=>{['Desktop','Tablet','Mobile'].forEach(d=>{const iframe=document.getElementById('iframe'+d);iframe.src='';const loader=iframe.parentElement.querySelector('.modal-loading');if(loader)loader.style.display='flex';const fallback=document.getElementById(d.toLowerCase()+'Fallback');if(fallback)fallback.style.display='none';});},400);
 }
