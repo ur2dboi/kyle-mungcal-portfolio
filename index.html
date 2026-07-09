@@ -176,8 +176,12 @@
         .about-highlights { display:grid; grid-template-columns:1fr 1fr; gap:1rem; padding:6px; margin:-6px; }
         .highlight-item { background:var(--surface); border-radius:var(--radius); padding:1.5rem; border:var(--border); text-align:center; transition:all 0.4s; transform-style:preserve-3d; }
         .highlight-item:hover { border-color:var(--accent); box-shadow:0 0 20px rgba(0,255,136,0.08); transform:translateY(-6px) rotateX(3deg) rotateY(-3deg); }
-        .highlight-item .icon { font-size:2rem; margin-bottom:0.5rem; }
+        .highlight-item .icon { display:flex; justify-content:center; margin-bottom:0.5rem; } .highlight-item .icon svg { color:var(--accent); }
         .highlight-item h4 { font-size:0.92rem; margin-bottom:0.3rem; font-family:var(--font-mono); letter-spacing:1px; }
+        .highlight-item:nth-child(1) .icon svg { color: var(--accent); }
+        .highlight-item:nth-child(2) .icon svg { color: var(--gold); }
+        .highlight-item:nth-child(3) .icon svg { color: var(--accent); }
+        .highlight-item:nth-child(4) .icon svg { color: var(--gold); }
         .highlight-item:nth-child(1) h4 { color:var(--accent); }
         .highlight-item:nth-child(2) h4 { color:var(--gold); }
         .highlight-item:nth-child(3) h4 { color:var(--accent); }
@@ -195,7 +199,7 @@
             border-color:var(--accent); box-shadow:0 0 30px rgba(0,255,136,0.12);
             transform:translateY(-8px) rotateX(3deg);
         }
-        .expertise-icon { font-size:2.8rem; margin-bottom:0.8rem; transition:transform 0.4s; }
+        .expertise-icon { display:flex; justify-content:center; margin-bottom:0.8rem; transition:transform 0.4s; } .expertise-icon svg { color:var(--accent); }
         .expertise-card:hover .expertise-icon { transform:translateZ(25px) scale(1.15); }
         .expertise-card h4 { font-size:1.05rem; margin-bottom:0.4rem; font-family:var(--font-mono); letter-spacing:0.5px; }
         .expertise-card:nth-child(1) h4 { color:var(--accent); }
@@ -215,7 +219,7 @@
         .services-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:1.2rem; padding:8px; margin:-8px; }
         .service-card { background:var(--surface); border-radius:var(--radius); padding:2rem 1.2rem; border:var(--border); text-align:center; transition:all 0.4s; position:relative; transform-style:preserve-3d; }
         .service-card:hover { border-color:var(--accent); box-shadow:0 0 24px rgba(0,255,136,0.1); transform:translateY(-8px) rotateX(4deg); }
-        .service-icon { font-size:2.5rem; margin-bottom:1rem; transition:transform 0.4s; }
+        .service-icon { display:flex; justify-content:center; margin-bottom:1rem; transition:transform 0.4s; } .service-icon svg { color:var(--accent); }
         .service-card:hover .service-icon { transform:translateZ(30px) scale(1.2); }
         .service-card h4 { font-size:1rem; margin-bottom:0.5rem; font-family:var(--font-mono); letter-spacing:0.5px; }
         .service-card p { font-size:0.8rem; color:var(--text2); }
@@ -501,7 +505,7 @@
             .about-card h3 { font-size:1.05rem; }
             .about-card p { font-size:0.8rem; }
             .expertise-card, .service-card, .process-step, .highlight-item { padding:1.3rem 1rem; }
-            .expertise-icon, .service-icon { font-size:2rem; }
+            .expertise-icon svg, .service-icon svg { width:32px; height:32px; } .highlight-item .icon svg { width:28px; height:28px; }
             .expertise-card h4, .service-card h4 { font-size:0.9rem; }
             .expertise-card p, .service-card p { font-size:0.72rem; }
             .expertise-tags span { font-size:0.58rem; padding:0.15rem 0.4rem; }
@@ -614,10 +618,10 @@
             <p>I solve problems with creative digital solutions and thrive on delivering websites that leave a lasting impression — whether it's a complete build, redesign, or optimization.</p>
         </div>
         <div class="about-highlights reveal-right reveal-stagger">
-            <div class="highlight-item"><div class="icon">◈</div><h4>UI/UX Design</h4><p>Intuitive, beautiful interfaces</p></div>
-            <div class="highlight-item"><div class="icon">⬡</div><h4>Web Development</h4><p>Modern, responsive websites</p></div>
-            <div class="highlight-item"><div class="icon">◈</div><h4>SEO</h4><p>Search engine optimization</p></div>
-            <div class="highlight-item"><div class="icon">⬡</div><h4>Branding</h4><p>Identity & procurement</p></div>
+            <div class="highlight-item"><div class="icon"><svg width="40" height="40" viewBox="0 0 40 40"><rect x="5" y="5" width="30" height="30" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="10" y1="14" x2="30" y2="14" stroke="currentColor" stroke-width="1"/><line x1="10" y1="19" x2="24" y2="19" stroke="currentColor" stroke-width="1"/><line x1="10" y1="24" x2="20" y2="24" stroke="currentColor" stroke-width="1"/><circle cx="33" cy="8" r="2.5" fill="currentColor"/><polygon points="30,32 35,36 28,38" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></div><h4>UI/UX Design</h4><p>Intuitive, beautiful interfaces</p></div>
+            <div class="highlight-item"><div class="icon"><svg width="40" height="40" viewBox="0 0 40 40"><polygon points="20,5 35,14 35,30 20,38 5,30 5,14" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="20" y1="5" x2="20" y2="38" stroke="currentColor" stroke-width="1"/><line x1="5" y1="14" x2="35" y2="14" stroke="currentColor" stroke-width="1"/><polygon points="18,20 12,26 18,32" fill="none" stroke="currentColor" stroke-width="1.5"/><polygon points="22,20 28,26 22,32" fill="none" stroke="currentColor" stroke-width="1.5"/></svg></div><h4>Web Development</h4><p>Modern, responsive websites</p></div>
+            <div class="highlight-item"><div class="icon"><svg width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="16" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="27" y1="23" x2="33" y2="29" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="16" r="4" fill="none" stroke="currentColor" stroke-width="1"/><line x1="20" y1="6" x2="20" y2="10" stroke="currentColor" stroke-width="1.5"/><line x1="20" y1="22" x2="20" y2="26" stroke="currentColor" stroke-width="1.5"/><line x1="10" y1="16" x2="14" y2="16" stroke="currentColor" stroke-width="1.5"/><line x1="26" y1="16" x2="30" y2="16" stroke="currentColor" stroke-width="1.5"/></svg></div><h4>SEO</h4><p>Search engine optimization</p></div>
+            <div class="highlight-item"><div class="icon"><svg width="40" height="40" viewBox="0 0 40 40"><rect x="8" y="8" width="24" height="24" rx="4" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="20" cy="20" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="15" y1="15" x2="25" y2="25" stroke="currentColor" stroke-width="1.2"/><circle cx="20" cy="20" r="2" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="28" cy="28" r="1.5" fill="currentColor"/></svg></div><h4>Branding</h4><p>Identity & procurement</p></div>
         </div>
     </div>
 </section>
@@ -626,10 +630,10 @@
     <h2 class="section-title reveal">&lt;<span class="green">Services</span>/&gt;</h2>
     <p class="section-subtitle reveal">// Comprehensive solutions to bring your vision to life</p>
     <div class="services-grid reveal-stagger">
-        <div class="service-card"><div class="service-icon">◈</div><h4>UI/UX Design</h4><p>Wireframes, mockups, and interactive prototypes for optimal user experience.</p></div>
-        <div class="service-card"><div class="service-icon">⬡</div><h4>Web Development</h4><p>High-performance responsive websites built with modern technologies.</p></div>
-        <div class="service-card"><div class="service-icon">◈</div><h4>SEO Optimization</h4><p>Strategic search optimization to boost your online visibility.</p></div>
-        <div class="service-card"><div class="service-icon">⬡</div><h4>Branding</h4><p>Compelling brand identity that resonates with your audience.</p></div>
+        <div class="service-card"><div class="service-icon"><svg width="40" height="40" viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="18" cy="18" r="6" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M22,22 l8,8" stroke="currentColor" stroke-width="1.5"/><circle cx="28" cy="12" r="2" fill="currentColor"/><line x1="4" y1="12" x2="8" y2="12" stroke="currentColor" stroke-width="1"/><line x1="32" y1="12" x2="36" y2="12" stroke="currentColor" stroke-width="1"/></svg></div><h4>UI/UX Design</h4><p>Wireframes, mockups, and interactive prototypes for optimal user experience.</p></div>
+        <div class="service-card"><div class="service-icon"><svg width="40" height="40" viewBox="0 0 40 40"><polygon points="10,6 2,20 10,34" fill="none" stroke="currentColor" stroke-width="1.5"/><polygon points="30,6 38,20 30,34" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="20" cy="20" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="20" cy="20" r="1.5" fill="currentColor"/><line x1="14" y1="20" x2="16" y2="20" stroke="currentColor" stroke-width="2"/><line x1="24" y1="20" x2="26" y2="20" stroke="currentColor" stroke-width="2"/></svg></div><h4>Web Development</h4><p>High-performance responsive websites built with modern technologies.</p></div>
+        <div class="service-card"><div class="service-icon"><svg width="40" height="40" viewBox="0 0 40 40"><circle cx="18" cy="20" r="14" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="36" cy="6" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M26,14 L32,9" stroke="currentColor" stroke-width="1.2"/><line x1="18" y1="8" x2="18" y2="14" stroke="currentColor" stroke-width="1.2"/><polygon points="18,6 15,12 21,12" fill="currentColor"/><circle cx="18" cy="20" r="6" fill="none" stroke="currentColor" stroke-width="1"/></svg></div><h4>SEO Optimization</h4><p>Strategic search optimization to boost your online visibility.</p></div>
+        <div class="service-card"><div class="service-icon"><svg width="40" height="40" viewBox="0 0 40 40"><polygon points="20,4 36,12 36,28 20,36 4,28 4,12" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="20" cy="20" r="8" fill="none" stroke="currentColor" stroke-width="1.2"/><circle cx="20" cy="20" r="3" fill="currentColor"/><line x1="20" y1="4" x2="20" y2="12" stroke="currentColor" stroke-width="1"/><line x1="20" y1="28" x2="20" y2="36" stroke="currentColor" stroke-width="1"/></svg></div><h4>Branding</h4><p>Compelling brand identity that resonates with your audience.</p></div>
     </div>
 </section>
 
@@ -638,7 +642,7 @@
     <p class="section-subtitle reveal">// Specialized platforms and custom solutions</p>
     <div class="expertise-grid reveal-stagger">
         <div class="expertise-card">
-            <div class="expertise-icon">🛒</div>
+            <div class="expertise-icon"><svg width="48" height="48" viewBox="0 0 48 48"><rect x="4" y="6" width="40" height="36" rx="4" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="4" y1="16" x2="44" y2="16" stroke="currentColor" stroke-width="1.2"/><circle cx="24" cy="6" r="4" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M18,30 l3,-5 h6 l3,5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="20" cy="26" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="28" cy="26" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="24" y1="20" x2="24" y2="24" stroke="currentColor" stroke-width="1.5"/></svg></div>
             <h4>Shopify Development</h4>
             <p>Custom Shopify stores, theme customization, app integration, and conversion-optimized e-commerce solutions that drive sales.</p>
             <div class="expertise-tags">
@@ -646,7 +650,7 @@
             </div>
         </div>
         <div class="expertise-card">
-            <div class="expertise-icon">📝</div>
+            <div class="expertise-icon"><svg width="48" height="48" viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M12,30 Q12,16 24,12 Q36,16 36,30 Q24,20 12,30" fill="none" stroke="currentColor" stroke-width="1.2"/><circle cx="20" cy="18" r="2" fill="currentColor"/><path d="M24,12 Q28,20 24,28 Q20,20 24,12" fill="none" stroke="currentColor" stroke-width="1"/><path d="M16,26 Q24,30 32,26" fill="none" stroke="currentColor" stroke-width="1"/></svg></div>
             <h4>WordPress Development</h4>
             <p>Custom themes, plugin development, WooCommerce stores, and high-performance WordPress sites tailored to your brand.</p>
             <div class="expertise-tags">
@@ -654,7 +658,7 @@
             </div>
         </div>
         <div class="expertise-card">
-            <div class="expertise-icon">⚡</div>
+            <div class="expertise-icon"><svg width="48" height="48" viewBox="0 0 48 48"><rect x="6" y="6" width="36" height="36" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="6" y1="16" x2="48" y2="16" stroke="currentColor" stroke-width="1"/><circle cx="12" cy="11" r="2" fill="currentColor"/><circle cx="19" cy="11" r="2" fill="currentColor"/><circle cx="26" cy="11" r="2" fill="currentColor"/><path d="M16,24 l3,4 l-3,4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M32,24 l-3,4 l3,4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M24,20 l-2,12 l2,-1" fill="none" stroke="currentColor" stroke-width="1.2"/></svg></div>
             <h4>Custom Development</h4>
             <p>Full-stack web applications, custom CMS, API integrations, and bespoke solutions built with modern technologies.</p>
             <div class="expertise-tags">
@@ -1172,7 +1176,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
         </div>
 
         <div class="form-success" id="formSuccess">
-            <div class="success-icon">◈</div>
+            <div class="success-icon"><svg width="48" height="48" viewBox="0 0 48 48"><circle cx="24" cy="24" r="22" fill="none" stroke="#00ff88" stroke-width="1.5"/><polyline points="14,24 20,30 34,18" fill="none" stroke="#00ff88" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="24" cy="24" r="4" fill="none" stroke="#00ff88" stroke-width="1"/></svg></div>
             <h3>&lt; Message Sent /&gt;</h3>
             <p>Thanks for reaching out! I'll get back to you within 24 hours.</p>
         </div>
