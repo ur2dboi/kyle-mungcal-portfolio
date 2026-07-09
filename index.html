@@ -865,6 +865,7 @@ function closeFormModal(){
 function handleFormSubmit(e){
     e.preventDefault();
     var form = document.getElementById('contactForm');
+    var btn = document.getElementById('formSubmitBtn');
     var data = new FormData(form);
     var name = data.get('name') || '';
     var email = data.get('email') || '';
@@ -872,16 +873,36 @@ function handleFormSubmit(e){
     var service = data.get('service') || '';
     var message = data.get('message') || '';
 
-    // Show success instantly — no waiting
-    document.getElementById('formContent').style.display = 'none';
-    document.getElementById('formSuccess').style.display = 'block';
+    btn.disabled = true;
+    btn.textContent = 'SENDING...';
 
-    // Open email client immediately
-    var mailto = 'mailto:kylemheler02@gmail.com?subject=' + encodeURIComponent('Project Inquiry: ' + name) + '&body=' + encodeURIComponent(
-        'Name: ' + name + '\nEmail: ' + email + '\nPhone: ' + phone + '\nService Needed: ' + service + '\n\n' + message
-    );
-    window.location.href = mailto;
+    // Web3Forms — sends directly to kylemheler02@gmail.com
+    data.append('access_key', '8efd1895-ce8c-4832-94e2-fca16d0b37ae');
+    data.append('subject', 'New Project Inquiry: ' + name);
+    data.append('from_name', 'Portfolio Contact Form');
 
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'https://api.web3forms.com/submit', true);
+
+    xhr.onload = function(){
+        document.getElementById('formContent').style.display = 'none';
+        document.getElementById('formSuccess').style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Send Message';
+    };
+
+    xhr.onerror = function(){
+        // Fallback: open email client
+        document.getElementById('formContent').style.display = 'none';
+        document.getElementById('formSuccess').style.display = 'block';
+        window.location.href = 'mailto:kylemheler02@gmail.com?subject=' + encodeURIComponent('Project Inquiry: ' + name) + '&body=' + encodeURIComponent(
+            'Name: ' + name + '\nEmail: ' + email + '\nPhone: ' + phone + '\nService: ' + service + '\n\n' + message
+        );
+        btn.disabled = false;
+        btn.textContent = 'Send Message';
+    };
+
+    xhr.send(data);
     return false;
 }
 
