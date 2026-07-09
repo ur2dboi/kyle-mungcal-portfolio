@@ -626,19 +626,13 @@
     });
 })();
 
-/* ── 3D PARALLAX EFFECT ── */
+/* -- 3D PARALLAX EFFECT -- */
 (function(){
-    const cards = document.querySelectorAll('.project-card, .service-card, .highlight-item');
+    const cards = document.querySelectorAll('.project-card, .service-card, .highlight-item, .process-step');
     cards.forEach(card => {
-        card.addEventListener('mousemove', function(e){
-            const rect = card.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const centerX = rect.width / 2;
-            const centerY = rect.height / 2;
-            const rotateY = ((x - centerX) / centerX) * 5;
-            const rotateX = ((centerY - y) / centerY) * 4;
-            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(5px)`;
+        card.addEventListener('mouseenter', function(){
+            card.style.transition = 'all 0.4s cubic-bezier(0.22,0.61,0.36,1)';
+            card.style.transform = 'perspective(1000px) rotateX(2deg) rotateY(2deg) translateZ(8px) scale(1.02)';
         });
         card.addEventListener('mouseleave', function(){
             card.style.transform = '';
