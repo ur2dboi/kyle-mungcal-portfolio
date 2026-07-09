@@ -129,19 +129,7 @@
         .hero-content { max-width:800px; text-align:center; position:relative; z-index:1; }
         .hero-badge { display:none; }
         .hero h1 { font-size:clamp(2.5rem,6vw,4.2rem); font-weight:800; line-height:1.1; margin-bottom:0.5rem; letter-spacing:-1px; }
-        .hero h1 .name { color:var(--accent); text-shadow:0 0 30px var(--accent-glow); position:relative; display:inline-block; }
-        .hero h1 .name::before {
-            content:'';
-            position:absolute; top:0; left:0; width:100%; height:2px;
-            background:var(--accent);
-            box-shadow:0 0 10px var(--accent-glow), 0 0 30px var(--accent-glow);
-            animation: scanLine 2s linear infinite;
-        }
-        @keyframes scanLine {
-            0% { top:0; opacity:1; }
-            50% { top:100%; opacity:0.5; }
-            100% { top:0; opacity:1; }
-        }
+        .hero h1 .name { color:var(--accent); text-shadow:0 0 30px var(--accent-glow); }
         .hero h1 .gold-dot { color:var(--gold); text-shadow:0 0 20px var(--gold-glow); }
         .hero p.subtitle { font-size:1.15rem; color:var(--text2); font-family:var(--font-mono); letter-spacing:1px; margin-bottom:2.5rem; }
         .hero p.subtitle .cursor {
@@ -238,7 +226,7 @@
         .contact-item:hover { color:var(--accent); transform:translateZ(10px); }
         .contact-item .icon-text { font-size:1.1rem; }
 
-        footer { text-align:center; padding:1.2rem 2rem; margin:0; color:var(--text2); font-size:0.78rem; border-top:1px solid rgba(0,255,136,0.06); font-family:var(--font-mono); letter-spacing:1px; }
+        footer { text-align:center; padding:1.2rem 2rem 0.8rem; margin:0; color:var(--text2); font-size:0.78rem; border-top:1px solid rgba(0,255,136,0.06); font-family:var(--font-mono); letter-spacing:1px; }
         footer p { margin:0; padding:0; }
 
         /* ── 3D Edge Glow on border ── */
@@ -452,7 +440,7 @@
     </div>
 </section>
 
-<section id="contact">
+<section id="contact" style="padding-bottom:2rem;">
     <div class="contact-section reveal-scale">
         <div class="corner-deco corner-tl"></div><div class="corner-deco corner-br"></div>
         <h2>&lt; <span class="green">Let's Build</span> Something <span class="gold">Amazing</span> /&gt;</h2>
