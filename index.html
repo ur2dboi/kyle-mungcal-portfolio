@@ -355,8 +355,8 @@
             border-color:var(--accent); box-shadow:0 0 30px rgba(0,255,136,0.12);
             transform:translateY(-8px) rotateX(3deg);
         }
-        .expertise-icon { display:flex; justify-content:center; margin-bottom:0.8rem; transition:transform 0.4s; } .expertise-icon svg { color:var(--accent); }
-        .expertise-card:hover .expertise-icon { transform:translateZ(25px) scale(1.15); }
+        .expertise-icon { transition:transform 0.4s; } .expertise-icon svg { color:var(--accent); }
+        .expertise-card:hover .expertise-icon { transform:translateZ(20px); }
         .expertise-card h4 { font-size:1.2rem; margin-bottom:0.4rem; font-family:var(--font-mono); letter-spacing:0.5px; }
         .expertise-card:nth-child(1) h4 { color:var(--accent); }
         .expertise-card:nth-child(2) h4 { color:var(--gold); }
@@ -375,8 +375,8 @@
         .services-grid { display:grid; grid-template-columns:repeat(4, 1fr); gap:1.2rem; padding:8px; margin:-8px; }
         .service-card { background:var(--surface); border-radius:var(--radius); padding:2rem 1.2rem; border:var(--border); text-align:center; transition:all 0.4s; position:relative; transform-style:preserve-3d; }
         .service-card:hover { border-color:var(--accent); box-shadow:0 0 24px rgba(0,255,136,0.1); transform:translateY(-8px) rotateX(4deg); }
-        .service-icon { display:flex; justify-content:center; margin-bottom:1rem; transition:transform 0.4s; } .service-icon svg { color:var(--accent); }
-        .service-card:hover .service-icon { transform:translateZ(30px) scale(1.2); }
+        .service-icon { transition:transform 0.4s; } .service-icon svg { color:var(--accent); }
+        .service-card:hover .service-icon { transform:translateZ(20px); }
         .service-card h4 { font-size:1.15rem; margin-bottom:0.5rem; font-family:var(--font-mono); letter-spacing:0.5px; }
         .service-card p { font-size:1rem; color:var(--text2); }
 
@@ -561,6 +561,149 @@
         .glitch-tag { display:inline-block; font-family:var(--font-mono); font-size:0.7rem; letter-spacing:4px; color:var(--accent); padding:0.15rem 0.6rem; border:1px solid rgba(0,255,136,0.35); margin-bottom:0.6rem; text-shadow:0 0 8px var(--accent-glow); background:rgba(0,255,136,0.04); position:relative; overflow:hidden; }
         .glitch-tag::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg, transparent, rgba(0,255,136,0.4), transparent); animation: tagShine 3s linear infinite; }
         @keyframes tagShine { to { left:100%; } }
+
+        /* ── FUTURISTIC ICON ANIMATIONS ── */
+        /* Icon container — centered circle with subtle radial glow behind */
+        .highlight-item .icon,
+        .service-icon,
+        .expertise-icon {
+            position:relative; display:inline-flex; align-items:center; justify-content:center;
+            margin:0 auto; border-radius:50%;
+            background:radial-gradient(circle, rgba(0,255,136,0.08) 0%, transparent 70%);
+        }
+        .highlight-item .icon { width:56px; height:56px; margin-bottom:0.5rem; }
+        .service-icon, .expertise-icon { width:72px; height:72px; margin-bottom:1rem; }
+
+        /* Rotating dashed orbit ring (::before) */
+        .highlight-item .icon::before,
+        .service-icon::before,
+        .expertise-icon::before {
+            content:''; position:absolute; inset:-4px; border-radius:50%;
+            border:1px dashed rgba(0,255,136,0.3);
+            animation: iconOrbit 8s linear infinite;
+            pointer-events:none;
+        }
+        .service-icon::before { inset:-5px; border-color:rgba(0,255,136,0.25); }
+        .expertise-icon::before { inset:-6px; border-color:rgba(0,255,136,0.22); animation-duration:12s; animation-direction:reverse; }
+        .highlight-item:nth-child(even) .icon::before { border-color:rgba(212,160,23,0.3); animation-duration:10s; animation-direction:reverse; }
+        .service-card:nth-child(even) .service-icon::before { border-color:rgba(0,170,255,0.25); }
+        .service-card:nth-child(3) .service-icon::before { border-color:rgba(255,51,119,0.25); animation-duration:9s; }
+        .expertise-card:nth-child(2) .expertise-icon::before { border-color:rgba(212,160,23,0.25); }
+        .expertise-card:nth-child(3) .expertise-icon::before { border-color:rgba(0,170,255,0.22); }
+
+        /* Orbiting neon dot (::after) — placed at top, spins around center via rotating transform-origin */
+        .highlight-item .icon::after,
+        .service-icon::after,
+        .expertise-icon::after {
+            content:''; position:absolute; top:-3px; left:50%;
+            width:6px; height:6px; margin-left:-3px; border-radius:50%;
+            background:#00ff88;
+            box-shadow:0 0 8px #00ff88, 0 0 16px rgba(0,255,136,0.8);
+            /* transform-origin = center of icon (half width = 28 for 56px icon; ring sits inset -4 so radius ≈ 28+3 = 31) */
+            transform-origin:3px 31px;
+            animation: iconDotSpin 4s linear infinite;
+            pointer-events:none;
+        }
+        .service-icon::after { width:7px; height:7px; margin-left:-3.5px; top:-3.5px; transform-origin:3.5px 39.5px; animation-duration:5s; }
+        .expertise-icon::after { width:7px; height:7px; margin-left:-3.5px; top:-3.5px; transform-origin:3.5px 40px; animation-duration:6s; animation-direction:reverse; }
+        .highlight-item:nth-child(even) .icon::after { background:var(--gold); box-shadow:0 0 8px var(--gold), 0 0 16px var(--gold-glow); animation-duration:5s; animation-direction:reverse; }
+        .service-card:nth-child(even) .service-icon::after { background:#00aaff; box-shadow:0 0 8px #00aaff, 0 0 16px rgba(0,170,255,0.7); }
+        .service-card:nth-child(3) .service-icon::after { background:#ff3377; box-shadow:0 0 8px #ff3377, 0 0 16px rgba(255,51,119,0.7); }
+        .expertise-card:nth-child(2) .expertise-icon::after { background:var(--gold); box-shadow:0 0 10px var(--gold), 0 0 20px var(--gold-glow); }
+        .expertise-card:nth-child(3) .expertise-icon::after { background:#00aaff; box-shadow:0 0 10px #00aaff, 0 0 20px rgba(0,170,255,0.7); }
+        @keyframes iconDotSpin { to { transform:rotate(360deg); } }
+        @keyframes iconOrbit   { to { transform:rotate(360deg); } }
+
+        /* SVG itself: idle neon pulse */
+        .highlight-item .icon svg,
+        .service-icon svg,
+        .expertise-icon svg {
+            position:relative; z-index:2;
+            filter:drop-shadow(0 0 4px currentColor);
+            animation: iconGlowPulse 3s ease-in-out infinite;
+            transition: transform 0.45s cubic-bezier(0.22,0.61,0.36,1), filter 0.45s;
+        }
+        .service-icon svg, .expertise-icon svg { animation-duration:3.5s; }
+        @keyframes iconGlowPulse {
+            0%,100% { filter:drop-shadow(0 0 4px currentColor); opacity:0.92; }
+            50%     { filter:drop-shadow(0 0 10px currentColor) drop-shadow(0 0 18px currentColor); opacity:1; }
+        }
+
+        /* Hover: bigger, neon burst, spin a bit, orbit speeds up */
+        .highlight-item:hover .icon svg,
+        .service-card:hover .service-icon svg,
+        .expertise-card:hover .expertise-icon svg {
+            transform:scale(1.18) rotate(-8deg);
+            filter:drop-shadow(0 0 14px currentColor) drop-shadow(0 0 28px currentColor) drop-shadow(0 0 40px currentColor);
+            animation-play-state:paused;
+        }
+        .highlight-item:hover .icon::before,
+        .service-card:hover .service-icon::before,
+        .expertise-card:hover .expertise-icon::before {
+            animation-duration:1.8s;
+        }
+        .highlight-item:hover .icon::after,
+        .service-card:hover .service-icon::after,
+        .expertise-card:hover .expertise-icon::after {
+            animation-duration:1s;
+        }
+
+        /* Process step numbers — expanding ring pulse + rotating dashed ring */
+        .process-num { position:relative; overflow:visible; }
+        .process-num::before {
+            content:''; position:absolute; inset:-3px; border-radius:50%;
+            border:1px solid rgba(0,255,136,0);
+            animation: numRingPulse 2.5s ease-out infinite;
+            pointer-events:none;
+        }
+        @keyframes numRingPulse {
+            0%   { transform:scale(0.85); opacity:0.9; border-color:rgba(0,255,136,0.7); }
+            100% { transform:scale(1.9); opacity:0; border-color:rgba(0,255,136,0); }
+        }
+        .process-step:nth-child(even) .process-num::before {
+            animation-name: numRingPulseGold;
+        }
+        @keyframes numRingPulseGold {
+            0%   { transform:scale(0.85); opacity:0.9; border-color:rgba(212,160,23,0.7); }
+            100% { transform:scale(1.9); opacity:0; border-color:rgba(212,160,23,0); }
+        }
+        .process-num::after {
+            content:''; position:absolute; inset:-7px; border-radius:50%;
+            border:1px dashed rgba(0,255,136,0.28);
+            animation: iconOrbit 10s linear infinite;
+            pointer-events:none;
+        }
+        .process-step:nth-child(even) .process-num::after { border-color:rgba(212,160,23,0.28); animation-direction:reverse; }
+
+        /* Scroll-to-top arrow: glow pulse when visible */
+        .scroll-top-btn svg {
+            animation: stPulse 2.5s ease-in-out infinite;
+            animation-play-state:paused;
+        }
+        .scroll-top-btn.visible svg { animation-play-state:running; }
+        @keyframes stPulse {
+            0%,100% { filter:drop-shadow(0 0 0 transparent); }
+            50%     { filter:drop-shadow(0 0 6px var(--accent)); }
+        }
+
+        /* Nav logo — breathing neon glow */
+        .nav-logo img {
+            animation: logoPulse 4s ease-in-out infinite;
+        }
+        @keyframes logoPulse {
+            0%,100% { filter:drop-shadow(0 0 8px rgba(0,255,136,0.5)); }
+            50%     { filter:drop-shadow(0 0 14px rgba(0,255,136,0.85)) drop-shadow(0 0 24px rgba(0,255,136,0.4)); }
+        }
+
+        /* Form success icon — spring pop-in */
+        .success-icon svg {
+            filter:drop-shadow(0 0 10px #00ff88) drop-shadow(0 0 20px rgba(0,255,136,0.6));
+            animation: successPop 0.6s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        @keyframes successPop {
+            0%   { transform:scale(0) rotate(-180deg); opacity:0; }
+            100% { transform:scale(1) rotate(0); opacity:1; }
+        }
         /* Subtle RGB grid corner decorators on projects */
         #projects .corner-deco { border-color:rgba(255,0,85,0.4); }
         #projects .corner-deco:nth-child(2) { border-color:rgba(0,170,255,0.4); }
@@ -825,6 +968,11 @@
             .about-card h3 { font-size:1.25rem; }
             .about-card p { font-size:0.92rem; }
             .expertise-card, .service-card, .process-step, .highlight-item { padding:1.4rem 1rem; }
+            .highlight-item .icon, .service-icon, .expertise-icon { width:44px !important; height:44px !important; margin-bottom:0.6rem !important; }
+            .service-icon, .expertise-icon { width:48px !important; height:48px !important; margin-bottom:0.8rem !important; }
+            .highlight-item .icon::before, .service-icon::before, .expertise-icon::before { display:none; }
+            .highlight-item .icon::after,  .service-icon::after,  .expertise-icon::after  { display:none; }
+            .process-num::before, .process-num::after { display:none; }
             .expertise-icon svg, .service-icon svg { width:32px; height:32px; } .highlight-item .icon svg { width:28px; height:28px; }
             .expertise-card h4, .service-card h4 { font-size:1.05rem; }
             .expertise-card p, .service-card p { font-size:0.88rem; }
