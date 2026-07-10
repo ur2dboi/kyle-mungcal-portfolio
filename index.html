@@ -290,20 +290,68 @@
         .process-step p { font-size:1rem; color:var(--text2); }
 
         .projects-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:1.5rem; transform-style:preserve-3d; padding:8px; margin:-8px; }
-        .project-card { background:var(--surface); border-radius:var(--radius); border:var(--border); transition:all 0.5s; cursor:pointer; transform-style:preserve-3d; margin:4px; }
-        .project-card:hover { transform:translateY(-10px) rotateX(2deg) rotateY(-2deg); border-color:var(--accent); box-shadow:0 20px 60px rgba(0,255,136,0.15); }
+        a.project-card { text-decoration:none; color:inherit; display:block; }
+        .project-card { background:var(--surface); border-radius:var(--radius); border:var(--border); transition:all 0.5s; cursor:pointer; transform-style:preserve-3d; margin:4px; position:relative; overflow:hidden; }
+        .project-card::before { content:''; position:absolute; inset:-2px; border-radius:6px; background:linear-gradient(125deg,transparent 20%,rgba(0,255,136,0.35) 45%,rgba(212,160,23,0.35) 55%,transparent 80%); opacity:0; z-index:-1; filter:blur(14px); transition:opacity 0.4s; }
+        .project-card:hover { transform:translateY(-10px) rotateX(2deg) rotateY(-2deg); border-color:var(--accent); box-shadow:0 20px 60px rgba(0,255,136,0.25); animation: cardGlitch 0.4s steps(2,end) 1; }
+        .project-card:hover::before { opacity:0.9; animation: borderGlow 1.4s linear infinite; }
+        @keyframes borderGlow { 0%{transform:translateX(-30%);} 100%{transform:translateX(30%);} }
+        @keyframes cardGlitch {
+            0%   { filter:hue-rotate(0deg)   saturate(1); transform:translateY(-10px) rotateX(2deg) rotateY(-2deg) translate(0,0); }
+            25%  { filter:hue-rotate(-15deg) saturate(1.4); transform:translateY(-10px) rotateX(2deg) rotateY(-2deg) translate(-1px,1px); }
+            50%  { filter:hue-rotate(15deg)  saturate(0.8); transform:translateY(-10px) rotateX(2deg) rotateY(-2deg) translate(1px,-1px); }
+            75%  { filter:hue-rotate(-5deg)  saturate(1.2); transform:translateY(-10px) rotateX(2deg) rotateY(-2deg) translate(0,1px); }
+            100% { filter:hue-rotate(0deg)   saturate(1); transform:translateY(-10px) rotateX(2deg) rotateY(-2deg) translate(0,0); }
+        }
         .project-image { height:200px; position:relative; overflow:hidden; border-radius:var(--radius) var(--radius) 0 0; border-bottom:1px solid rgba(0,255,136,0.08); background-size:cover; background-position:center top; background-repeat:no-repeat; transition:transform 0.5s; }
         .project-card:hover .project-image { transform:scale(1.05); }
         .project-image::before { content:''; position:absolute; inset:0; background:rgba(0,0,0,0.3); z-index:1; transition:background 0.3s; }
-        .project-card:hover .project-image::before { background:rgba(0,0,0,0.55); }
+        .project-card:hover .project-image::before { background:rgba(0,0,0,0.65); }
         .project-image::after { content:''; position:absolute; inset:0; z-index:3; background:repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.3) 2px, rgba(0,0,0,0.3) 4px); opacity:0.25; pointer-events:none; }
-        .project-image .hover-hint { position:absolute; inset:0; background:rgba(0,0,0,0.7); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.3s; z-index:5; font-family:var(--font-mono); color:var(--accent); font-size:0.85rem; letter-spacing:2px; text-shadow:0 0 10px var(--accent-glow); }
+        .project-image .hover-hint { position:absolute; inset:0; background:rgba(0,0,0,0.8); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.6rem; opacity:0; transition:opacity 0.3s; z-index:5; font-family:var(--font-mono); color:var(--accent); letter-spacing:2px; text-shadow:0 0 10px var(--accent-glow); }
         .project-card:hover .hover-hint { opacity:1; }
+        .hover-hint .visit-btn { display:inline-block; padding:0.55rem 1.3rem; border:1px solid var(--accent); color:var(--accent); background:transparent; font-family:var(--font-mono); font-size:0.85rem; font-weight:700; letter-spacing:3px; text-transform:uppercase; position:relative; clip-path:polygon(8px 0, 100% 0, calc(100% - 8px) 100%, 0 100%); transition:all 0.25s; text-shadow:0 0 10px var(--accent-glow); box-shadow:0 0 20px rgba(0,255,136,0.25), inset 0 0 20px rgba(0,255,136,0.08); animation: btnGlitchPulse 1.6s ease-in-out infinite; }
+        .hover-hint .visit-btn:hover { background:var(--accent); color:#000; text-shadow:none; }
+        .hover-hint .visit-arrow { font-size:0.7rem; color:var(--gold); letter-spacing:4px; text-shadow:0 0 8px var(--gold-glow); animation: arrowBlink 1s steps(2) infinite; }
+        @keyframes btnGlitchPulse {
+            0%,100% { box-shadow:0 0 20px rgba(0,255,136,0.25), inset 0 0 20px rgba(0,255,136,0.08); }
+            50%     { box-shadow:0 0 32px rgba(0,255,136,0.55), inset 0 0 28px rgba(0,255,136,0.2), 0 0 60px rgba(0,255,136,0.2); }
+        }
+        @keyframes arrowBlink { 0%,100%{opacity:0.35;} 50%{opacity:1;} }
         .project-info { padding:1.3rem; transition:transform 0.4s; }
         .project-card:hover .project-info { transform:translateZ(15px); }
         .project-info h4 { font-size:1.15rem; margin-bottom:0.2rem; font-family:var(--font-mono); letter-spacing:0.5px; }
         .project-info .domain { font-size:0.85rem; color:var(--accent); margin-bottom:0.5rem; font-family:var(--font-mono); text-shadow:0 0 8px rgba(0,255,136,0.3); }
         .project-info p { font-size:1rem; color:var(--text2); }
+
+        /* ── Glitch effect for Recent Projects title ── */
+        #projects .section-title { position:relative; display:inline-block; }
+        #projects .section-title-wrap { text-align:center; margin-bottom:0.2rem; position:relative; }
+        .glitch { position:relative; display:inline-block; font-size:2.4rem; font-weight:800; font-family:var(--font-mono); letter-spacing:-0.5px; color:var(--text); }
+        .glitch::before, .glitch::after { content:attr(data-text); position:absolute; top:0; left:0; width:100%; height:100%; overflow:hidden; pointer-events:none; }
+        .glitch::before { color:var(--accent); text-shadow:2px 0 var(--accent-glow); left:2px; clip-path:inset(0 0 70% 0); animation: glitchTop 2.8s infinite linear alternate-reverse; }
+        .glitch::after  { color:var(--gold);   text-shadow:-2px 0 var(--gold-glow);  left:-2px; clip-path:inset(65% 0 0 0); animation: glitchBot 2.2s infinite linear alternate-reverse; }
+        .glitch:hover::before { animation-duration: 0.4s; }
+        .glitch:hover::after  { animation-duration: 0.3s; }
+        @keyframes glitchTop {
+            0%,100% { clip-path:inset(0 0 80% 0); transform:translate(0,0); }
+            20%     { clip-path:inset(10% 0 60% 0); transform:translate(-3px,-1px); }
+            40%     { clip-path:inset(40% 0 30% 0); transform:translate(2px,1px); }
+            60%     { clip-path:inset(20% 0 55% 0); transform:translate(-2px,0); }
+            80%     { clip-path:inset(60% 0 10% 0); transform:translate(3px,-1px); }
+        }
+        @keyframes glitchBot {
+            0%,100% { clip-path:inset(75% 0 0 0); transform:translate(0,0); }
+            20%     { clip-path:inset(55% 0 15% 0); transform:translate(2px,1px); }
+            40%     { clip-path:inset(30% 0 45% 0); transform:translate(-2px,-1px); }
+            60%     { clip-path:inset(70% 0 5% 0);  transform:translate(3px,0); }
+            80%     { clip-path:inset(45% 0 25% 0); transform:translate(-3px,1px); }
+        }
+        /* Tag above glitch title */
+        .glitch-tag { display:inline-block; font-family:var(--font-mono); font-size:0.7rem; letter-spacing:4px; color:var(--accent); padding:0.15rem 0.6rem; border:1px solid rgba(0,255,136,0.35); margin-bottom:0.6rem; text-shadow:0 0 8px var(--accent-glow); background:rgba(0,255,136,0.04); }
+        /* Scanline sweep over the whole projects section */
+        #projects::after { content:''; position:absolute; left:0; right:0; top:0; height:2px; background:linear-gradient(90deg, transparent, var(--accent), transparent); box-shadow:0 0 20px var(--accent-glow); opacity:0.6; animation: glitchSweep 5s linear infinite; pointer-events:none; z-index:2; }
+        @keyframes glitchSweep { 0%{top:-10%;} 100%{top:110%;} }
 
         .contact-section { background:var(--surface); border-radius:var(--radius); padding:2.5rem 2rem 2.5rem; text-align:center; border:1px solid rgba(0,255,136,0.2); margin:0 auto 5rem; max-width:900px; position:relative; box-shadow:0 0 60px rgba(0,255,136,0.04); transition:transform 0.5s; transform-style:preserve-3d; }
         .contact-section:hover { transform:translateZ(10px); }
@@ -547,6 +595,9 @@
                 grid-template-columns:1fr; gap:0.8rem; padding:4px; margin:-4px;
             }
 
+            /* Glitch title */
+            .glitch { font-size:1.8rem !important; }
+            .glitch-tag { font-size:0.6rem; letter-spacing:3px; }
             /* Cards */
             .about-card { padding:1.3rem; }
             .about-card h3 { font-size:1.25rem; }
@@ -558,6 +609,8 @@
             .expertise-tags span { font-size:0.58rem; padding:0.15rem 0.4rem; }
             .project-card { margin:2px; }
             .project-image { height:150px; }
+            .hover-hint .visit-btn { padding:0.45rem 1rem; font-size:0.75rem; letter-spacing:2px; }
+            .hover-hint .visit-arrow { font-size:0.6rem; letter-spacing:3px; }
             .project-info { padding:0.9rem; }
             .project-info h4 { font-size:1rem; }
             .project-info p { font-size:0.88rem; }
@@ -599,7 +652,9 @@
             .hero p.subtitle { font-size:0.72rem; }
             .hero-stats { gap:0.8rem; }
             .hero-stat .num { font-size:1.3rem; }
-            .section-title { font-size:1.3rem; }
+            .section-title, .glitch { font-size:1.3rem !important; }
+            .glitch-tag { font-size:0.55rem; }
+            .hover-hint .visit-btn { padding:0.4rem 0.85rem; font-size:0.7rem; }
         }
     </style>
 </head>
@@ -709,54 +764,104 @@
 </section>
 
 <section id="projects">
-    <h2 class="section-title reveal">&lt;<span class="green">Recent</span> <span class="gold">Projects</span>/&gt;</h2>
-    <p class="section-subtitle reveal">// Click any project to visit the live website</p>
+    <div class="section-title-wrap reveal">
+        <div class="glitch-tag">// PROJECTS.DB</div>
+        <div style="display:block;">
+            <h2 class="section-title glitch" data-text="<Recent Projects/>">&lt;<span class="green">Recent</span> <span class="gold">Projects</span>/&gt;</h2>
+        </div>
+    </div>
+    <p class="section-subtitle reveal">// Click any card to visit the live website</p>
     <div class="projects-grid reveal-stagger">
 
-        <div class="project-card" onclick="window.open('https://northwestaerosolutions.com','_blank')">
-            <div class="project-image" style="background-image:url('project-thumbs/northwest-aero.jpg');"><div class="hover-hint">◈ VISIT SITE ◈</div></div>
+        <a class="project-card" href="https://northwestaerosolutions.com" target="_blank" rel="noopener noreferrer">
+            <div class="project-image" style="background-image:url('project-thumbs/northwest-aero.jpg');">
+                <div class="hover-hint">
+                    <span class="visit-btn">◈ VISIT SITE ◈</span>
+                    <span class="visit-arrow">→  OPEN IN NEW TAB  ←</span>
+                </div>
+            </div>
             <div class="project-info"><h4>Northwest Aero Solutions</h4><div class="domain">northwestaerosolutions.com</div><p>A trusted ally in defense & security — dedicated to providing reliable support and advanced technology solutions for safety and peace.</p></div>
-        </div>
+        </a>
 
-        <div class="project-card" onclick="window.open('https://giantexhaust.com','_blank')">
-            <div class="project-image" style="background-image:url('project-thumbs/giant-exhaust.jpg');"><div class="hover-hint">◈ VISIT SITE ◈</div></div>
+        <a class="project-card" href="https://giantexhaust.com" target="_blank" rel="noopener noreferrer">
+            <div class="project-image" style="background-image:url('project-thumbs/giant-exhaust.jpg');">
+                <div class="hover-hint">
+                    <span class="visit-btn">◈ VISIT SITE ◈</span>
+                    <span class="visit-arrow">→  OPEN IN NEW TAB  ←</span>
+                </div>
+            </div>
             <div class="project-info"><h4>Giant Exhaust</h4><div class="domain">giantexhaust.com</div><p>Elevate your ride with precision exhaust — quality auto parts at below-market prices. Full Shopify e-commerce store with vehicle search.</p></div>
-        </div>
+        </a>
 
-        <div class="project-card" onclick="window.open('https://useeverest.com','_blank')">
-            <div class="project-image" style="background-image:url('project-thumbs/everest-ai.jpg');"><div class="hover-hint">◈ VISIT SITE ◈</div></div>
+        <a class="project-card" href="https://useeverest.com" target="_blank" rel="noopener noreferrer">
+            <div class="project-image" style="background-image:url('project-thumbs/everest-ai.jpg');">
+                <div class="hover-hint">
+                    <span class="visit-btn">◈ VISIT SITE ◈</span>
+                    <span class="visit-arrow">→  OPEN IN NEW TAB  ←</span>
+                </div>
+            </div>
             <div class="project-info"><h4>Everest AI</h4><div class="domain">useeverest.com</div><p>AI-powered driver recruiting & retention — first to call, first to hire. 24/7 AI voice agents for the trucking industry. 2-min response time.</p></div>
-        </div>
+        </a>
 
-        <div class="project-card" onclick="window.open('https://zalynartenails.com','_blank')">
-            <div class="project-image" style="background-image:url('project-thumbs/zalyn-art-nails.jpg');"><div class="hover-hint">◈ VISIT SITE ◈</div></div>
+        <a class="project-card" href="https://zalynartenails.com" target="_blank" rel="noopener noreferrer">
+            <div class="project-image" style="background-image:url('project-thumbs/zalyn-art-nails.jpg');">
+                <div class="hover-hint">
+                    <span class="visit-btn">◈ VISIT SITE ◈</span>
+                    <span class="visit-arrow">→  OPEN IN NEW TAB  ←</span>
+                </div>
+            </div>
             <div class="project-info"><h4>Zalyn Arte Nails</h4><div class="domain">zalynartenails.com</div><p>Join 200,000+ happy customers — premium press-on nail sets delivered to your door. Shopify e-commerce with free shipping over $75.</p></div>
-        </div>
+        </a>
 
-        <div class="project-card" onclick="window.open('https://lilysyutoriguesthouse.com','_blank')">
-            <div class="project-image" style="background-image:url('project-thumbs/lily-guesthouse.jpg');"><div class="hover-hint">◈ VISIT SITE ◈</div></div>
+        <a class="project-card" href="https://lilysyutoriguesthouse.com" target="_blank" rel="noopener noreferrer">
+            <div class="project-image" style="background-image:url('project-thumbs/lily-guesthouse.jpg');">
+                <div class="hover-hint">
+                    <span class="visit-btn">◈ VISIT SITE ◈</span>
+                    <span class="visit-arrow">→  OPEN IN NEW TAB  ←</span>
+                </div>
+            </div>
             <div class="project-info"><h4>Lily's Yutori Guesthouse</h4><div class="domain">lilysyutoriguesthouse.com</div><p>Your home away from home in Tagaytay — a peaceful retreat with pool, pavilion, and Japanese-inspired architecture. Booking & reservation system.</p></div>
-        </div>
+        </a>
 
-        <div class="project-card" onclick="window.open('https://invictaexecutivesolutions.com.au','_blank')">
-            <div class="project-image" style="background-image:url('project-thumbs/invicta-executive.jpg');"><div class="hover-hint">◈ VISIT SITE ◈</div></div>
+        <a class="project-card" href="https://invictaexecutivesolutions.com.au" target="_blank" rel="noopener noreferrer">
+            <div class="project-image" style="background-image:url('project-thumbs/invicta-executive.jpg');">
+                <div class="hover-hint">
+                    <span class="visit-btn">◈ VISIT SITE ◈</span>
+                    <span class="visit-arrow">→  OPEN IN NEW TAB  ←</span>
+                </div>
+            </div>
             <div class="project-info"><h4>Invicta Executive Solutions</h4><div class="domain">invictaexecutivesolutions.com.au</div><p>Driving strategy, shaping leadership — strategic consulting for defence, government, and industry. Founded by Dean Spence with decades of experience.</p></div>
-        </div>
+        </a>
 
-        <div class="project-card" onclick="window.open('https://mamicurvesofficial.com','_blank')">
-            <div class="project-image" style="background-image:url('project-thumbs/mami-curves.jpg');"><div class="hover-hint">◈ VISIT SITE ◈</div></div>
+        <a class="project-card" href="https://mamicurvesofficial.com" target="_blank" rel="noopener noreferrer">
+            <div class="project-image" style="background-image:url('project-thumbs/mami-curves.jpg');">
+                <div class="hover-hint">
+                    <span class="visit-btn">◈ VISIT SITE ◈</span>
+                    <span class="visit-arrow">→  OPEN IN NEW TAB  ←</span>
+                </div>
+            </div>
             <div class="project-info"><h4>Mami Curves Official</h4><div class="domain">mamicurvesofficial.com</div><p>Your body, your rule, your fit — bold fashion e-commerce for curves. Dresses, sets, skirts & tops. Shopify store with full product catalog.</p></div>
-        </div>
+        </a>
 
-        <div class="project-card" onclick="window.open('https://ipartyrentalandmore.com','_blank')">
-            <div class="project-image" style="background-image:url('project-thumbs/iparty.jpg');"><div class="hover-hint">◈ VISIT SITE ◈</div></div>
+        <a class="project-card" href="https://ipartyrentalandmore.com" target="_blank" rel="noopener noreferrer">
+            <div class="project-image" style="background-image:url('project-thumbs/iparty.jpg');">
+                <div class="hover-hint">
+                    <span class="visit-btn">◈ VISIT SITE ◈</span>
+                    <span class="visit-arrow">→  OPEN IN NEW TAB  ←</span>
+                </div>
+            </div>
             <div class="project-info"><h4>iParty Rental & More</h4><div class="domain">ipartyrentalandmore.com</div><p>Turning life's special moments into beautiful celebrations — party rentals including backdrops, centerpieces, bounce houses, candy carts & more.</p></div>
-        </div>
+        </a>
 
-        <div class="project-card" onclick="window.open('https://usstrut.com','_blank')">
-            <div class="project-image" style="background-image:url('project-thumbs/us-strut.jpg');"><div class="hover-hint">◈ VISIT SITE ◈</div></div>
+        <a class="project-card" href="https://usstrut.com" target="_blank" rel="noopener noreferrer">
+            <div class="project-image" style="background-image:url('project-thumbs/us-strut.jpg');">
+                <div class="hover-hint">
+                    <span class="visit-btn">◈ VISIT SITE ◈</span>
+                    <span class="visit-arrow">→  OPEN IN NEW TAB  ←</span>
+                </div>
+            </div>
             <div class="project-info"><h4>US Strut</h4><div class="domain">usstrut.com</div><p>Complete strut & coil spring assemblies — drop-in replacements for 500+ SKUs across 20+ vehicle makes. No spring compressor needed. Ships ready to install.</p></div>
-        </div>
+        </a>
 
     </div>
 </section>
@@ -909,7 +1014,7 @@
             requestAnimationFrame(animCursor);
         }
         animCursor();
-        const hoverables = 'a, button, .project-card, .service-card, .expertise-card, .process-step, .highlight-item, .benefit-item, input, textarea, select, .nav-cta, .scroll-top-btn';
+        const hoverables = 'a, button, .project-card, .service-card, .expertise-card, .process-step, .highlight-item, .benefit-item, input, textarea, select, .nav-cta, .scroll-top-btn, .visit-btn';
         document.querySelectorAll(hoverables).forEach(el => {
             el.addEventListener('mouseenter', () => { dot.classList.add('hovering'); ring.classList.add('hovering'); });
             el.addEventListener('mouseleave', () => { dot.classList.remove('hovering'); ring.classList.remove('hovering'); });
