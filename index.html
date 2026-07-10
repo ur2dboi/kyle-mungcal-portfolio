@@ -368,6 +368,41 @@
         .glitch .g .green, .glitch .g .gold { color:#00ff88 !important; text-shadow:inherit !important; }
         .glitch .b .green, .glitch .b .gold { color:#00aaff !important; text-shadow:inherit !important; }
         .glitch:hover .r, .glitch:hover .g, .glitch:hover .b { animation-duration:0.25s; }
+
+        /* ── Subtle/darker glitch variant for other section headers ── */
+        .glitch-subtle { position:relative; display:inline-block; }
+        .glitch-subtle .r, .glitch-subtle .g, .glitch-subtle .b {
+            position:absolute; top:0; left:0; width:100%; height:100%;
+            pointer-events:none; mix-blend-mode:screen; opacity:0.45;
+        }
+        .glitch-subtle .r { color:#ff3377; text-shadow:1px 0 rgba(255,0,85,0.35); z-index:-1;
+            animation: glitchRsub 5s infinite steps(2,end); }
+        .glitch-subtle .g { color:#00cc77; text-shadow:-1px 0 rgba(0,255,136,0.3); z-index:-1;
+            animation: glitchGsub 4.5s infinite steps(2,end); }
+        .glitch-subtle .b { color:#3399dd; text-shadow:0 0 6px rgba(0,170,255,0.25); z-index:-1;
+            animation: glitchBsub 5.5s infinite steps(2,end); }
+        .glitch-subtle .r .green, .glitch-subtle .r .gold,
+        .glitch-subtle .g .green, .glitch-subtle .g .gold,
+        .glitch-subtle .b .green, .glitch-subtle .b .gold { color:inherit !important; text-shadow:inherit !important; }
+        .glitch-subtle .r .green { color:#ff3377 !important; }
+        .glitch-subtle .g .green { color:#00cc77 !important; }
+        .glitch-subtle .b .green { color:#3399dd !important; }
+        .glitch-subtle:hover .r, .glitch-subtle:hover .g, .glitch-subtle:hover .b { opacity:0.75; animation-duration:0.6s; }
+        @keyframes glitchRsub {
+            0%,95%,100% { transform:translate(0,0); clip-path:inset(0 0 0 0); }
+            96%         { transform:translate(-2px,-1px); clip-path:inset(20% 0 55% 0); }
+            98%         { transform:translate(1px,1px);   clip-path:inset(55% 0 15% 0); }
+        }
+        @keyframes glitchGsub {
+            0%,94%,100% { transform:translate(0,0); clip-path:inset(0 0 0 0); }
+            95%         { transform:translate(2px,0);    clip-path:inset(60% 0 20% 0); }
+            97%         { transform:translate(-1px,-1px); clip-path:inset(15% 0 60% 0); }
+        }
+        @keyframes glitchBsub {
+            0%,96%,100% { transform:translate(0,0); clip-path:inset(0 0 0 0); }
+            97%         { transform:translate(1px,-1px); clip-path:inset(35% 0 45% 0); }
+            99%         { transform:translate(-1px,1px); clip-path:inset(70% 0 10% 0); }
+        }
         @keyframes glitchR {
             0%,90%,100% { transform:translate(0,0);      clip-path:inset(0 0 0 0); opacity:0.8; }
             91%         { transform:translate(-4px,-2px); clip-path:inset(10% 0 70% 0); opacity:1; }
@@ -766,7 +801,12 @@
 </section>
 
 <section id="about">
-    <h2 class="section-title reveal">&lt;<span class="green">About</span> <span class="gold">Me</span>/&gt;</h2>
+    <h2 class="section-title reveal glitch-subtle" data-text="<About Me/>">
+        &lt;<span class="green">About</span> <span class="gold">Me</span>/&gt;
+        <span class="r" aria-hidden="true">&lt;<span class="green">About</span> <span class="gold">Me</span>/&gt;</span>
+        <span class="g" aria-hidden="true">&lt;<span class="green">About</span> <span class="gold">Me</span>/&gt;</span>
+        <span class="b" aria-hidden="true">&lt;<span class="green">About</span> <span class="gold">Me</span>/&gt;</span>
+    </h2>
     <p class="section-subtitle reveal">// Passionate about crafting exceptional digital experiences</p>
     <div class="about-grid">
         <div class="about-card reveal-left">
@@ -785,7 +825,12 @@
 </section>
 
 <section id="services">
-    <h2 class="section-title reveal">&lt;<span class="green">Services</span>/&gt;</h2>
+    <h2 class="section-title reveal glitch-subtle" data-text="<Services/>">
+        &lt;<span class="green">Services</span>/&gt;
+        <span class="r" aria-hidden="true">&lt;<span class="green">Services</span>/&gt;</span>
+        <span class="g" aria-hidden="true">&lt;<span class="green">Services</span>/&gt;</span>
+        <span class="b" aria-hidden="true">&lt;<span class="green">Services</span>/&gt;</span>
+    </h2>
     <p class="section-subtitle reveal">// Comprehensive solutions to bring your vision to life</p>
     <div class="services-grid reveal-stagger">
         <div class="service-card"><div class="service-icon"><svg width="40" height="40" viewBox="0 0 40 40"><rect x="4" y="4" width="32" height="32" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="18" cy="18" r="6" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M22,22 l8,8" stroke="currentColor" stroke-width="1.5"/><circle cx="28" cy="12" r="2" fill="currentColor"/><line x1="4" y1="12" x2="8" y2="12" stroke="currentColor" stroke-width="1"/><line x1="32" y1="12" x2="36" y2="12" stroke="currentColor" stroke-width="1"/></svg></div><h4>UI/UX Design</h4><p>Wireframes, mockups, and interactive prototypes for optimal user experience.</p></div>
@@ -796,7 +841,12 @@
 </section>
 
 <section id="expertise">
-    <h2 class="section-title reveal">&lt;<span class="green">Expertise</span>/&gt;</h2>
+    <h2 class="section-title reveal glitch-subtle" data-text="<Expertise/>">
+        &lt;<span class="green">Expertise</span>/&gt;
+        <span class="r" aria-hidden="true">&lt;<span class="green">Expertise</span>/&gt;</span>
+        <span class="g" aria-hidden="true">&lt;<span class="green">Expertise</span>/&gt;</span>
+        <span class="b" aria-hidden="true">&lt;<span class="green">Expertise</span>/&gt;</span>
+    </h2>
     <p class="section-subtitle reveal">// Specialized platforms and custom solutions</p>
     <div class="expertise-grid reveal-stagger">
         <div class="expertise-card">
@@ -936,7 +986,12 @@
 </section>
 
 <section id="process">
-    <h2 class="section-title reveal">&lt;<span class="green">Development</span> <span class="gold">Process</span>/&gt;</h2>
+    <h2 class="section-title reveal glitch-subtle" data-text="<Development Process/>">
+        &lt;<span class="green">Development</span> <span class="gold">Process</span>/&gt;
+        <span class="r" aria-hidden="true">&lt;<span class="green">Development</span> <span class="gold">Process</span>/&gt;</span>
+        <span class="g" aria-hidden="true">&lt;<span class="green">Development</span> <span class="gold">Process</span>/&gt;</span>
+        <span class="b" aria-hidden="true">&lt;<span class="green">Development</span> <span class="gold">Process</span>/&gt;</span>
+    </h2>
     <p class="section-subtitle reveal">// A battle-tested workflow that delivers — every time</p>
     <div class="process-timeline reveal-stagger">
         <div class="process-step"><div class="process-num">01</div><h4>Discovery & Planning</h4><p>Understanding business goals, audience, and requirements through strategic consultation.</p></div>
@@ -949,7 +1004,12 @@
 <section id="contact" style="padding-top:2rem; padding-bottom:2rem;">
     <div class="contact-section reveal-scale">
         <div class="corner-deco corner-tl"></div><div class="corner-deco corner-br"></div>
-        <h2>&lt; <span class="green">Let's Build</span> Something <span class="gold">Amazing</span> /&gt;</h2>
+        <h2 class="glitch-subtle" data-text="<Let's Build Something Amazing/>">
+            &lt; <span class="green">Let's Build</span> Something <span class="gold">Amazing</span> /&gt;
+            <span class="r" aria-hidden="true">&lt; <span class="green">Let's Build</span> Something <span class="gold">Amazing</span> /&gt;</span>
+            <span class="g" aria-hidden="true">&lt; <span class="green">Let's Build</span> Something <span class="gold">Amazing</span> /&gt;</span>
+            <span class="b" aria-hidden="true">&lt; <span class="green">Let's Build</span> Something <span class="gold">Amazing</span> /&gt;</span>
+        </h2>
         <p class="lead">Ready to transform your ideas into exceptional digital experiences? I build websites that look stunning and drive real business results. Whether you need a complete solution, redesign, or optimization — I'm here to help.</p>
         <div class="contact-benefits">
             <div class="benefit-item"><span class="check">✓</span> Free initial consultation & assessment</div>
