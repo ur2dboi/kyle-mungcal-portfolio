@@ -592,11 +592,14 @@
         #projects .corner-deco { border-color:rgba(255,0,85,0.4); }
         #projects .corner-deco:nth-child(2) { border-color:rgba(0,170,255,0.4); }
 
-        .contact-section { background:var(--surface); border-radius:var(--radius); padding:2.5rem 2rem 2.5rem; text-align:center; border:1px solid rgba(0,255,136,0.2); margin:0 auto 5rem; max-width:900px; position:relative; box-shadow:0 0 60px rgba(0,255,136,0.04); transition:transform 0.5s; transform-style:preserve-3d; }
-        .contact-section:hover { transform:translateZ(10px); }
+        .contact-section { background:var(--surface); border-radius:var(--radius); padding:2.8rem 2rem 2.5rem; text-align:center; border:1px solid rgba(0,255,136,0.2); margin:0 auto 5rem; max-width:900px; position:relative; z-index:2; box-shadow:0 0 60px rgba(0,255,136,0.06); transition:transform 0.5s, box-shadow 0.5s, border-color 0.5s; }
+        .contact-section:hover { transform:translateY(-4px); border-color:rgba(0,255,136,0.35); box-shadow:0 12px 48px rgba(0,0,0,0.6), 0 0 40px rgba(0,255,136,0.1); }
         .contact-section h2 { font-size:2rem; margin-bottom:1rem; font-family:var(--font-mono); letter-spacing:1px; }
         .contact-section h2 .green { color:var(--accent); }
-        .contact-section .lead { color:var(--text2); max-width:600px; margin:0 auto 1.5rem; font-size:1.1rem; line-height:1.7; }
+        .contact-section .lead { color:var(--text2); max-width:600px; margin:0 auto 1.8rem; font-size:1.1rem; line-height:1.7; }
+        /* Ensure CTA button sits above everything in the contact card */
+        .contact-section .btn-primary { position:relative; z-index:5; display:inline-block; margin:0.4rem auto 1.8rem; font-size:1rem !important; padding:1rem 2.5rem !important; cursor:pointer; }
+        .contact-section .btn-primary:hover { transform:translateY(-2px); }
         .contact-benefits { display:flex; flex-wrap:wrap; gap:1rem; justify-content:center; margin-bottom:1.5rem; }
         .benefit-item { display:flex; align-items:center; gap:0.5rem; color:var(--text2); font-size:1rem; font-family:var(--font-mono); padding:0.4rem 1rem; border:1px solid rgba(0,255,136,0.1); border-radius:2px; transition:all 0.3s; }
         .benefit-item:hover { border-color:var(--accent); color:var(--accent); transform:translateY(-3px) translateZ(10px); box-shadow:0 4px 16px rgba(0,255,136,0.08); }
@@ -1168,10 +1171,10 @@
     <div class="contact-section reveal-scale">
         <div class="corner-deco corner-tl"></div><div class="corner-deco corner-br"></div>
         <h2 class="glitch-subtle" data-text="<Let's Build Something Amazing/>">
-            &lt; <span class="green">Let's Build</span> Something <span class="gold">Amazing</span> /&gt;
-            <span class="r" aria-hidden="true">&lt; <span class="green">Let's Build</span> Something <span class="gold">Amazing</span> /&gt;</span>
-            <span class="g" aria-hidden="true">&lt; <span class="green">Let's Build</span> Something <span class="gold">Amazing</span> /&gt;</span>
-            <span class="b" aria-hidden="true">&lt; <span class="green">Let's Build</span> Something <span class="gold">Amazing</span> /&gt;</span>
+            &lt;<span class="green">Let's Build</span> Something <span class="gold">Amazing</span>/&gt;
+            <span class="r" aria-hidden="true">&lt;<span class="green">Let's Build</span> Something <span class="gold">Amazing</span>/&gt;</span>
+            <span class="g" aria-hidden="true">&lt;<span class="green">Let's Build</span> Something <span class="gold">Amazing</span>/&gt;</span>
+            <span class="b" aria-hidden="true">&lt;<span class="green">Let's Build</span> Something <span class="gold">Amazing</span>/&gt;</span>
         </h2>
         <p class="lead">Ready to transform your ideas into exceptional digital experiences? I build websites that look stunning and drive real business results. Whether you need a complete solution, redesign, or optimization — I'm here to help.</p>
         <div class="contact-benefits">
@@ -1400,8 +1403,8 @@
         }, { passive: true });
     }
 
-    /* ── 3D tilt on cards (throttled, gentle; NO project cards — they use CSS lift for stability) ── */
-    const tiltSel = '.service-card, .expertise-card, .process-step, .highlight-item, .about-card, .contact-section';
+    /* ── 3D tilt on cards (throttled, gentle; NO project cards — they use CSS lift; NO contact-section — CTA area must stay stable) ── */
+    const tiltSel = '.service-card, .expertise-card, .process-step, .highlight-item, .about-card';
     document.querySelectorAll(tiltSel).forEach(card => {
         let raf = null;
         card.addEventListener('mousemove', (e) => {
