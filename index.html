@@ -331,50 +331,7 @@
             animation: borderPulse 4s ease-in-out infinite;
         }
 
-        /* MODAL */
-        .modal-overlay { position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.88); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.35s; touch-action:none; }
-        .modal-overlay.active { opacity:1; pointer-events:auto; }
-        .modal-container { width:96vw; max-width:1500px; max-height:96vh; overflow-y:auto; padding:0.5rem; -webkit-overflow-scrolling:touch; }
-        .modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; padding:0 0.5rem; flex-wrap:wrap; gap:0.5rem; }
-        .modal-title { font-family:var(--font-mono); color:var(--accent); font-size:1.2rem; letter-spacing:2px; text-shadow:0 0 16px var(--accent-glow); }
-        .modal-title .gold { color:var(--gold); }
-        .modal-url { font-family:var(--font-mono); color:var(--text2); font-size:0.7rem; letter-spacing:1px; margin-top:2px; }
-        .modal-actions { display:flex; gap:0.8rem; align-items:center; }
-        .modal-visit-btn { background:transparent; color:var(--gold); border:1px solid var(--gold); padding:0.4rem 1rem; font-family:var(--font-mono); font-size:0.7rem; letter-spacing:1px; cursor:pointer; text-decoration:none; transition:all 0.2s; border-radius:2px; }
-        .modal-visit-btn:hover { background:var(--gold); color:#000; box-shadow:0 0 16px var(--gold-glow); }
-        .modal-close { background:transparent; color:var(--accent); border:1px solid var(--accent); width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:1rem; font-family:var(--font-mono); transition:all 0.25s; border-radius:2px; flex-shrink:0; }
-        .modal-close:hover { background:var(--accent); color:#000; box-shadow:0 0 20px var(--accent-glow); }
-        .modal-devices { display:flex; gap:1.5rem; justify-content:center; align-items:flex-start; flex-wrap:wrap; }
-        .device-wrapper { display:flex; flex-direction:column; align-items:center; transform-style:preserve-3d; transition:transform 0.5s; }
-        .device-wrapper:hover { transform:translateZ(20px) scale(1.02); }
-        .device-label-row { text-align:center; color:var(--accent); font-family:var(--font-mono); font-size:0.65rem; letter-spacing:3px; text-shadow:0 0 10px var(--accent-glow); margin-top:0.6rem; }
-
-        .device-desktop { width:520px; flex-shrink:0; }
-        .desktop-frame { background:#1a1a1a; border-radius:10px 10px 3px 3px; padding:8px; box-shadow:0 0 50px rgba(0,255,136,0.06); border:1px solid #333; }
-        .desktop-screen-wrap { position:relative; width:100%; aspect-ratio:16/10; border-radius:3px; overflow:hidden; border:1px solid #111; background:#000; }
-        .desktop-screen-wrap iframe { position:absolute; top:0; left:0; width:1600px; height:1000px; border:none; transform:scale(0.315); transform-origin:top left; }
-        .desktop-stand { width:36px; height:6px; background:#1a1a1a; margin:5px auto 0; border-radius:0 0 3px 3px; border:1px solid #333; border-top:none; }
-        .desktop-base { width:90px; height:3px; background:#1a1a1a; margin:2px auto 0; border-radius:3px; border:1px solid #333; }
-
-        .device-tablet { width:260px; flex-shrink:0; }
-        .tablet-frame { background:#1a1a1a; border-radius:18px; padding:12px 10px; box-shadow:0 0 30px rgba(0,255,136,0.06); border:1px solid #333; }
-        .tablet-screen-wrap { position:relative; width:100%; aspect-ratio:3/4; border-radius:4px; overflow:hidden; border:1px solid #111; background:#000; }
-        .tablet-screen-wrap iframe { position:absolute; top:0; left:0; width:768px; height:1024px; border:none; transform:scale(0.3125); transform-origin:top left; }
-        .tablet-home { width:4px; height:4px; background:#444; border-radius:50%; margin:8px auto 0; }
-
-        .device-mobile { width:175px; flex-shrink:0; }
-        .mobile-frame { background:#1a1a1a; border-radius:24px; padding:16px 8px; box-shadow:0 0 24px rgba(0,255,136,0.06); border:1px solid #333; }
-        .mobile-notch { width:48px; height:5px; background:#111; border-radius:0 0 10px 10px; margin:0 auto 7px; }
-        .mobile-screen-wrap { position:relative; width:100%; aspect-ratio:9/19.5; border-radius:3px; overflow:hidden; border:1px solid #111; background:#000; }
-        .mobile-screen-wrap iframe { position:absolute; top:0; left:0; width:390px; height:844px; border:none; transform:scale(0.4077); transform-origin:top left; }
-
-        .frame-fallback { position:absolute; inset:0; background:linear-gradient(135deg,#0a0a0a,#0d1510); display:flex; flex-direction:column; align-items:center; justify-content:center; z-index:10; padding:1rem; text-align:center; pointer-events:auto; }
-        .frame-fallback .fallback-icon { font-size:2rem; margin-bottom:0.6rem; opacity:0.7; }
-        .frame-fallback .fallback-msg { font-family:var(--font-mono); color:var(--text2); font-size:0.62rem; letter-spacing:1px; margin-bottom:0.6rem; line-height:1.4; max-width:80%; }
-        .frame-fallback .fallback-link { font-family:var(--font-mono); color:#000; font-size:0.6rem; letter-spacing:1px; text-decoration:none; background:var(--accent); padding:0.35rem 0.9rem; border-radius:2px; transition:all 0.2s; cursor:pointer; font-weight:600; }
-        .frame-fallback .fallback-link:hover { background:var(--gold); box-shadow:0 0 16px var(--gold-glow); }
-        .modal-loading { position:absolute; inset:0; background:#000; display:flex; align-items:center; justify-content:center; z-index:8; pointer-events:none; }
-        .modal-loading .pulse-text { font-family:var(--font-mono); color:var(--accent); font-size:0.7rem; letter-spacing:3px; animation:pulse 2s infinite; }
+        /* ── CONTACT FORM MODAL (kept) ── */
         @keyframes rippleOut {
             0% { width:0; height:0; opacity:0.8; }
             100% { width:120px; height:120px; opacity:0; }
@@ -540,12 +497,7 @@
             .scroll-top-btn svg { width: 16px; height: 16px; }
         }
 
-        @media (max-width:1100px) {
-            .device-desktop { width:400px; } .desktop-screen-wrap iframe { transform:scale(0.24); }
-            .device-tablet { width:210px; } .tablet-screen-wrap iframe { transform:scale(0.253); }
-            .device-mobile { width:145px; } .mobile-screen-wrap iframe { transform:scale(0.337); }
-            .modal-devices { gap:1rem; }
-        }
+
         @media (max-width:850px) {
             /* Nav hamburger */
             /* Mobile nav */
@@ -629,14 +581,7 @@
             footer { padding:1rem; font-size:0.68rem; }
 
             /* Modal devices */
-            .modal-devices { flex-direction:column; align-items:center; gap:1.5rem; }
-            .device-desktop { width:88vw; max-width:360px; }
-            .desktop-screen-wrap iframe { transform:scale(0.21); }
-            .device-tablet { width:190px; }
-            .tablet-screen-wrap iframe { transform:scale(0.22); }
-            .device-mobile { width:130px; }
-            .mobile-screen-wrap iframe { transform:scale(0.28); }
-            .modal-header { flex-direction:column; align-items:flex-start; }
+
 
             /* Form modal */
             .form-modal { padding:1.3rem; width:94vw; max-height:82vh; overflow-y:auto; -webkit-overflow-scrolling:touch; }
@@ -765,51 +710,51 @@
 
 <section id="projects">
     <h2 class="section-title reveal">&lt;<span class="green">Recent</span> <span class="gold">Projects</span>/&gt;</h2>
-    <p class="section-subtitle reveal">// Click any project to preview it live in Desktop · Tablet · Mobile</p>
+    <p class="section-subtitle reveal">// Click any project to visit the live website</p>
     <div class="projects-grid reveal-stagger">
 
-        <div class="project-card" onclick="openPreview('https://northwestaerosolutions.com','Northwest Aero Solutions','northwestaerosolutions.com')">
-            <div class="project-image" style="background-image:url('project-thumbs/northwest-aero.jpg');"><div class="hover-hint">◈ LIVE PREVIEW ◈</div></div>
+        <div class="project-card" onclick="window.open('https://northwestaerosolutions.com','_blank')">
+            <div class="project-image" style="background-image:url('project-thumbs/northwest-aero.jpg');"><div class="hover-hint">◈ VISIT SITE ◈</div></div>
             <div class="project-info"><h4>Northwest Aero Solutions</h4><div class="domain">northwestaerosolutions.com</div><p>A trusted ally in defense & security — dedicated to providing reliable support and advanced technology solutions for safety and peace.</p></div>
         </div>
 
-        <div class="project-card" onclick="openPreview('https://giantexhaust.com','Giant Exhaust','giantexhaust.com')">
-            <div class="project-image" style="background-image:url('project-thumbs/giant-exhaust.jpg');"><div class="hover-hint">◈ LIVE PREVIEW ◈</div></div>
+        <div class="project-card" onclick="window.open('https://giantexhaust.com','_blank')">
+            <div class="project-image" style="background-image:url('project-thumbs/giant-exhaust.jpg');"><div class="hover-hint">◈ VISIT SITE ◈</div></div>
             <div class="project-info"><h4>Giant Exhaust</h4><div class="domain">giantexhaust.com</div><p>Elevate your ride with precision exhaust — quality auto parts at below-market prices. Full Shopify e-commerce store with vehicle search.</p></div>
         </div>
 
-        <div class="project-card" onclick="openPreview('https://useeverest.com','Everest AI','useeverest.com')">
-            <div class="project-image" style="background-image:url('project-thumbs/everest-ai.jpg');"><div class="hover-hint">◈ LIVE PREVIEW ◈</div></div>
+        <div class="project-card" onclick="window.open('https://useeverest.com','_blank')">
+            <div class="project-image" style="background-image:url('project-thumbs/everest-ai.jpg');"><div class="hover-hint">◈ VISIT SITE ◈</div></div>
             <div class="project-info"><h4>Everest AI</h4><div class="domain">useeverest.com</div><p>AI-powered driver recruiting & retention — first to call, first to hire. 24/7 AI voice agents for the trucking industry. 2-min response time.</p></div>
         </div>
 
-        <div class="project-card" onclick="openPreview('https://zalynartenails.com','Zalyn Arte Nails','zalynartenails.com')">
-            <div class="project-image" style="background-image:url('project-thumbs/zalyn-art-nails.jpg');"><div class="hover-hint">◈ LIVE PREVIEW ◈</div></div>
+        <div class="project-card" onclick="window.open('https://zalynartenails.com','_blank')">
+            <div class="project-image" style="background-image:url('project-thumbs/zalyn-art-nails.jpg');"><div class="hover-hint">◈ VISIT SITE ◈</div></div>
             <div class="project-info"><h4>Zalyn Arte Nails</h4><div class="domain">zalynartenails.com</div><p>Join 200,000+ happy customers — premium press-on nail sets delivered to your door. Shopify e-commerce with free shipping over $75.</p></div>
         </div>
 
-        <div class="project-card" onclick="openPreview('https://lilysyutoriguesthouse.com','Lily\'s Yutori Guesthouse','lilysyutoriguesthouse.com')">
-            <div class="project-image" style="background-image:url('project-thumbs/lily-guesthouse.jpg');"><div class="hover-hint">◈ LIVE PREVIEW ◈</div></div>
+        <div class="project-card" onclick="window.open('https://lilysyutoriguesthouse.com','_blank')">
+            <div class="project-image" style="background-image:url('project-thumbs/lily-guesthouse.jpg');"><div class="hover-hint">◈ VISIT SITE ◈</div></div>
             <div class="project-info"><h4>Lily's Yutori Guesthouse</h4><div class="domain">lilysyutoriguesthouse.com</div><p>Your home away from home in Tagaytay — a peaceful retreat with pool, pavilion, and Japanese-inspired architecture. Booking & reservation system.</p></div>
         </div>
 
-        <div class="project-card" onclick="openPreview('https://invictaexecutivesolutions.com.au','Invicta Executive Solutions','invictaexecutivesolutions.com.au')">
-            <div class="project-image" style="background-image:url('project-thumbs/invicta-executive.jpg');"><div class="hover-hint">◈ LIVE PREVIEW ◈</div></div>
+        <div class="project-card" onclick="window.open('https://invictaexecutivesolutions.com.au','_blank')">
+            <div class="project-image" style="background-image:url('project-thumbs/invicta-executive.jpg');"><div class="hover-hint">◈ VISIT SITE ◈</div></div>
             <div class="project-info"><h4>Invicta Executive Solutions</h4><div class="domain">invictaexecutivesolutions.com.au</div><p>Driving strategy, shaping leadership — strategic consulting for defence, government, and industry. Founded by Dean Spence with decades of experience.</p></div>
         </div>
 
-        <div class="project-card" onclick="openPreview('https://mamicurvesofficial.com','Mami Curves Official','mamicurvesofficial.com')">
-            <div class="project-image" style="background-image:url('project-thumbs/mami-curves.jpg');"><div class="hover-hint">◈ LIVE PREVIEW ◈</div></div>
+        <div class="project-card" onclick="window.open('https://mamicurvesofficial.com','_blank')">
+            <div class="project-image" style="background-image:url('project-thumbs/mami-curves.jpg');"><div class="hover-hint">◈ VISIT SITE ◈</div></div>
             <div class="project-info"><h4>Mami Curves Official</h4><div class="domain">mamicurvesofficial.com</div><p>Your body, your rule, your fit — bold fashion e-commerce for curves. Dresses, sets, skirts & tops. Shopify store with full product catalog.</p></div>
         </div>
 
-        <div class="project-card" onclick="openPreview('https://ipartyrentalandmore.com','iParty Rental & More','ipartyrentalandmore.com')">
-            <div class="project-image" style="background-image:url('project-thumbs/iparty.jpg');"><div class="hover-hint">◈ LIVE PREVIEW ◈</div></div>
+        <div class="project-card" onclick="window.open('https://ipartyrentalandmore.com','_blank')">
+            <div class="project-image" style="background-image:url('project-thumbs/iparty.jpg');"><div class="hover-hint">◈ VISIT SITE ◈</div></div>
             <div class="project-info"><h4>iParty Rental & More</h4><div class="domain">ipartyrentalandmore.com</div><p>Turning life's special moments into beautiful celebrations — party rentals including backdrops, centerpieces, bounce houses, candy carts & more.</p></div>
         </div>
 
-        <div class="project-card" onclick="openPreview('https://usstrut.com','US Strut','usstrut.com')">
-            <div class="project-image" style="background-image:url('project-thumbs/us-strut.jpg');"><div class="hover-hint">◈ LIVE PREVIEW ◈</div></div>
+        <div class="project-card" onclick="window.open('https://usstrut.com','_blank')">
+            <div class="project-image" style="background-image:url('project-thumbs/us-strut.jpg');"><div class="hover-hint">◈ VISIT SITE ◈</div></div>
             <div class="project-info"><h4>US Strut</h4><div class="domain">usstrut.com</div><p>Complete strut & coil spring assemblies — drop-in replacements for 500+ SKUs across 20+ vehicle makes. No spring compressor needed. Ships ready to install.</p></div>
         </div>
 
@@ -856,434 +801,7 @@
 
 <footer><p>◈ © 2026 Kyle Mheler Mungcal ◈</p></footer>
 
-<!-- MODAL -->
-<div class="modal-overlay" id="previewModal">
-    <div class="modal-container" onclick="event.stopPropagation()">
-        <div class="modal-header">
-            <div>
-                <div class="modal-title" id="modalProjectName">◈ <span class="gold">Project</span> ◈</div>
-                <div class="modal-url" id="modalProjectUrl">loading...</div>
-            </div>
-            <div class="modal-actions">
-                <a class="modal-visit-btn" id="modalVisitBtn" href="#" target="_blank" rel="noopener">↗ VISIT SITE</a>
-                <button class="modal-close" onclick="closePreview()" title="Close (Esc)">✕</button>
-            </div>
-        </div>
-        <div class="modal-devices">
-            <div class="device-wrapper">
-                <div class="device-desktop"><div class="desktop-frame"><div class="desktop-screen-wrap" id="desktopScreenWrap">
-                    <div class="modal-loading"><span class="pulse-text">LOADING</span></div>
-                    <div class="frame-fallback" id="desktopFallback" style="display:none;"><div class="fallback-icon">🖥️</div><div class="fallback-msg">This site blocks embedded previews</div><a class="fallback-link" id="desktopFallbackLink" href="#" target="_blank" rel="noopener">↗ Open in new tab</a></div>
-                    <iframe id="iframeDesktop" src="" title="Desktop Preview" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-top-navigation"></iframe>
-                </div><div class="desktop-stand"></div><div class="desktop-base"></div></div></div>
-                <div class="device-label-row">◈ DESKTOP ◈</div>
-            </div>
-            <div class="device-wrapper">
-                <div class="device-tablet"><div class="tablet-frame"><div class="tablet-screen-wrap" id="tabletScreenWrap">
-                    <div class="modal-loading"><span class="pulse-text">LOADING</span></div>
-                    <div class="frame-fallback" id="tabletFallback" style="display:none;"><div class="fallback-icon">📱</div><div class="fallback-msg">This site blocks embedded previews</div><a class="fallback-link" id="tabletFallbackLink" href="#" target="_blank" rel="noopener">↗ Open in new tab</a></div>
-                    <iframe id="iframeTablet" src="" title="Tablet Preview" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-top-navigation"></iframe>
-                </div><div class="tablet-home"></div></div></div>
-                <div class="device-label-row">◈ TABLET ◈</div>
-            </div>
-            <div class="device-wrapper">
-                <div class="device-mobile"><div class="mobile-frame"><div class="mobile-notch"></div><div class="mobile-screen-wrap" id="mobileScreenWrap">
-                    <div class="modal-loading"><span class="pulse-text">LOADING</span></div>
-                    <div class="frame-fallback" id="mobileFallback" style="display:none;"><div class="fallback-icon">📲</div><div class="fallback-msg">This site blocks embedded previews</div><a class="fallback-link" id="mobileFallbackLink" href="#" target="_blank" rel="noopener">↗ Open in new tab</a></div>
-                    <iframe id="iframeMobile" src="" title="Mobile Preview" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-top-navigation"></iframe>
-                </div></div></div>
-                <div class="device-label-row">◈ MOBILE ◈</div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<script>
-
-/* ── MATRIX CODE RAIN ── */
-(function(){
-    const canvas = document.getElementById('codeRain');
-    if(!canvas) return;
-    const ctx = canvas.getContext('2d');
-    const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789{}[]<>/\|&!?#@%=+-_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const fontSize = 14;
-    let columns, drops;
-
-    function init(){
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        columns = Math.floor(canvas.width / fontSize);
-        drops = new Array(columns).fill(0);
-    }
-    init();
-    window.addEventListener('resize', init);
-
-    function draw(){
-        ctx.fillStyle = 'rgba(0,0,0,0.06)';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        for(let i = 0; i < drops.length; i++){
-            const char = chars[Math.floor(Math.random() * chars.length)];
-            const x = i * fontSize;
-            const y = drops[i] * fontSize;
-
-            // Green chars with slight color variation
-            const o = 120 + Math.floor(Math.random() * 80);
-            ctx.fillStyle = 'rgba(255,255,255,' + (o / 255 * 0.7).toFixed(2) + ')';
-            ctx.font = fontSize + 'px monospace';
-            ctx.fillText(char, x, y);
-
-            // Reset drop when it reaches bottom or randomly
-            if(y > canvas.height && Math.random() > 0.975){
-                drops[i] = 0;
-            }
-            drops[i]++;
-        }
-    }
-
-    setInterval(draw, 70);
-})();
-
-/* ── TYPING ANIMATION ── */
-(function(){
-    const texts = [
-        '&lt;<span style="color:var(--accent)"> Full Stack Developer </span>/&gt;',
-        '&lt;<span style="color:var(--gold)"> Web Designer </span>/&gt;',
-        '&lt;<span style="color:var(--accent)"> UI/UX Engineer </span>/&gt;',
-        '&lt;<span style="color:var(--gold)"> WordPress Expert </span>/&gt;',
-        '&lt;<span style="color:var(--accent)"> SEO Specialist </span>/&gt;'
-    ];
-    const el = document.getElementById('typingText');
-    if(!el) return;
-    const cursor = el.querySelector('.cursor');
-
-    let textIndex = 0;
-    let charIndex = 0;
-    let isDeleting = false;
-    let currentText = '';
-
-    function type(){
-        const fullText = texts[textIndex];
-        const speed = isDeleting ? 40 : 80;
-
-        if(!isDeleting && charIndex < fullText.length){
-            currentText = fullText.substring(0, charIndex + 1);
-            el.innerHTML = currentText + '<span class="cursor"></span>';
-            charIndex++;
-            setTimeout(type, speed);
-        } else if(!isDeleting && charIndex >= fullText.length){
-            // Pause at end
-            setTimeout(() => { isDeleting = true; type(); }, 2500);
-        } else if(isDeleting && charIndex > 0){
-            currentText = fullText.substring(0, charIndex - 1);
-            el.innerHTML = currentText + '<span class="cursor"></span>';
-            charIndex--;
-            setTimeout(type, speed);
-        } else {
-            isDeleting = false;
-            textIndex = (textIndex + 1) % texts.length;
-            setTimeout(type, 400);
-        }
-    }
-
-    // Start typing once revealed
-    const obs = new IntersectionObserver((entries) => {
-        if(entries[0].isIntersecting){
-            obs.disconnect();
-            setTimeout(type, 600);
-        }
-    }, { threshold: 0.5 });
-    obs.observe(el);
-})();
-
-/* ── SCROLL REVEAL ── */
-(function(){
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-            }
-        });
-    }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
-
-    document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-stagger').forEach(el => {
-        observer.observe(el);
-    });
-})();
-
-/* -- 3D PARALLAX EFFECT (desktop only) -- */
-(function(){
-    if('ontouchstart' in window) return;
-    var cards = document.querySelectorAll('.project-card, .service-card, .expertise-card, .highlight-item, .process-step');
-    cards.forEach(function(card){
-        card.addEventListener('mouseenter', function(){
-            card.style.transition = 'all 0.4s cubic-bezier(0.22,0.61,0.36,1)';
-            card.style.transform = 'perspective(1000px) rotateX(2deg) rotateY(2deg) translateZ(8px) scale(1.02)';
-        });
-        card.addEventListener('mouseleave', function(){
-            card.style.transform = '';
-        });
-    });
-})();
-
-/* ── PARALLAX GRID SCROLL ── */
-(function(){
-    var grid = document.getElementById('parallaxGrid');
-    if(grid && !('ontouchstart' in window)){
-        window.addEventListener('scroll', function(){
-            var scrollY = window.scrollY;
-            grid.style.transform = 'translateZ(-100px) scale(1.2) translateY(' + (scrollY * 0.05) + 'px)';
-        }, {passive: true});
-    }
-})();
-
-/* ── PARALLAX ORBS ON MOUSE MOVE ── */
-(function(){
-    if(!('ontouchstart' in window)){
-        document.addEventListener('mousemove', function(e){
-            var x = (e.clientX / window.innerWidth - 0.5) * 30;
-            var y = (e.clientY / window.innerHeight - 0.5) * 30;
-            document.querySelectorAll('.orb').forEach(function(orb, i){
-                var factor = (i + 1) * 0.5;
-                orb.style.transform = 'translate(' + (x * factor) + 'px, ' + (y * factor) + 'px)';
-            });
-        }, {passive: true});
-    }
-})();
-
-
-/* ── MOBILE MENU ── */
-(function(){
-    var btn = document.getElementById('hamburgerBtn');
-    var menu = document.getElementById('navMenu');
-    var cta = document.getElementById('desktopCta');
-    if(!btn || !menu) return;
-    
-    // On mobile, move CTA into the menu dropdown
-    function moveCta() {
-        if(window.innerWidth <= 850 && cta && cta.parentNode !== menu) {
-            menu.appendChild(cta);
-            cta.style.display = 'block';
-        } else if(window.innerWidth > 850 && cta && cta.parentNode === menu) {
-            var navInner = document.querySelector('.nav-inner');
-            if(navInner) navInner.appendChild(cta);
-        }
-    }
-    moveCta();
-    window.addEventListener('resize', function(){ moveCta(); });
-    
-    btn.addEventListener('click', function(){
-        btn.classList.toggle('open');
-        menu.classList.toggle('open');
-    });
-    menu.querySelectorAll('a').forEach(function(a){
-        a.addEventListener('click', function(){
-            btn.classList.remove('open');
-            menu.classList.remove('open');
-        });
-    });
-})();
-
-
-
-/* ── CUSTOM CURSOR (desktop only) ── */
-(function(){
-    if('ontouchstart' in window) return;
-    var dot = document.getElementById('cursorDot');
-    var ring = document.getElementById('cursorRing');
-    if(!dot || !ring) return;
-
-    let mouseX = -100, mouseY = -100;
-    let ringX = -100, ringY = -100;
-
-    document.addEventListener('mousemove', function(e){
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        dot.style.left = mouseX + 'px';
-        dot.style.top = mouseY + 'px';
-    });
-    document.addEventListener('pointerdown', function(e){
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-        dot.style.left = mouseX + 'px';
-        dot.style.top = mouseY + 'px';
-    });
-
-    function animateRing(){
-        ringX += (mouseX - ringX) * 0.15;
-        ringY += (mouseY - ringY) * 0.15;
-        ring.style.left = ringX + 'px';
-        ring.style.top = ringY + 'px';
-        requestAnimationFrame(animateRing);
-    }
-    animateRing();
-
-    // Cursor grows on interactive elements
-    const hoverTargets = document.querySelectorAll('a, button, .project-card, .service-card, .expertise-card, .highlight-item, .process-step, .btn, .nav-cta, .benefit-item');
-    hoverTargets.forEach(el => {
-        el.addEventListener('mouseenter', function(){
-            dot.classList.add('hovering');
-            ring.classList.add('hovering');
-        });
-        el.addEventListener('mouseleave', function(){
-            dot.classList.remove('hovering');
-            ring.classList.remove('hovering');
-        });
-    });
-
-    // Ripple on click
-    document.addEventListener('click', function(e){
-        const ripple = document.createElement('div');
-        ripple.style.cssText = 'position:fixed;z-index:99997;pointer-events:none;left:' + e.clientX + 'px;top:' + e.clientY + 'px;width:0;height:0;border:1px solid #00ff88;border-radius:50%;transform:translate(-50%,-50%);animation:rippleOut 0.8s ease-out forwards;';
-        document.body.appendChild(ripple);
-        setTimeout(() => ripple.remove(), 800);
-    });
-})();
-
-
-/* ── CONTACT FORM MODAL ── */
-function openFormModal(){
-    var modal = document.getElementById('formModal');
-    modal.classList.add('active');
-    document.getElementById('formContent').style.display = 'block';
-    document.getElementById('formSuccess').style.display = 'none';
-    document.getElementById('contactForm').reset();
-}
-function closeFormModal(){
-    document.getElementById('formModal').classList.remove('active');
-}
-
-function handleFormSubmit(e){
-    e.preventDefault();
-    var form = document.getElementById('contactForm');
-    var btn = document.getElementById('formSubmitBtn');
-    var data = new FormData(form);
-    var name = data.get('name') || '';
-    var email = data.get('email') || '';
-    var phone = data.get('phone') || '';
-    var service = data.get('service') || '';
-    var message = data.get('message') || '';
-
-    btn.disabled = true;
-    btn.textContent = 'SENDING...';
-
-    // Web3Forms — sends directly to kylemheler02@gmail.com
-    data.append('access_key', '8efd1895-ce8c-4832-94e2-fca16d0b37ae');
-    data.append('subject', 'New Project Inquiry: ' + name);
-    data.append('from_name', 'Portfolio Contact Form');
-
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', 'https://api.web3forms.com/submit', true);
-
-    xhr.onload = function(){
-        document.getElementById('formContent').style.display = 'none';
-        document.getElementById('formSuccess').style.display = 'block';
-        btn.disabled = false;
-        btn.textContent = 'Send Message';
-    };
-
-    xhr.onerror = function(){
-        // Fallback: open email client
-        document.getElementById('formContent').style.display = 'none';
-        document.getElementById('formSuccess').style.display = 'block';
-        window.location.href = 'mailto:kylemheler02@gmail.com?subject=' + encodeURIComponent('Project Inquiry: ' + name) + '&body=' + encodeURIComponent(
-            'Name: ' + name + '\nEmail: ' + email + '\nPhone: ' + phone + '\nService: ' + service + '\n\n' + message
-        );
-        btn.disabled = false;
-        btn.textContent = 'Send Message';
-    };
-
-    xhr.send(data);
-    return false;
-}
-
-
-
-/* ── SCROLL-TO-TOP BUTTON ── */
-(function(){
-    var btn = document.getElementById('scrollTopBtn');
-    if(!btn) return;
-    window.addEventListener('scroll', function(){
-        if(window.scrollY > 500){
-            btn.classList.add('visible');
-        } else {
-            btn.classList.remove('visible');
-        }
-    }, {passive: true});
-})();
-
-/* ── MODAL ── */
-let iframeTimers={};
-function openPreview(url,name,domain){
-    var modal=document.getElementById('previewModal');
-    document.getElementById('modalProjectName').innerHTML='◈ <span class="gold">'+name+'</span> ◈';
-    document.getElementById('modalProjectUrl').textContent=domain;
-    document.getElementById('modalVisitBtn').href=url;
-    ['desktopFallbackLink','tabletFallbackLink','mobileFallbackLink'].forEach(function(id){document.getElementById(id).href=url;});
-
-    // Shopify sites block iframes — show fallback immediately
-    var isShopify = url.indexOf('myshopify.com') > -1 || 
-                    ['giantexhaust.com','zalynartenails.com','mamicurvesofficial.com','ipartyrentalandmore.com','usstrut.com'].some(function(d){return url.indexOf(d) > -1;});
-
-    ['Desktop','Tablet','Mobile'].forEach(function(d){
-        var iframe = document.getElementById('iframe'+d);
-        var fallback = document.getElementById(d.toLowerCase()+'Fallback');
-        var loader = iframe.parentElement.querySelector('.modal-loading');
-        if(iframeTimers[d]) clearTimeout(iframeTimers[d]);
-        
-        iframe.src = '';
-        if(loader) loader.style.display = 'flex';
-        if(fallback) fallback.style.display = 'none';
-        
-        if(isShopify){
-            // Known blockers — show fallback after 1.5s
-            iframeTimers[d] = setTimeout(function(){
-                if(loader) loader.style.display = 'none';
-                if(fallback) fallback.style.display = 'flex';
-            }, 1500);
-        } else {
-            iframeTimers[d] = setTimeout(function(){
-                if(loader) loader.style.display = 'none';
-                if(fallback) fallback.style.display = 'flex';
-            }, 5000);
-        }
-        
-        iframe.src = url;
-        iframe.onload = function(){
-            clearTimeout(iframeTimers[d]);
-            if(loader) loader.style.display = 'none';
-            try {
-                var doc = iframe.contentDocument || iframe.contentWindow.document;
-                if(!doc || doc.location.href === 'about:blank' || doc.body.innerHTML.trim() === ''){
-                    if(fallback) fallback.style.display = 'flex';
-                }
-            } catch(e){}
-        };
-        iframe.onerror = function(){
-            clearTimeout(iframeTimers[d]);
-            if(loader) loader.style.display = 'none';
-            if(fallback) fallback.style.display = 'flex';
-        };
-    });
-    modal.classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
-function closePreview(){
-    var modal = document.getElementById('previewModal');
-    modal.classList.remove('active');
-    Object.keys(iframeTimers).forEach(function(k){ clearTimeout(iframeTimers[k]); });
-    setTimeout(function(){
-        ['Desktop','Tablet','Mobile'].forEach(function(d){
-            var iframe = document.getElementById('iframe'+d);
-            iframe.src = '';
-            var loader = iframe.parentElement.querySelector('.modal-loading');
-            if(loader) loader.style.display = 'flex';
-            var fallback = document.getElementById(d.toLowerCase()+'Fallback');
-            if(fallback) fallback.style.display = 'none';
-        });
-    }, 400);
-}
-</script>
 
 <!-- CONTACT FORM MODAL -->
 <div class="form-modal-overlay" id="formModal" onclick="if(event.target===this)closeFormModal()">
