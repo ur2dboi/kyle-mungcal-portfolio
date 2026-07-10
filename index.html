@@ -855,5 +855,210 @@
 </div>
 
 
+<script>
+(function () {
+    'use strict';
+
+    /* ── Typing animation (hero subtitle) ── */
+    const typingEl = document.getElementById('typingText');
+    const phrases = [
+        'Full Stack Web Developer',
+        'Shopify & WordPress Expert',
+        'UI/UX Designer  •  SEO Specialist',
+        'Turning ideas into interactive websites.'
+    ];
+    let phraseIdx = 0, charIdx = 0, deleting = false;
+    function typeLoop() {
+        if (!typingEl) return;
+        const cur = phrases[phraseIdx];
+        const cursor = '<span class="cursor"></span>';
+        if (!deleting) {
+            charIdx++;
+            typingEl.innerHTML = cur.substring(0, charIdx) + cursor;
+            if (charIdx === cur.length) { deleting = true; setTimeout(typeLoop, 1600); return; }
+        } else {
+            charIdx--;
+            typingEl.innerHTML = cur.substring(0, charIdx) + cursor;
+            if (charIdx === 0) { deleting = false; phraseIdx = (phraseIdx + 1) % phrases.length; }
+        }
+        setTimeout(typeLoop, deleting ? 35 : 70);
+    }
+    setTimeout(typeLoop, 500);
+
+    /* ── Scroll Reveal (IntersectionObserver) ── */
+    const revealSel = '.reveal, .reveal-left, .reveal-right, .reveal-scale, .reveal-stagger';
+    const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+            if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); }
+        });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll(revealSel).forEach(el => io.observe(el));
+
+    /* ── Custom cursor (desktop only) ── */
+    const dot = document.getElementById('cursorDot');
+    const ring = document.getElementById('cursorRing');
+    const isFine = window.matchMedia('(pointer: fine)').matches;
+    if (isFine && dot && ring) {
+        let mx = window.innerWidth / 2, my = window.innerHeight / 2;
+        let dx = mx, dy = my;
+        document.addEventListener('mousemove', (e) => { mx = e.clientX; my = e.clientY; });
+        function animCursor() {
+            dx += (mx - dx) * 0.18; dy += (my - dy) * 0.18;
+            dot.style.left = mx + 'px'; dot.style.top = my + 'px';
+            ring.style.left = dx + 'px'; ring.style.top = dy + 'px';
+            requestAnimationFrame(animCursor);
+        }
+        animCursor();
+        const hoverables = 'a, button, .project-card, .service-card, .expertise-card, .process-step, .highlight-item, .benefit-item, input, textarea, select, .nav-cta, .scroll-top-btn';
+        document.querySelectorAll(hoverables).forEach(el => {
+            el.addEventListener('mouseenter', () => { dot.classList.add('hovering'); ring.classList.add('hovering'); });
+            el.addEventListener('mouseleave', () => { dot.classList.remove('hovering'); ring.classList.remove('hovering'); });
+        });
+        // Ripple on click
+        document.addEventListener('mousedown', (e) => {
+            const r = document.createElement('div');
+            r.style.cssText = `position:fixed;left:${e.clientX}px;top:${e.clientY}px;width:0;height:0;border:2px solid rgba(0,255,136,0.6);border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:99997;animation:rippleOut 0.6s ease-out forwards;`;
+            document.body.appendChild(r);
+            setTimeout(() => r.remove(), 650);
+        });
+    }
+
+    /* ── Hamburger menu ── */
+    const hamburger = document.getElementById('hamburgerBtn');
+    const navMenu = document.getElementById('navMenu');
+    if (hamburger && navMenu) {
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('open');
+            navMenu.classList.toggle('open');
+        });
+        navMenu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+            hamburger.classList.remove('open'); navMenu.classList.remove('open');
+        }));
+    }
+
+    /* ── Form modal (mailto fallback, instant success) ── */
+    const formModal = document.getElementById('formModal');
+    const contactForm = document.getElementById('contactForm');
+    const formContent = document.getElementById('formContent');
+    const formSuccess = document.getElementById('formSuccess');
+    const formSubmitBtn = document.getElementById('formSubmitBtn');
+    window.openFormModal = function () {
+        if (!formModal) return;
+        formModal.classList.add('active');
+        document.body.classList.add('no-scroll');
+        setTimeout(() => formModal.querySelector('input,textarea,select,button')?.focus(), 200);
+    };
+    window.closeFormModal = function () {
+        if (!formModal) return;
+        formModal.classList.remove('active');
+        document.body.classList.remove('no-scroll');
+    };
+    window.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeFormModal(); });
+    window.handleFormSubmit = function (e) {
+        e.preventDefault();
+        if (!contactForm) return false;
+        const fd = new FormData(contactForm);
+        const name = (fd.get('name') || '').trim();
+        const email = (fd.get('email') || '').trim();
+        const phone = (fd.get('phone') || '').trim();
+        const service = (fd.get('service') || '').trim();
+        const message = (fd.get('message') || '').trim();
+        const subject = encodeURIComponent(`New Project Inquiry${service ? ' - ' + service : ''}${name ? ' from ' + name : ''}`);
+        const body = encodeURIComponent(
+            `Name: ${name}\nEmail: ${email}\nPhone: ${phone}\nService: ${service}\n\nMessage:\n${message}`
+        );
+        if (formSubmitBtn) { formSubmitBtn.disabled = true; formSubmitBtn.textContent = 'Sending…'; }
+        window.location.href = `mailto:kylemheler02@gmail.com?subject=${subject}&body=${body}`;
+        setTimeout(() => {
+            if (formContent) formContent.style.display = 'none';
+            if (formSuccess) formSuccess.style.display = 'block';
+            setTimeout(() => {
+                closeFormModal();
+                contactForm.reset();
+                setTimeout(() => {
+                    if (formContent) formContent.style.display = 'block';
+                    if (formSuccess) formSuccess.style.display = 'none';
+                    if (formSubmitBtn) { formSubmitBtn.disabled = false; formSubmitBtn.textContent = '▶ Send Message'; }
+                }, 400);
+            }, 2200);
+        }, 400);
+        return false;
+    };
+
+    /* ── Scroll-to-top button ── */
+    const scrollTopBtn = document.getElementById('scrollTopBtn');
+    if (scrollTopBtn) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 500) scrollTopBtn.classList.add('visible');
+            else scrollTopBtn.classList.remove('visible');
+        }, { passive: true });
+    }
+
+    /* ── Parallax grid ── */
+    const grid = document.getElementById('parallaxGrid');
+    if (grid) {
+        window.addEventListener('scroll', () => {
+            const y = window.scrollY;
+            grid.style.transform = `translateY(${y * 0.08}px) scale(1)`;
+        }, { passive: true });
+    }
+
+    /* ── 3D tilt on cards ── */
+    const tiltSel = '.project-card, .service-card, .expertise-card, .process-step, .highlight-item, .about-card, .contact-section';
+    document.querySelectorAll(tiltSel).forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const r = card.getBoundingClientRect();
+            const x = (e.clientX - r.left) / r.width - 0.5;
+            const y = (e.clientY - r.top) / r.height - 0.5;
+            card.style.transform = `perspective(900px) rotateY(${x * 6}deg) rotateX(${-y * 6}deg) translateY(-6px)`;
+        });
+        card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+    });
+
+    /* ── Matrix code rain ── */
+    const canvas = document.getElementById('codeRain');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        let W, H, cols, drops;
+        const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン<>/{}[]()=+*&^%$#@!';
+        const fontSize = 14;
+        function resize() {
+            W = canvas.width = window.innerWidth;
+            H = canvas.height = window.innerHeight;
+            cols = Math.floor(W / fontSize);
+            drops = new Array(cols).fill(0).map(() => Math.random() * -100);
+        }
+        resize();
+        window.addEventListener('resize', resize);
+        function draw() {
+            ctx.fillStyle = 'rgba(0,0,0,0.08)';
+            ctx.fillRect(0, 0, W, H);
+            ctx.fillStyle = 'rgba(0,255,136,0.55)';
+            ctx.font = fontSize + "px 'Courier New', monospace";
+            for (let i = 0; i < cols; i++) {
+                const ch = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(ch, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > H && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+            requestAnimationFrame(draw);
+        }
+        draw();
+    }
+
+    /* ── Smooth scroll offset for fixed nav ── */
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', (e) => {
+            const id = a.getAttribute('href');
+            if (id.length <= 1) return;
+            const target = document.querySelector(id);
+            if (!target) return;
+            e.preventDefault();
+            const top = target.getBoundingClientRect().top + window.scrollY - 72;
+            window.scrollTo({ top, behavior: 'smooth' });
+        });
+    });
+})();
+</script>
 </body>
 </html>
