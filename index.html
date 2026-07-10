@@ -173,28 +173,7 @@
         @keyframes streamDrift1 { 0%{transform:translateX(-10px);} 100%{transform:translateX(10px);} }
         @keyframes streamDrift2 { 0%{transform:translateX(8px);}  100%{transform:translateX(-8px);} }
 
-        /* HUD corner brackets — futuristic frame markers */
-        .bg-hud-corner {
-            position:fixed; width:80px; height:80px; pointer-events:none; z-index:4;
-            border:1px solid rgba(0,255,136,0.25);
-            mix-blend-mode:screen;
-        }
-        .bg-hud-corner.tl { top:14px; left:14px; border-right:none; border-bottom:none; border-top-width:2px; border-left-width:2px; box-shadow:-4px -4px 20px rgba(0,255,136,0.12); }
-        .bg-hud-corner.tr { top:14px; right:14px; border-left:none; border-bottom:none; border-top-width:2px; border-right-width:2px; border-color:rgba(0,170,255,0.25); box-shadow:4px -4px 20px rgba(0,170,255,0.12); }
-        .bg-hud-corner.bl { bottom:14px; left:14px; border-right:none; border-top:none; border-bottom-width:2px; border-left-width:2px; border-color:rgba(212,160,23,0.25); box-shadow:-4px 4px 20px rgba(212,160,23,0.1); }
-        .bg-hud-corner.br { bottom:14px; right:14px; border-left:none; border-top:none; border-bottom-width:2px; border-right-width:2px; border-color:rgba(255,0,85,0.22); box-shadow:4px 4px 20px rgba(255,0,85,0.1); }
-        /* Tiny tick labels inside corners */
-        .bg-hud-corner::before {
-            content:attr(data-label);
-            position:absolute; font-family:var(--font-mono); font-size:9px; letter-spacing:2px;
-            color:rgba(0,255,136,0.5); text-shadow:0 0 6px rgba(0,255,136,0.3);
-        }
-        .bg-hud-corner.tl::before { top:6px; left:6px; content:'SYS.ONLINE'; color:rgba(0,255,136,0.55); }
-        .bg-hud-corner.tr::before { top:6px; right:6px; content:'SEC.ACTIVE'; color:rgba(0,170,255,0.5); }
-        .bg-hud-corner.bl::before { bottom:6px; left:6px; content:'NODE_01'; color:rgba(212,160,23,0.5); }
-        .bg-hud-corner.br::before { bottom:6px; right:6px; content:'v3.0.7'; color:rgba(255,0,85,0.45); }
-
-        /* Central crosshair / reticle at top — subtle nav HUD element */
+        /* Central crosshair / reticle lines — subtle HUD guide lines */
         .bg-hud-axis {
             position:fixed; pointer-events:none; z-index:4;
             mix-blend-mode:screen; opacity:0.25;
@@ -211,8 +190,6 @@
         }
 
         @media (max-width:850px) {
-            .bg-hud-corner { width:44px; height:44px; }
-            .bg-hud-corner::before { font-size:7px; letter-spacing:1px; }
             .bg-hud-axis { display:none; }
             .bg-datastream { display:none; }
             .bg-slow-scan { height:80px; }
@@ -584,11 +561,7 @@
         .glitch-tag { display:inline-block; font-family:var(--font-mono); font-size:0.7rem; letter-spacing:4px; color:var(--accent); padding:0.15rem 0.6rem; border:1px solid rgba(0,255,136,0.35); margin-bottom:0.6rem; text-shadow:0 0 8px var(--accent-glow); background:rgba(0,255,136,0.04); position:relative; overflow:hidden; }
         .glitch-tag::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg, transparent, rgba(0,255,136,0.4), transparent); animation: tagShine 3s linear infinite; }
         @keyframes tagShine { to { left:100%; } }
-        /* RGB scanline sweep across projects section */
-        #projects::before { content:''; position:absolute; left:0; right:0; top:0; height:3px; background:linear-gradient(90deg, transparent, #ff0055, #00ff88, #00aaff, transparent); box-shadow:0 0 24px rgba(0,255,136,0.8), 0 0 40px rgba(0,170,255,0.5), 0 0 40px rgba(255,0,85,0.5); opacity:0.85; animation: rgbSweep 4s linear infinite; pointer-events:none; z-index:2; filter:blur(0.5px); }
-        #projects::after  { content:''; position:absolute; left:0; right:0; top:0; height:1px; background:#fff; opacity:0; animation: rgbSweep 4s linear infinite; animation-delay:2s; pointer-events:none; z-index:2; box-shadow:0 0 8px #fff; }
-        @keyframes rgbSweep { 0%{top:-5%; opacity:0;} 5%{opacity:0.9;} 95%{opacity:0.9;} 100%{top:105%; opacity:0;} }
-        /* Subtle RGB grid corner decorators */
+        /* Subtle RGB grid corner decorators on projects */
         #projects .corner-deco { border-color:rgba(255,0,85,0.4); }
         #projects .corner-deco:nth-child(2) { border-color:rgba(0,170,255,0.4); }
 
@@ -922,10 +895,6 @@
 <div class="bg-datastream ds4"></div>
 <div class="bg-datastream ds5"></div>
 <div class="bg-datastream ds6"></div>
-<div class="bg-hud-corner tl"></div>
-<div class="bg-hud-corner tr"></div>
-<div class="bg-hud-corner bl"></div>
-<div class="bg-hud-corner br"></div>
 <div class="bg-hud-axis axis-h"></div>
 <div class="bg-hud-axis axis-v"></div>
 
