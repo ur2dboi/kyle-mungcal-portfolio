@@ -454,7 +454,7 @@
         .form-modal input, .form-modal textarea, .form-modal select, .form-modal .form-submit, .form-modal .form-close {
             cursor: auto;
         }
-        body.no-scroll { position:fixed; width:100%; overflow:hidden; overscroll-behavior:none; }
+        body.no-scroll { overflow:hidden; overscroll-behavior:none; }
         .cursor-dot {
             position: fixed; z-index: 99999; pointer-events: none;
             width: 8px; height: 8px;
@@ -857,8 +857,8 @@
 <footer><p>◈ © 2026 Kyle Mheler Mungcal ◈</p></footer>
 
 <!-- MODAL -->
-<div class="modal-overlay" id="previewModal" onclick="if(event.target===this)closePreview()">
-    <div class="modal-container">
+<div class="modal-overlay" id="previewModal">
+    <div class="modal-container" onclick="event.stopPropagation()">
         <div class="modal-header">
             <div>
                 <div class="modal-title" id="modalProjectName">◈ <span class="gold">Project</span> ◈</div>
@@ -1199,16 +1199,7 @@ function handleFormSubmit(e){
     return false;
 }
 
-document.addEventListener('keydown', function(e){
-    if(e.key === 'Escape' && document.getElementById('formModal').classList.contains('active')){
-        closeFormModal();
-    }
-});
-document.addEventListener('keydown', function(e){
-    if(e.key === 'Escape' && document.getElementById('previewModal').classList.contains('active')){
-        closePreview();
-    }
-});
+
 
 /* ── SCROLL-TO-TOP BUTTON ── */
 (function(){
@@ -1227,6 +1218,8 @@ document.addEventListener('keydown', function(e){
 let iframeTimers={};
 function openPreview(url,name,domain){
     var modal=document.getElementById('previewModal');
+    // Save scroll position before locking
+    document.body.dataset.scrollTop = window.scrollY;
     document.getElementById('modalProjectName').innerHTML='◈ <span class="gold">'+name+'</span> ◈';
     document.getElementById('modalProjectUrl').textContent=domain;
     document.getElementById('modalVisitBtn').href=url;
@@ -1280,11 +1273,26 @@ function openPreview(url,name,domain){
     document.body.style.overflow = 'hidden';
 }
 function closePreview(){
-    document.getElementById('previewModal').classList.remove('active');document.body.classList.remove('no-scroll');
-    Object.keys(iframeTimers).forEach(k=>clearTimeout(iframeTimers[k]));
-    setTimeout(()=>{['Desktop','Tablet','Mobile'].forEach(d=>{const iframe=document.getElementById('iframe'+d);iframe.src='';const loader=iframe.parentElement.querySelector('.modal-loading');if(loader)loader.style.display='flex';const fallback=document.getElementById(d.toLowerCase()+'Fallback');if(fallback)fallback.style.display='none';});},400);
+    var modal = document.getElementById('previewModal');
+    modal.classList.remove('active');
+    document.body.classList.remove('no-scroll');
+    // Restore scroll position
+    var savedScroll = document.body.dataset.scrollTop;
+    if(savedScroll){
+        setTimeout(function(){ window.scrollTo(0, parseInt(savedScroll)); }, 50);
+    }
+    Object.keys(iframeTimers).forEach(function(k){ clearTimeout(iframeTimers[k]); });
+    setTimeout(function(){
+        ['Desktop','Tablet','Mobile'].forEach(function(d){
+            var iframe = document.getElementById('iframe'+d);
+            iframe.src = '';
+            var loader = iframe.parentElement.querySelector('.modal-loading');
+            if(loader) loader.style.display = 'flex';
+            var fallback = document.getElementById(d.toLowerCase()+'Fallback');
+            if(fallback) fallback.style.display = 'none';
+        });
+    }, 400);
 }
-document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.getElementById('previewModal').classList.contains('active'))closePreview();});
 </script>
 
 <!-- CONTACT FORM MODAL -->
