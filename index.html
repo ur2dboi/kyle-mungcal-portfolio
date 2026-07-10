@@ -352,11 +352,12 @@
 
         /* ── RGB CHROMATIC-ABERRATION GLITCH for Recent Projects title ── */
         #projects .section-title-wrap { text-align:center; margin-bottom:0.2rem; position:relative; perspective:800px; }
-        .glitch { position:relative; display:inline-block; font-size:2.4rem; font-weight:800; font-family:var(--font-mono); letter-spacing:-0.5px; color:var(--text); text-shadow:0 0 20px rgba(255,255,255,0.05); }
+        .glitch { position:relative; display:block; text-align:center; font-size:2.4rem; font-weight:800; font-family:var(--font-mono); letter-spacing:-0.5px; color:var(--text); text-shadow:0 0 20px rgba(255,255,255,0.05); margin:0; }
         /* Three stacked clones for R / G / B channel separation */
         .glitch .r, .glitch .g, .glitch .b {
             position:absolute; top:0; left:0; width:100%; height:100%;
             pointer-events:none; mix-blend-mode:screen;
+            text-align:center;
         }
         .glitch .r { color:#ff0055; text-shadow:2px 0 #ff0055, 0 0 12px rgba(255,0,85,0.6); z-index:-1;
             animation: glitchR 3.2s infinite steps(2,end); }
@@ -370,10 +371,11 @@
         .glitch:hover .r, .glitch:hover .g, .glitch:hover .b { animation-duration:0.25s; }
 
         /* ── Subtle/darker glitch variant for other section headers ── */
-        .glitch-subtle { position:relative; display:inline-block; }
+        .glitch-subtle { position:relative; display:block; text-align:center; margin:0 0 0.2rem; font-size:2.4rem; font-weight:800; font-family:var(--font-mono); letter-spacing:-0.5px; color:var(--text); text-shadow:0 0 8px rgba(255,255,255,0.03); }
         .glitch-subtle .r, .glitch-subtle .g, .glitch-subtle .b {
             position:absolute; top:0; left:0; width:100%; height:100%;
             pointer-events:none; mix-blend-mode:screen; opacity:0.45;
+            text-align:center;
         }
         .glitch-subtle .r { color:#ff3377; text-shadow:1px 0 rgba(255,0,85,0.35); z-index:-1;
             animation: glitchRsub 5s infinite steps(2,end); }
@@ -680,7 +682,7 @@
 
             /* Sections */
             section { padding:1.5rem 1rem 0; }
-            .section-title { font-size:1.8rem; }
+            .section-title, .glitch-subtle, .glitch { font-size:1.8rem !important; }
             .section-subtitle { font-size:0.88rem; margin-bottom:1rem; }
 
             /* All grids → single column */
@@ -721,7 +723,7 @@
 
             /* Contact */
             .contact-section { padding:1.5rem 1rem; margin:0 auto 2.5rem; }
-            .contact-section h2 { font-size:1.6rem; }
+            .contact-section h2.glitch-subtle { font-size:1.6rem !important; }
             .contact-section .lead { font-size:0.92rem; margin-bottom:1rem; }
             .contact-benefits { gap:0.5rem; margin-bottom:1rem; }
             .benefit-item { font-size:0.82rem; padding:0.25rem 0.6rem; }
@@ -750,7 +752,7 @@
             .hero p.subtitle { font-size:0.72rem; }
             .hero-stats { gap:0.8rem; }
             .hero-stat .num { font-size:1.3rem; }
-            .section-title, .glitch { font-size:1.3rem !important; }
+            .section-title, .glitch-subtle, .glitch { font-size:1.3rem !important; }
             .glitch-tag { font-size:0.55rem; }
             .hover-hint .visit-btn { padding:0.4rem 0.85rem; font-size:0.7rem; }
         }
@@ -801,7 +803,7 @@
 </section>
 
 <section id="about">
-    <h2 class="section-title reveal glitch-subtle" data-text="<About Me/>">
+    <h2 class="glitch-subtle reveal" data-text="<About Me/>">
         &lt;<span class="green">About</span> <span class="gold">Me</span>/&gt;
         <span class="r" aria-hidden="true">&lt;<span class="green">About</span> <span class="gold">Me</span>/&gt;</span>
         <span class="g" aria-hidden="true">&lt;<span class="green">About</span> <span class="gold">Me</span>/&gt;</span>
@@ -825,7 +827,7 @@
 </section>
 
 <section id="services">
-    <h2 class="section-title reveal glitch-subtle" data-text="<Services/>">
+    <h2 class="glitch-subtle reveal" data-text="<Services/>">
         &lt;<span class="green">Services</span>/&gt;
         <span class="r" aria-hidden="true">&lt;<span class="green">Services</span>/&gt;</span>
         <span class="g" aria-hidden="true">&lt;<span class="green">Services</span>/&gt;</span>
@@ -841,7 +843,7 @@
 </section>
 
 <section id="expertise">
-    <h2 class="section-title reveal glitch-subtle" data-text="<Expertise/>">
+    <h2 class="glitch-subtle reveal" data-text="<Expertise/>">
         &lt;<span class="green">Expertise</span>/&gt;
         <span class="r" aria-hidden="true">&lt;<span class="green">Expertise</span>/&gt;</span>
         <span class="g" aria-hidden="true">&lt;<span class="green">Expertise</span>/&gt;</span>
@@ -879,15 +881,13 @@
 <section id="projects">
     <div class="section-title-wrap reveal">
         <div class="glitch-tag">// PROJECTS.DB :: v3.0.7</div>
-        <div style="display:block;">
-            <h2 class="section-title glitch" data-text="<Recent Projects/>">
-                &lt;<span class="green">Recent</span> <span class="gold">Projects</span>/&gt;
-                <span class="r" aria-hidden="true">&lt;<span class="green">Recent</span> <span class="gold">Projects</span>/&gt;</span>
-                <span class="g" aria-hidden="true">&lt;<span class="green">Recent</span> <span class="gold">Projects</span>/&gt;</span>
-                <span class="b" aria-hidden="true">&lt;<span class="green">Recent</span> <span class="gold">Projects</span>/&gt;</span>
-                <span class="tear t1"></span><span class="tear t2"></span><span class="tear t3"></span>
-            </h2>
-        </div>
+        <h2 class="glitch" data-text="<Recent Projects/>">
+            &lt;<span class="green">Recent</span> <span class="gold">Projects</span>/&gt;
+            <span class="r" aria-hidden="true">&lt;<span class="green">Recent</span> <span class="gold">Projects</span>/&gt;</span>
+            <span class="g" aria-hidden="true">&lt;<span class="green">Recent</span> <span class="gold">Projects</span>/&gt;</span>
+            <span class="b" aria-hidden="true">&lt;<span class="green">Recent</span> <span class="gold">Projects</span>/&gt;</span>
+            <span class="tear t1"></span><span class="tear t2"></span><span class="tear t3"></span>
+        </h2>
     </div>
     <p class="section-subtitle reveal">// Click any card to visit the live website</p>
     <div class="projects-grid reveal-stagger">
@@ -986,7 +986,7 @@
 </section>
 
 <section id="process">
-    <h2 class="section-title reveal glitch-subtle" data-text="<Development Process/>">
+    <h2 class="glitch-subtle reveal" data-text="<Development Process/>">
         &lt;<span class="green">Development</span> <span class="gold">Process</span>/&gt;
         <span class="r" aria-hidden="true">&lt;<span class="green">Development</span> <span class="gold">Process</span>/&gt;</span>
         <span class="g" aria-hidden="true">&lt;<span class="green">Development</span> <span class="gold">Process</span>/&gt;</span>
