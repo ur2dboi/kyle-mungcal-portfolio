@@ -328,9 +328,12 @@
         }
         @keyframes arrowBlink { 0%,100%{opacity:0.35;} 50%{opacity:1;} }
         .project-info { padding:1.3rem; }
-        .project-info h4 { font-size:1.15rem; margin-bottom:0.2rem; font-family:var(--font-mono); letter-spacing:0.5px; }
-        .project-info .domain { font-size:0.85rem; color:var(--accent); margin-bottom:0.5rem; font-family:var(--font-mono); text-shadow:0 0 8px rgba(0,255,136,0.3); }
-        .project-info p { font-size:1rem; color:var(--text2); }
+        .project-info h4 { font-size:1.15rem; margin-bottom:0.2rem; font-family:var(--font-mono); letter-spacing:0.5px; color:var(--text); transition:color 0.35s, text-shadow 0.35s; }
+        .project-info .domain { font-size:0.85rem; color:var(--accent); margin-bottom:0.5rem; font-family:var(--font-mono); text-shadow:0 0 8px rgba(0,255,136,0.3); transition:text-shadow 0.35s; }
+        .project-info p { font-size:1rem; color:var(--text2); transition:color 0.35s, opacity 0.35s, transform 0.35s; line-height:1.55; }
+        .project-card:hover .project-info h4 { color:#fff; text-shadow:0 0 12px rgba(255,255,255,0.35); }
+        .project-card:hover .project-info .domain { text-shadow:0 0 16px var(--accent-glow), 0 0 30px rgba(0,255,136,0.35); }
+        .project-card:hover .project-info p { color:#c8c8c8; opacity:1; transform:translateY(-1px); }
 
         /* ── RGB CHROMATIC-ABERRATION GLITCH for Recent Projects title ── */
         #projects .section-title-wrap { text-align:center; margin-bottom:0.2rem; position:relative; perspective:800px; }
