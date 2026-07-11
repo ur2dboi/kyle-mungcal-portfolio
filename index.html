@@ -1387,29 +1387,54 @@
             display:flex; flex-direction:column; align-items:center; justify-content:center;
             font-family:var(--font-mono); color:var(--armor-yellow);
             text-transform:uppercase; letter-spacing:3px; font-weight:700;
-            transition:opacity 0.6s;
             width:100vw;
             height:100vh;
             height:100dvh;
+            min-height:-webkit-fill-available;
             overflow:hidden;
-            -webkit-overflow-scrolling:touch;
             overscroll-behavior:contain;
+            -webkit-tap-highlight-color:transparent;
+            touch-action:none;
+            user-select:none; -webkit-user-select:none;
+        }
+        #bootSeq::before{
+            content:''; position:absolute; inset:0; pointer-events:none;
+            background-image:
+              radial-gradient(1px 1px at 15% 25%, #ffd100 50%, transparent 51%),
+              radial-gradient(1px 1px at 35% 65%, #9ecbff 50%, transparent 51%),
+              radial-gradient(1px 1px at 55% 15%, #fff 50%, transparent 51%),
+              radial-gradient(1px 1px at 75% 45%, #ffd100 50%, transparent 51%),
+              radial-gradient(1px 1px at 88% 78%, #fff 50%, transparent 51%),
+              radial-gradient(2px 2px at 22% 82%, #fff 50%, transparent 51%);
+            opacity:0.6; animation:starTwinkle 2s steps(2) infinite;
+        }
+        @keyframes bootPulse { 0%,100%{opacity:1;} 50%{opacity:0.6;} }
+        #bootSeq .boot-logo { animation:bootPulse 1.6s ease-in-out infinite; }
+        #bootSeq .boot-skip {
+            position:absolute; bottom:22px; left:0; right:0; text-align:center;
+            font-size:0.58rem; letter-spacing:3px; color:#6a8bbd;
+            text-transform:uppercase; pointer-events:none; opacity:0.8;
         }
         html.boot-visible, body.boot-visible { overflow:hidden !important; position:fixed; inset:0; width:100%; height:100%; }
-        #bootSeq.done { opacity:0; pointer-events:none; }
+        body.boot-visible { touch-action:none; overscroll-behavior:contain; }
+        #bootSeq.done { opacity:0; pointer-events:none; visibility:hidden; }
         #bootSeq .boot-logo {
-            width:120px; height:120px; position:relative; margin-bottom:1.2rem;
+            width:120px; height:120px; position:relative; margin-bottom:1.4rem;
+            filter:drop-shadow(0 0 12px rgba(31,78,140,0.8));
         }
-        #bootSeq .boot-bar { width:min(520px,80vw); height:8px; border:2px solid var(--armor-yellow); position:relative; clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%); margin-top:0.3rem; }
-        #bootSeq .boot-bar-fill { height:100%; width:0; background:repeating-linear-gradient(-45deg,var(--armor-yellow) 0 8px,#c99e00 8px 12px); transition:width 0.07s linear; }
-        #bootSeq .boot-txt { font-size:0.75rem; margin:0.2rem 0; color:#9ecbff; letter-spacing:4px; }
-        #bootSeq .boot-txt b { color:var(--armor-yellow); }
-        #bootSeq .boot-sub { font-size:0.62rem; color:#6a8bbd; letter-spacing:3px; margin-top:0.8rem; }
+        #bootSeq .boot-bar { width:min(520px,80vw); height:8px; border:2px solid var(--armor-yellow); position:relative; clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%); margin-top:0.6rem; box-shadow:0 0 12px rgba(255,209,0,0.45); }
+        #bootSeq .boot-bar-fill { height:100%; width:0; background:repeating-linear-gradient(-45deg,var(--armor-yellow) 0 8px,#c99e00 8px 12px); }
+        #bootSeq .boot-txt { font-size:0.75rem; margin:0.4rem 0 0.15rem; color:#9ecbff; letter-spacing:4px; }
+        #bootSeq .boot-txt b { color:var(--armor-yellow); text-shadow:0 0 8px rgba(255,209,0,0.6); }
+        #bootSeq .boot-sub { font-size:0.62rem; color:#6a8bbd; letter-spacing:3px; margin-top:0.7rem; }
+        #bootSeq .boot-pct { font-size:0.62rem; color:var(--armor-yellow); margin-top:0.25rem; letter-spacing:2px; }
         @media (max-width:480px) {
-            #bootSeq .boot-logo { width:90px; height:90px; }
-            #bootSeq .boot-bar { height:6px; }
-            #bootSeq .boot-txt { font-size:0.62rem; letter-spacing:2px; }
-            #bootSeq .boot-sub { font-size:0.52rem; letter-spacing:2px; }
+            #bootSeq .boot-logo { width:96px; height:96px; margin-bottom:1.2rem; }
+            #bootSeq .boot-bar { height:7px; }
+            #bootSeq .boot-txt { font-size:0.64rem; letter-spacing:2px; }
+            #bootSeq .boot-sub { font-size:0.54rem; letter-spacing:2px; }
+            #bootSeq .boot-pct { font-size:0.56rem; }
+            #bootSeq .boot-skip { font-size:0.52rem; bottom:18px; }
         }
 
         /* ── HUD CORNER READOUTS (fixed on viewport, desktop only) ── */
@@ -1701,33 +1726,68 @@
     </svg>
     <div class="boot-txt"><b>KYLE MHELER MUNGCAL</b></div>
     <div class="boot-bar"><div class="boot-bar-fill" id="bootFill"></div></div>
-    <div class="boot-txt" id="bootLine" style="margin-top:0.4rem;">LOADING...</div>
-    <div class="boot-sub">PREPARING INTERFACE // PLEASE WAIT</div>
+    <div class="boot-pct" id="bootPct">0%</div>
+    <div class="boot-txt" id="bootLine" style="margin-top:0.6rem;">INITIALIZING INTERFACE...</div>
+    <div class="boot-sub">SYSTEMS BOOT // PLEASE WAIT</div>
+    <div class="boot-skip">▸ TAP TO SKIP ◂</div>
 </div>
 <script>
 // ── EMERGENCY BOOT KILL-SWITCH (independent of main script) ──
-// Guarantees the loading screen never gets stuck, even if main JS throws.
+// Guarantees the loading screen never gets stuck, while letting the animation play on mobile.
 (function(){
     var el = document.getElementById('bootSeq');
-    function kill(){
+    var BOOT_MIN_MS = 1800;
+    var startTs = Date.now();
+    function kill(force){
         if(!el || el.dataset.killed==='1') return;
+        var elapsed = Date.now() - startTs;
+        // Enforce minimum visible time so mobile users see the animation
+        if(!force && elapsed < BOOT_MIN_MS){
+            setTimeout(function(){ kill(force); }, BOOT_MIN_MS - elapsed + 50);
+            return;
+        }
         el.dataset.killed='1';
         el.classList.add('done');
-        document.documentElement.classList.remove('boot-visible');
-        document.body && document.body.classList.remove('boot-visible');
+        // remove boot-visible lock to allow scroll
+        setTimeout(function(){
+            document.documentElement.classList.remove('boot-visible');
+            if(document.body) document.body.classList.remove('boot-visible');
+        }, 30);
         setTimeout(function(){ try{ el.remove(); }catch(e){ el.style.display='none'; } }, 700);
     }
-    // Hard timeout (always fires)
-    setTimeout(kill, 4200);
-    // On user interaction (tap/click/key), dismiss fast
-    function onInteract(){ kill(); document.removeEventListener('click',onInteract); document.removeEventListener('touchstart',onInteract); document.removeEventListener('keydown',onInteract); }
-    document.addEventListener('click', onInteract, { passive:true, once:true });
-    document.addEventListener('touchstart', onInteract, { passive:true, once:true });
-    document.addEventListener('keydown', onInteract, { once:true });
-    // On window load, ensure kill runs after ~1.5s regardless of main script
-    window.addEventListener('load', function(){ setTimeout(kill, 1200); }, { once:true });
-    // On DOMContentLoaded, if load never fires, kill at 3s
-    document.addEventListener('DOMContentLoaded', function(){ setTimeout(kill, 2800); }, { once:true });
+    // Hard upper-bound timeout (always fires, no matter what)
+    setTimeout(function(){ kill(true); }, 5000);
+    // Intentional skip: require a SHORT TAP/CLICK on the boot overlay itself
+    // (not any synthetic page-load events) with minimum 400ms elapsed to avoid
+    // instant dismissal from the browser's synthetic first-touch on some mobile browsers.
+    function onSkip(e){
+        if(Date.now() - startTs < 450) return; // ignore near-instant touches (synthetic)
+        // Only skip if the tap lands directly on the boot overlay (not while it's already fading)
+        if(el && el.dataset.killed!=='1'){
+            // Show a brief "SKIPPING" flash then dismiss
+            var sub = el.querySelector('.boot-sub');
+            if(sub) sub.textContent = '// SKIPPING //';
+            var pct = document.getElementById('bootPct');
+            if(pct) pct.textContent = '100%';
+            var fill = document.getElementById('bootFill');
+            if(fill) fill.style.width='100%';
+            setTimeout(function(){ kill(true); }, 200);
+        }
+    }
+    // Attach skip listener directly to boot element only (not document) to avoid
+    // catching other initial page interactions. Use touchend not touchstart (touchend
+    // fires after the finger lifts, matching an intentional "tap to skip").
+    if(el){
+        el.addEventListener('touchend', onSkip, { passive:true });
+        el.addEventListener('click', onSkip, { passive:true });
+    }
+    document.addEventListener('keydown', function(e){
+        if(e.key==='Enter'||e.key===' '||e.key==='Escape'){ onSkip(e); }
+    }, { once:true });
+    // On window load: dismiss after min time (main script will also try)
+    window.addEventListener('load', function(){ setTimeout(function(){ kill(false); }, 800); }, { once:true });
+    // DOMContentLoaded fallback: if load never fires, kill at 3.5s
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(function(){ kill(false); }, 3200); }, { once:true });
 })();
 </script>
 
@@ -2300,50 +2360,59 @@
             if (!boot || boot.classList.contains('done')) return;
             const fill = document.getElementById('bootFill');
             const line = document.getElementById('bootLine');
+            const pct  = document.getElementById('bootPct');
             if (fill) fill.style.width = '100%';
+            if (pct)  pct.textContent = '100%';
             if (line) line.textContent = 'READY';
             setTimeout(() => {
                 boot.classList.add('done');
                 document.documentElement.classList.remove('boot-visible');
-                document.body.classList.remove('boot-visible');
+                if (document.body) document.body.classList.remove('boot-visible');
                 setTimeout(() => { try { boot.remove(); } catch(e){ boot.style.display='none'; } }, 700);
-            }, 300);
+            }, 260);
         }
         if (boot) {
-            // Tap/click on boot screen to dismiss instantly (mobile-friendly)
-            boot.addEventListener('click', dismissBoot, { passive:true });
-            boot.addEventListener('touchend', dismissBoot, { passive:true });
+            // Note: skip-on-tap is handled by the emergency kill-switch above.
             const fill = document.getElementById('bootFill');
             const line = document.getElementById('bootLine');
+            const pct  = document.getElementById('bootPct');
             const lines = [
-                'INITIALIZING INTERFACE...',
-                'LOADING ASSETS...',
-                'CONNECTING TO SERVER...',
-                'PREPARING PROJECTS...',
-                'OPTIMIZING EXPERIENCE...',
-                'READY'
+                { at:0,  text:'INITIALIZING INTERFACE...' },
+                { at:18, text:'LOADING ASSETS...' },
+                { at:36, text:'CONNECTING TO SERVER...' },
+                { at:54, text:'PREPARING PROJECTS...' },
+                { at:72, text:'OPTIMIZING EXPERIENCE...' },
+                { at:92, text:'SYSTEMS ONLINE' }
             ];
-            let p = 0, li = 0;
             const startedAt = performance.now();
-            const tick = setInterval(() => {
-                p += 4 + Math.random() * 5;
-                if (p > 100) p = 100;
-                if (fill) fill.style.width = p + '%';
-                const ni = Math.min(lines.length - 1, Math.floor(p / 18));
-                if (ni !== li) { li = ni; if (line) line.textContent = lines[li]; }
-                if (p >= 100) { clearInterval(tick); }
-            }, reducedMotion ? 20 : 50);
-            // Dismiss when window loaded AND at least 1.3s elapsed
-            const minShow = 1300;
-            const tryDismiss = () => {
-                const elapsed = performance.now() - startedAt;
-                const wait = Math.max(0, minShow - elapsed);
-                setTimeout(dismissBoot, wait);
-            };
-            if (document.readyState === 'complete') tryDismiss();
-            else window.addEventListener('load', tryDismiss, { once: true });
-            // Safety fallback: force-dismiss after 6s even if load never fires
-            setTimeout(dismissBoot, 6000);
+            // Minimum duration mobile users actually see the animation
+            const MIN_DURATION_MS = 1400;
+            // Animate the progress bar via rAF (more reliable than setInterval on mobile)
+            let progress = 0; let rafId; let lastLi = -1;
+            function tick(ts){
+                if(!boot || boot.dataset.killed==='1') return;
+                const elapsed = ts - startedAt;
+                // Progress ramps from 0→100 over ~1.6-2.0s, with a slight ease
+                const rawT = Math.min(1, elapsed / 1800);
+                progress = Math.min(100, Math.round(rawT*100 * (1 - 0.08*Math.sin(rawT*Math.PI))));
+                if(fill) fill.style.width = progress + '%';
+                if(pct)  pct.textContent = progress + '%';
+                // update status line
+                let ni = 0;
+                for(let i=0;i<lines.length;i++){ if(progress >= lines[i].at) ni=i; }
+                if(ni !== lastLi && line){ line.textContent = lines[ni].text; lastLi=ni; }
+                if(progress < 100 && elapsed < 4500 && boot.dataset.killed!=='1'){
+                    rafId = requestAnimationFrame(tick);
+                } else {
+                    // Wait for min duration then dismiss
+                    const wait = Math.max(0, MIN_DURATION_MS - elapsed);
+                    setTimeout(dismissBoot, wait);
+                }
+            }
+            // Wait until DOM is painted before starting the tick (ensures overlay is visible)
+            requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ rafId = requestAnimationFrame(tick); }); });
+            // Safety: force-dismiss after 4.5s even if rAF is throttled
+            setTimeout(dismissBoot, 4500);
         }
 
         /* ── Live HUD counters ── */
