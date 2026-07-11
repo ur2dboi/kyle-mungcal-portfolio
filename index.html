@@ -860,54 +860,121 @@
         .form-success h3 { margin-bottom:0.5rem; color:var(--armor-blue); }
         .form-success p { color:var(--text2); font-size:0.85rem; font-family:var(--font-mono); letter-spacing:1px; }
 
-        /* ── Custom Cursor (desktop only) ── */
-        @media (pointer: fine) { html { cursor: auto; } }
-        .cursor-dot, .cursor-ring { display:none !important; }
-        .form-modal input, .form-modal textarea, .form-modal select, .form-modal .form-submit, .form-modal .form-close {
-            cursor: auto;
-        }
+        /* ── GUNDAM HUD CUSTOM CURSOR (desktop / fine pointer only) ── */
+        @media (pointer: fine) { html, body { cursor: none !important; } }
+        .form-modal input, .form-modal textarea, .form-modal select,
+        .form-modal .form-submit, .form-modal .form-close,
+        a, button, .project-card, .service-card, .expertise-card,
+        .process-step, .highlight-item, .benefit-item, .nav-cta,
+        .scroll-top-btn, .visit-btn, .hamburger { cursor: none !important; }
+        .cursor-dot, .cursor-ring { display:block !important; pointer-events:none; }
         body.no-scroll { overflow:hidden; }
+
+        /* Core reticle dot (red, like a Gundam vulcan/aim point) */
         .cursor-dot {
             position: fixed; top:0; left:0; z-index: 99999; pointer-events: none;
-            width: 8px; height: 8px; margin:0;
-            background: var(--accent);
-            border-radius: 50%;
-            box-shadow: 0 0 12px var(--accent-glow), 0 0 24px var(--accent-glow);
-            transition: width 0.2s ease-out, height 0.2s ease-out, background 0.2s, box-shadow 0.2s;
+            width: 6px; height: 6px; margin:0;
+            background: var(--armor-red);
+            border:1px solid #fff;
+            box-shadow: 0 0 6px var(--armor-red), 0 0 14px rgba(200,16,46,0.6);
             transform: translate3d(0,0,0);
             will-change: transform;
             contain: layout paint size style;
         }
+        /* Outer targeting reticle (square brackets like mobile suit HUD) */
         .cursor-ring {
             position: fixed; top:0; left:0; z-index: 99998; pointer-events: none;
             width: 36px; height: 36px; margin:0;
-            border: 1.5px solid rgba(0,255,136,0.5);
-            border-radius: 50%;
-            box-shadow: 0 0 8px rgba(0,255,136,0.15);
-            transition: width 0.25s cubic-bezier(0.22,0.61,0.36,1),
-                        height 0.25s cubic-bezier(0.22,0.61,0.36,1),
-                        border-color 0.25s, background 0.25s;
             transform: translate3d(0,0,0);
             will-change: transform;
             contain: layout paint size style;
+            transition: width 0.2s cubic-bezier(0.22,0.61,0.36,1),
+                        height 0.2s cubic-bezier(0.22,0.61,0.36,1);
         }
-        .cursor-ring.hovering {
-            width: 48px; height: 48px;
-            border-color: var(--gold);
-            background: rgba(212,160,23,0.06);
-            box-shadow: 0 0 16px var(--gold-glow);
-        }
+        /* Draw reticle brackets via four spans inside ring */
+        .cursor-ring span { position:absolute; background:var(--armor-yellow); box-shadow:0 0 6px rgba(255,209,0,0.7); transition:all 0.2s; }
+        .cursor-ring .b-tl { top:0; left:0; width:10px; height:2px; }
+        .cursor-ring .b-tl::after { content:''; position:absolute; top:0; left:0; width:2px; height:10px; background:var(--armor-yellow); box-shadow:0 0 6px rgba(255,209,0,0.7); }
+        .cursor-ring .b-tr { top:0; right:0; width:10px; height:2px; }
+        .cursor-ring .b-tr::after { content:''; position:absolute; top:0; right:0; width:2px; height:10px; background:var(--armor-yellow); box-shadow:0 0 6px rgba(255,209,0,0.7); }
+        .cursor-ring .b-bl { bottom:0; left:0; width:10px; height:2px; }
+        .cursor-ring .b-bl::after { content:''; position:absolute; bottom:0; left:0; width:2px; height:10px; background:var(--armor-yellow); box-shadow:0 0 6px rgba(255,209,0,0.7); }
+        .cursor-ring .b-br { bottom:0; right:0; width:10px; height:2px; }
+        .cursor-ring .b-br::after { content:''; position:absolute; bottom:0; right:0; width:2px; height:10px; background:var(--armor-yellow); box-shadow:0 0 6px rgba(255,209,0,0.7); }
+        /* Lock-on: brackets turn red + expand + pulsing ring */
+        .cursor-ring.hovering { width:46px; height:46px; }
+        .cursor-ring.hovering span { background:var(--armor-red); box-shadow:0 0 10px var(--armor-red); }
+        .cursor-ring.hovering span::after { background:var(--armor-red); box-shadow:0 0 10px var(--armor-red); }
         .cursor-dot.hovering {
-            width:12px; height:12px;
-            background: var(--gold);
-            box-shadow: 0 0 18px var(--gold-glow), 0 0 28px var(--gold-glow);
+            width:10px; height:10px;
+            background:var(--armor-red);
+            box-shadow:0 0 10px var(--armor-red), 0 0 22px rgba(200,16,46,0.9);
+            animation: reticlePulse 0.6s steps(2) infinite;
         }
-        /* ── MOBILE OPTIMIZATION ── */
+        @keyframes reticlePulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+
+        /* ── BOOT SEQUENCE OVERLAY (plays once per page load) ── */
+        #bootSeq {
+            position:fixed; inset:0; z-index:100000;
+            background:linear-gradient(180deg,#071025 0%,#0c1b3a 100%);
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            font-family:var(--font-mono); color:var(--armor-yellow);
+            text-transform:uppercase; letter-spacing:3px; font-weight:700;
+            transition:opacity 0.6s;
+        }
+        #bootSeq.done { opacity:0; pointer-events:none; }
+        #bootSeq .boot-logo {
+            width:120px; height:120px; position:relative; margin-bottom:1.2rem;
+        }
+        #bootSeq .boot-bar { width:min(520px,80vw); height:8px; border:2px solid var(--armor-yellow); position:relative; clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%); margin-top:0.3rem; }
+        #bootSeq .boot-bar-fill { height:100%; width:0; background:repeating-linear-gradient(-45deg,var(--armor-yellow) 0 8px,#c99e00 8px 12px); transition:width 0.07s linear; }
+        #bootSeq .boot-txt { font-size:0.75rem; margin:0.2rem 0; color:#9ecbff; letter-spacing:4px; }
+        #bootSeq .boot-txt b { color:var(--armor-yellow); }
+        #bootSeq .boot-sub { font-size:0.62rem; color:#6a8bbd; letter-spacing:3px; margin-top:0.8rem; }
+        @media (pointer: coarse) { #bootSeq { display:none; } }
+
+        /* ── HUD CORNER READOUTS (fixed on viewport, desktop only) ── */
+        .hud-corner { position:fixed; font-family:var(--font-mono); font-size:0.62rem; letter-spacing:2px; font-weight:700; color:var(--armor-yellow); text-transform:uppercase; z-index:9990; pointer-events:none; text-shadow:0 0 6px rgba(255,209,0,0.5); }
+        .hud-corner::before, .hud-corner::after { content:''; position:absolute; background:var(--armor-yellow); box-shadow:0 0 6px rgba(255,209,0,0.5); }
+        .hud-tl { top:84px; left:14px; padding-left:14px; border-left:2px solid var(--armor-yellow); }
+        .hud-tl::after { content:'E.F.S.F. RX-78-2'; display:block; color:var(--armor-red); font-size:0.6rem; margin-top:2px; text-shadow:0 0 6px rgba(200,16,46,0.6); }
+        .hud-tr { top:84px; right:14px; padding-right:14px; border-right:2px solid var(--armor-yellow); text-align:right; }
+        .hud-tr::after { content:'CORE FIGHTER ONLINE'; display:block; color:#9ecbff; font-size:0.6rem; margin-top:2px; text-shadow:0 0 6px rgba(158,203,255,0.5); }
+        .hud-bl { bottom:16px; left:14px; padding-left:14px; border-left:2px solid var(--armor-yellow); }
+        .hud-br { bottom:16px; right:14px; padding-right:14px; border-right:2px solid var(--armor-yellow); text-align:right; }
+        @media (max-width:850px), (pointer:coarse) { .hud-corner { display:none !important; } }
+
+        /* ── LOCK-ON BRACKETS AROUND HOVERED TARGET CARDS ── */
+        .lock-brackets { position:absolute; inset:-8px; pointer-events:none; opacity:0; transition:opacity 0.2s; z-index:5; }
+        .lock-brackets span { position:absolute; width:18px; height:18px; border-color:var(--armor-red); border-style:solid; box-shadow:0 0 8px rgba(200,16,46,0.7); transition:all 0.2s; }
+        .lock-brackets .lb-tl { top:0; left:0; border-width:3px 0 0 3px; }
+        .lock-brackets .lb-tr { top:0; right:0; border-width:3px 3px 0 0; }
+        .lock-brackets .lb-bl { bottom:0; left:0; border-width:0 0 3px 3px; }
+        .lock-brackets .lb-br { bottom:0; right:0; border-width:0 3px 3px 0; }
+        .project-card:hover .lock-brackets, .service-card:hover .lock-brackets,
+        .expertise-card:hover .lock-brackets, .highlight-item:hover .lock-brackets,
+        .process-step:hover .lock-brackets, .about-card:hover .lock-brackets { opacity:1; animation:bracketPulse 0.8s steps(2) infinite; }
+        @keyframes bracketPulse { 0%,100%{opacity:1;} 50%{opacity:0.4;} }
+        .lock-tag { position:absolute; top:-2px; left:10px; background:var(--armor-red); color:#fff; font-family:var(--font-mono); font-size:0.55rem; letter-spacing:2px; font-weight:800; padding:0.15rem 0.4rem; clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%); z-index:6; opacity:0; transition:opacity 0.2s; }
+        .project-card:hover .lock-tag { opacity:1; }
+
+        /* ── CARD SCAN-LINE / HUD STATUS ── */
+        .card-status { position:absolute; bottom:6px; right:8px; font-family:var(--font-mono); font-size:0.55rem; letter-spacing:1.5px; color:var(--armor-yellow); font-weight:800; opacity:0.8; text-shadow:0 0 4px rgba(255,209,0,0.6); pointer-events:none; z-index:4; }
+        .card-status::before { content:'●'; color:#19e15d; margin-right:4px; text-shadow:0 0 6px #19e15d; }
+
+        /* ── BEAM / PROJECTILE CANVAS (click burst) ── */
+        #beamCanvas { position:fixed; inset:0; pointer-events:none; z-index:99990; }
+
+        /* ── MOBILE / COARSE POINTER: disable custom cursor + effects ── */
         @media (pointer: coarse) {
-            body { cursor: auto; }
-            .cursor-dot, .cursor-ring { display: none; }
+            html, body { cursor: auto !important; }
+            .cursor-dot, .cursor-ring, #beamCanvas, #bootSeq, .hud-corner { display: none !important; }
+            a, button, .project-card, .service-card, .expertise-card,
+            .process-step, .highlight-item, .benefit-item, .nav-cta,
+            .scroll-top-btn, .visit-btn, .hamburger,
+            .form-modal input, .form-modal textarea, .form-modal select,
+            .form-modal .form-submit, .form-modal .form-close { cursor: pointer !important; }
         }
-        button { cursor: pointer; }
 
         /* Hamburger menu */
         .hamburger {
@@ -1101,7 +1168,33 @@
 <body>
 
 <div class="cursor-dot" id="cursorDot"></div>
-<div class="cursor-ring" id="cursorRing"></div>
+<div class="cursor-ring" id="cursorRing">
+    <span class="b-tl"></span><span class="b-tr"></span>
+    <span class="b-bl"></span><span class="b-br"></span>
+</div>
+
+<canvas id="beamCanvas"></canvas>
+
+<!-- Boot sequence overlay (plays once) -->
+<div id="bootSeq" aria-hidden="true">
+    <svg class="boot-logo" viewBox="0 0 120 120">
+        <polygon points="20,10 100,10 110,20 110,100 100,110 20,110 10,100 10,20" fill="#1f4e8c" stroke="#ffd100" stroke-width="3"/>
+        <rect x="18" y="18" width="84" height="8" fill="#c8102e"/>
+        <polygon points="44,26 52,46 60,38 68,46 76,26" fill="#ffd100"/>
+        <text x="60" y="85" text-anchor="middle" font-family="monospace" font-weight="900" font-size="32" fill="#fff">KMM</text>
+        <text x="60" y="102" text-anchor="middle" font-family="monospace" font-weight="700" font-size="9" fill="#ffd100" letter-spacing="2">E.F.S.F.</text>
+    </svg>
+    <div class="boot-txt"><b>RX-78-2</b> &nbsp; MOBILE SUIT SYSTEM</div>
+    <div class="boot-bar"><div class="boot-bar-fill" id="bootFill"></div></div>
+    <div class="boot-txt" id="bootLine" style="margin-top:0.4rem;">INITIALIZING...</div>
+    <div class="boot-sub">EARTH FEDERATION SPACE FORCE // LOADING CORE FIGHTER</div>
+</div>
+
+<!-- HUD corner readouts -->
+<div class="hud-corner hud-tl">SECTOR 07 · NORZAGARAY</div>
+<div class="hud-corner hud-tr" id="hudTr">TARGETS: 0</div>
+<div class="hud-corner hud-bl" id="hudBl">SP: 100%</div>
+<div class="hud-corner hud-br" id="hudBr">RX-78-2 · STANDBY</div>
 
 <!-- Futuristic background ambience overlays -->
 <div class="bg-vignette"></div>
@@ -1493,24 +1586,157 @@
         const onMove = (e) => { mx = e.clientX; my = e.clientY; };
         document.addEventListener('mousemove', onMove, { passive: true });
         function animCursor() {
-            dx += (mx - dx) * 0.18; dy += (my - dy) * 0.18;
-            // dot is 8px → center at 4; ring is 36px → center at 18 (hover size 48 → center 24 handled by CSS transition on width/height from top-left)
-            dot.style.transform = `translate3d(${mx - 4}px,${my - 4}px,0)`;
-            ring.style.transform = `translate3d(${dx - 18}px,${dy - 18}px,0)`;
+            dx += (mx - dx) * 0.22; dy += (my - dy) * 0.22;
+            const dotOff = dot.classList.contains('hovering') ? 5 : 3;  // 6px → 3; 10px → 5
+            const ringSize = ring.classList.contains('hovering') ? 46 : 36;
+            const rOff = ringSize / 2;
+            dot.style.transform = `translate3d(${mx - dotOff}px,${my - dotOff}px,0)`;
+            ring.style.transform = `translate3d(${dx - rOff}px,${dy - rOff}px,0)`;
+            ring.style.width = ringSize + 'px';
+            ring.style.height = ringSize + 'px';
             rafId = requestAnimationFrame(animCursor);
         }
         animCursor();
-        const hoverables = 'a, button, .project-card, .service-card, .expertise-card, .process-step, .highlight-item, .benefit-item, input, textarea, select, .nav-cta, .scroll-top-btn, .visit-btn';
+        const hoverables = 'a, button, .project-card, .service-card, .expertise-card, .process-step, .highlight-item, .benefit-item, input, textarea, select, .nav-cta, .scroll-top-btn, .visit-btn, .hamburger';
         document.querySelectorAll(hoverables).forEach(el => {
             el.addEventListener('mouseenter', () => { dot.classList.add('hovering'); ring.classList.add('hovering'); });
             el.addEventListener('mouseleave', () => { dot.classList.remove('hovering'); ring.classList.remove('hovering'); });
         });
-        // Ripple on click
-        document.addEventListener('mousedown', (e) => {
-            const r = document.createElement('div');
-            r.style.cssText = `position:fixed;left:${e.clientX}px;top:${e.clientY}px;width:0;height:0;border:2px solid rgba(31,78,140,0.55);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);transform:translate(-50%,-50%);pointer-events:none;z-index:99997;animation:rippleOut 0.5s ease-out forwards;`;
-            document.body.appendChild(r);
-            setTimeout(() => r.remove(), 650);
+
+        /* ── Inject lock-on brackets into cards ── */
+        const lockTargets = '.project-card, .service-card, .expertise-card, .process-step, .highlight-item, .about-card';
+        document.querySelectorAll(lockTargets).forEach(c => {
+            if (!c.style.position) c.style.position = 'relative';
+            const lb = document.createElement('div');
+            lb.className = 'lock-brackets';
+            lb.innerHTML = '<span class="lb-tl"></span><span class="lb-tr"></span><span class="lb-bl"></span><span class="lb-br"></span>';
+            c.appendChild(lb);
+        });
+        document.querySelectorAll('.project-card').forEach((c,i) => {
+            const t = document.createElement('div');
+            t.className = 'lock-tag';
+            t.textContent = `TARGET ${String(i+1).padStart(2,'0')} // LOCK`;
+            c.appendChild(t);
+            const s = document.createElement('div');
+            s.className = 'card-status';
+            s.textContent = 'UNIT ONLINE';
+            c.appendChild(s);
+        });
+
+        /* ── Beam / laser click FX canvas ── */
+        const beamCv = document.getElementById('beamCanvas');
+        if (beamCv) {
+            const bctx = beamCv.getContext('2d');
+            let beams = [], sparks = [];
+            function resizeBeam() { beamCv.width = innerWidth; beamCv.height = innerHeight; }
+            resizeBeam();
+            window.addEventListener('resize', resizeBeam, { passive:true });
+            function fireBeam(tx,ty) {
+                // from bottom-center (imaginary vulcan cannon position)
+                const ox = innerWidth/2, oy = innerHeight + 20;
+                beams.push({ x:ox, y:oy, tx, ty, t:0, dur:12 });
+                // sparks at impact
+                for (let i=0;i<12;i++){
+                    const a = Math.random()*Math.PI*2, sp = 2+Math.random()*4;
+                    sparks.push({ x:tx, y:ty, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp, life:20+Math.random()*12, col: Math.random()<0.5 ? '#ffd100' : '#c8102e' });
+                }
+                // HUD flash
+                const hudBr = document.getElementById('hudBr');
+                if (hudBr) { hudBr.textContent = 'FIRING BEAM RIFLE'; hudBr.style.color = '#ff7a7a'; setTimeout(()=>{ hudBr.textContent='RX-78-2 · COMBAT READY'; hudBr.style.color='var(--armor-yellow)'; },600); }
+            }
+            function animBeam() {
+                bctx.clearRect(0,0,beamCv.width,beamCv.height);
+                // beams
+                for (let i=beams.length-1;i>=0;i--){
+                    const b = beams[i]; b.t++;
+                    const p = Math.min(1, b.t/b.dur);
+                    const cx = b.x + (b.tx-b.x)*p, cy = b.y + (b.ty-b.y)*p;
+                    bctx.strokeStyle = 'rgba(255,209,0,0.9)';
+                    bctx.lineWidth = 4; bctx.shadowColor = '#ffd100'; bctx.shadowBlur = 18;
+                    bctx.beginPath(); bctx.moveTo(b.x,b.y); bctx.lineTo(cx,cy); bctx.stroke();
+                    bctx.strokeStyle = 'rgba(255,255,255,0.9)'; bctx.lineWidth = 1.5; bctx.shadowBlur = 8;
+                    bctx.beginPath(); bctx.moveTo(b.x,b.y); bctx.lineTo(cx,cy); bctx.stroke();
+                    bctx.shadowBlur = 0;
+                    if (p>=1) beams.splice(i,1);
+                }
+                // sparks
+                for (let i=sparks.length-1;i>=0;i--){
+                    const s = sparks[i]; s.life--;
+                    s.x+=s.vx; s.y+=s.vy; s.vy+=0.15; s.vx*=0.97;
+                    bctx.fillStyle = s.col;
+                    bctx.globalAlpha = Math.max(0, s.life/30);
+                    bctx.fillRect(s.x-1.5,s.y-1.5,3,3);
+                    bctx.globalAlpha = 1;
+                    if (s.life<=0) sparks.splice(i,1);
+                }
+                requestAnimationFrame(animBeam);
+            }
+            animBeam();
+            document.addEventListener('mousedown', (e) => {
+                if (e.target.closest('input,textarea,select,label')) return;
+                fireBeam(e.clientX, e.clientY);
+                // crosshair impact ripple square
+                const r = document.createElement('div');
+                r.style.cssText = `position:fixed;left:${e.clientX}px;top:${e.clientY}px;width:20px;height:20px;border:2px solid rgba(255,209,0,0.8);transform:translate(-50%,-50%) rotate(45deg);pointer-events:none;z-index:99997;transition:all 0.45s ease-out;`;
+                document.body.appendChild(r);
+                requestAnimationFrame(()=>{ r.style.width='60px'; r.style.height='60px'; r.style.opacity='0'; r.style.borderColor='rgba(200,16,46,0)'; });
+                setTimeout(()=>r.remove(), 500);
+            });
+        }
+
+        /* ── Boot sequence (plays once per session) ── */
+        const boot = document.getElementById('bootSeq');
+        if (boot && isFine && !reducedMotion && !sessionStorage.getItem('booted_kmm')) {
+            const fill = document.getElementById('bootFill');
+            const line = document.getElementById('bootLine');
+            const lines = [
+                'INITIALIZING CORE MODULES...',
+                'LOADING LUNA TITANIUM ARMOR...',
+                'CALIBRATING BEAM RIFLE...',
+                'BOOTING E.F.S.F. OS...',
+                'V-FIN ACTIVE // ALL SYSTEMS GREEN',
+                'KYLE MUNGCAL // READY'
+            ];
+            let p=0, li=0;
+            const tick = setInterval(()=>{
+                p += 3 + Math.random()*6;
+                if (p>100) p=100;
+                if (fill) fill.style.width = p+'%';
+                const ni = Math.min(lines.length-1, Math.floor(p/18));
+                if (ni!==li){ li=ni; if (line) line.textContent = lines[li]; }
+                if (p>=100){
+                    clearInterval(tick);
+                    setTimeout(()=>{ boot.classList.add('done'); sessionStorage.setItem('booted_kmm','1'); setTimeout(()=>boot.remove(),700); }, 450);
+                }
+            }, 60);
+        } else if (boot) { boot.remove(); }
+
+        /* ── Live HUD counters ── */
+        const hudTr = document.getElementById('hudTr');
+        const hudBl = document.getElementById('hudBl');
+        const hudBr = document.getElementById('hudBr');
+        if (hudTr) {
+            const n = document.querySelectorAll('.project-card').length;
+            hudTr.textContent = `TARGETS: ${n} LOCKED`;
+        }
+        if (hudBr) {
+            setTimeout(()=>{ hudBr.textContent = 'RX-78-2 · COMBAT READY'; }, 1200);
+        }
+        // SP bar depletes slightly on click, regenerates over time
+        if (hudBl) {
+            let sp = 100;
+            setInterval(()=>{ sp = Math.min(100, sp+1); hudBl.textContent = `SP: ${Math.floor(sp)}%`; hudBl.style.color = sp<30 ? '#ff7a7a' : 'var(--armor-yellow)'; }, 180);
+            document.addEventListener('mousedown', ()=>{ sp = Math.max(10, sp-4); });
+        }
+        // Konami-ish secret: type "gundam" → screen flash + fun console msg + small transform sound (silent text)
+        let seq='';
+        document.addEventListener('keydown', (e)=>{
+            seq = (seq+e.key.toLowerCase()).slice(-6);
+            if (seq==='gundam'){
+                document.body.animate([{filter:'brightness(2) hue-rotate(20deg)'},{filter:'brightness(1) hue-rotate(0)'}],{duration:500});
+                if (hudBr) hudBr.textContent = 'NEWTYPE AWAKENED // HYPER MODE';
+                setTimeout(()=>{ if (hudBr) hudBr.textContent='RX-78-2 · COMBAT READY'; }, 1800);
+            }
         });
     }
 
