@@ -296,16 +296,6 @@
         }
         body.shake > .perspective-wrap { animation: cockpitShake 0.28s ease-out; }
 
-        /* Floating target blips (enemy markers in background) */
-        .blip {
-            position:fixed; pointer-events:none; z-index:2;
-            font-family:var(--font-mono); font-size:0.6rem; letter-spacing:1.5px;
-            color:var(--armor-red); font-weight:800; text-shadow:0 0 6px rgba(200,16,46,0.8);
-            animation: blipPulse 1.4s steps(2) infinite;
-        }
-        .blip::before { content:'◆ '; color:var(--armor-yellow); }
-        @keyframes blipPulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-
         /* Explosion flash overlay (brief) */
         .muzzle-flash {
             position:fixed; inset:0; pointer-events:none; z-index:99996;
@@ -1127,7 +1117,6 @@
               linear-gradient(180deg, rgba(10,20,40,0.22) 0%, transparent 12%, transparent 88%, rgba(10,20,40,0.30) 100%);
             }
             .orb { filter:blur(70px); opacity:0.45 !important; }
-            .blip { font-size:0.55rem; }
         }
 
         /* Hamburger menu */
@@ -1998,25 +1987,6 @@
             }
             tickBF();
         }
-
-        /* ── Spawn random enemy blips across the background ── */
-        function spawnBlip(){
-            if (reducedMotion) return;
-            const label = ['ENEMY','ZAKU','GOUF','DOM','UNIT','TGT','MS-06','MS-07','ZEON'][Math.floor(Math.random()*9)];
-            const id = 'T-'+Math.floor(Math.random()*9000+1000);
-            const el = document.createElement('div');
-            el.className='blip';
-            el.textContent = label+' '+id;
-            const x = 5 + Math.random()*90;
-            const y = 15 + Math.random()*65;
-            el.style.left = x+'vw'; el.style.top = y+'vh';
-            document.body.appendChild(el);
-            setTimeout(()=>{ el.style.transition='opacity 1s'; el.style.opacity='0'; }, 3500+Math.random()*3500);
-            setTimeout(()=>el.remove(), 8500);
-        }
-        setInterval(spawnBlip, 2200);
-        // initial blips
-        for (let i=0;i<3;i++) setTimeout(spawnBlip, i*700);
 
         // Konami-ish secret: type "gundam" → screen flash + fun console msg + small transform sound (silent text)
         let seq='';
