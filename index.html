@@ -182,7 +182,138 @@
             50%     { transform: translate3d(30px,-25px,0) scale(1.08); }
         }
 
-        /* ── GUNDAM NAVIGATION BAR (armor plate with V-fin style) ── */
+        /* Mecha cockpit / battlefield background */
+        /* Horizon "city / battlefield" silhouette behind grid */
+        .battlefield {
+            position:fixed; inset:0; pointer-events:none; z-index:0;
+            background:
+              /* sky gradient simulating outside-cockpit daylight battle */
+              linear-gradient(180deg,
+                rgba(180,205,240,0.55) 0%,
+                rgba(210,225,245,0.35) 35%,
+                rgba(232,238,248,0.15) 60%,
+                transparent 100%);
+            will-change: transform;
+            transition:transform 0.2s linear;
+        }
+        .battlefield::before {
+            /* skyline / colony silhouette */
+            content:''; position:absolute; left:-5%; right:-5%; bottom:30%;
+            height:180px;
+            background:
+                /* Buildings as stacked rectangles (low-poly skyline) */
+                linear-gradient(90deg,
+                    transparent 0%, transparent 2%,
+                    rgba(31,78,140,0.35) 2%, rgba(31,78,140,0.35) 6%, transparent 6%, transparent 7%,
+                    rgba(26,26,26,0.30) 7%, rgba(26,26,26,0.30) 12%, transparent 12%, transparent 13%,
+                    rgba(31,78,140,0.42) 13%, rgba(31,78,140,0.42) 18%, transparent 18%, transparent 19%,
+                    rgba(200,16,46,0.32) 19%, rgba(200,16,46,0.32) 21%, transparent 21%, transparent 23%,
+                    rgba(26,26,26,0.30) 23%, rgba(26,26,26,0.30) 30%, transparent 30%, transparent 31%,
+                    rgba(31,78,140,0.40) 31%, rgba(31,78,140,0.40) 35%, transparent 35%, transparent 37%,
+                    rgba(255,209,0,0.35) 37%, rgba(255,209,0,0.35) 39%, transparent 39%, transparent 42%,
+                    rgba(31,78,140,0.42) 42%, rgba(31,78,140,0.42) 49%, transparent 49%, transparent 51%,
+                    rgba(26,26,26,0.32) 51%, rgba(26,26,26,0.32) 58%, transparent 58%, transparent 60%,
+                    rgba(200,16,46,0.30) 60%, rgba(200,16,46,0.30) 62%, transparent 62%, transparent 64%,
+                    rgba(31,78,140,0.40) 64%, rgba(31,78,140,0.40) 72%, transparent 72%, transparent 73%,
+                    rgba(31,78,140,0.35) 73%, rgba(31,78,140,0.35) 79%, transparent 79%, transparent 81%,
+                    rgba(26,26,26,0.32) 81%, rgba(26,26,26,0.32) 88%, transparent 88%, transparent 90%,
+                    rgba(31,78,140,0.40) 90%, rgba(31,78,140,0.40) 96%, transparent 96%);
+            background-size:100% 100%;
+            clip-path:polygon(0 100%, 0 40%,
+                2% 40%, 2% 10%, 6% 10%, 6% 40%,
+                7% 40%, 7% 5%, 12% 5%, 12% 40%,
+                13% 40%, 13% 20%, 18% 20%, 18% 40%,
+                19% 40%, 19% 30%, 21% 30%, 21% 40%,
+                23% 40%, 23% 0%, 30% 0%, 30% 40%,
+                31% 40%, 31% 15%, 35% 15%, 35% 40%,
+                37% 40%, 37% 25%, 39% 25%, 39% 40%,
+                42% 40%, 42% 8%, 49% 8%, 49% 40%,
+                51% 40%, 51% 2%, 58% 2%, 58% 40%,
+                60% 40%, 60% 22%, 62% 22%, 62% 40%,
+                64% 40%, 64% 12%, 72% 12%, 72% 40%,
+                73% 40%, 73% 28%, 79% 28%, 79% 40%,
+                81% 40%, 81% 6%, 88% 6%, 88% 40%,
+                90% 40%, 90% 18%, 96% 18%, 96% 40%,
+                100% 40%, 100% 100%);
+        }
+        .battlefield::after {
+            /* ground / terrain below */
+            content:''; position:absolute; left:0; right:0; bottom:0; height:32%;
+            background:
+              linear-gradient(180deg, rgba(26,26,26,0.05) 0%, rgba(26,26,26,0.15) 100%),
+              repeating-linear-gradient(90deg, rgba(31,78,140,0.10) 0 2px, transparent 2px 40px);
+        }
+
+        /* Radar sweep canvas (fixed bottom-right) */
+        #radarCanvas {
+            position:fixed; right:18px; bottom:70px; width:160px; height:160px;
+            z-index:9985; pointer-events:none;
+            border:2px solid var(--armor-yellow);
+            border-radius:50%;
+            background:radial-gradient(circle, rgba(20,40,80,0.35) 0%, rgba(10,20,40,0.55) 100%);
+            box-shadow:0 0 14px rgba(255,209,0,0.35), inset 0 0 24px rgba(31,78,140,0.4);
+            opacity:0.85;
+        }
+        .radar-label {
+            position:fixed; right:18px; bottom:230px; z-index:9986; pointer-events:none;
+            font-family:var(--font-mono); font-size:0.6rem; letter-spacing:2px;
+            color:var(--armor-yellow); text-shadow:0 0 6px rgba(255,209,0,0.6); font-weight:800;
+        }
+        @media (max-width:850px) {
+            #radarCanvas { width:110px; height:110px; right:10px; bottom:60px; opacity:0.75; }
+            .radar-label { right:10px; bottom:170px; font-size:0.55rem; }
+        }
+
+        /* Cockpit frame edges (subtle vignette that feels like being inside the suit) */
+        .cockpit-frame {
+            position:fixed; inset:0; pointer-events:none; z-index:9998;
+            background:
+              radial-gradient(ellipse at center, transparent 55%, rgba(10,20,40,0.25) 100%),
+              linear-gradient(180deg, rgba(10,20,40,0.35) 0%, transparent 14%, transparent 86%, rgba(10,20,40,0.45) 100%);
+            mix-blend-mode:multiply;
+        }
+        /* Cross-hair / viewfinder center reticle */
+        .viewfinder {
+            position:fixed; left:50%; top:50%; width:40px; height:40px;
+            transform:translate(-50%,-50%); pointer-events:none; z-index:9997;
+            opacity:0.35; mix-blend-mode:screen;
+        }
+        .viewfinder::before, .viewfinder::after {
+            content:''; position:absolute; background:var(--armor-red);
+            box-shadow:0 0 6px rgba(200,16,46,0.6);
+        }
+        .viewfinder::before { left:50%; top:0; width:2px; height:100%; transform:translateX(-50%); }
+        .viewfinder::after { top:50%; left:0; height:2px; width:100%; transform:translateY(-50%); }
+        .viewfinder span { position:absolute; width:10px; height:10px; border:2px solid var(--armor-yellow); border-radius:50%; left:50%; top:50%; transform:translate(-50%,-50%); box-shadow:0 0 8px rgba(255,209,0,0.7); }
+
+        /* Step-shock animation when firing beams / clicking */
+        @keyframes cockpitShake {
+            0%,100% { transform:translate(0,0); }
+            20% { transform:translate(-4px,3px); }
+            40% { transform:translate(5px,-3px); }
+            60% { transform:translate(-3px,-2px); }
+            80% { transform:translate(2px,3px); }
+        }
+        body.shake > .perspective-wrap { animation: cockpitShake 0.28s ease-out; }
+
+        /* Floating target blips (enemy markers in background) */
+        .blip {
+            position:fixed; pointer-events:none; z-index:2;
+            font-family:var(--font-mono); font-size:0.6rem; letter-spacing:1.5px;
+            color:var(--armor-red); font-weight:800; text-shadow:0 0 6px rgba(200,16,46,0.8);
+            animation: blipPulse 1.4s steps(2) infinite;
+        }
+        .blip::before { content:'◆ '; color:var(--armor-yellow); }
+        @keyframes blipPulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+        /* Explosion flash overlay (brief) */
+        .muzzle-flash {
+            position:fixed; inset:0; pointer-events:none; z-index:99996;
+            background:radial-gradient(circle at var(--fx,50%) var(--fy,50%), rgba(255,220,120,0.55) 0%, rgba(255,120,40,0.25) 20%, transparent 45%);
+            opacity:0; transition:opacity 0.08s;
+        }
+        .muzzle-flash.on { opacity:1; }
+
 
         /* Smoothness hints */
         .reveal, .reveal-left, .reveal-right, .reveal-scale, .project-card,
@@ -980,15 +1111,23 @@
         /* ── BEAM / PROJECTILE CANVAS (click burst) ── */
         #beamCanvas { position:fixed; inset:0; pointer-events:none; z-index:99990; }
 
-        /* ── MOBILE / COARSE POINTER: disable custom cursor + effects ── */
+        /* ── MOBILE / COARSE POINTER: hide only custom cursor ── */
         @media (pointer: coarse) {
             html, body { cursor: auto !important; }
-            .cursor-dot, .cursor-ring, #beamCanvas, #bootSeq, .hud-corner { display: none !important; }
+            .cursor-dot, .cursor-ring { display: none !important; }
             a, button, .project-card, .service-card, .expertise-card,
             .process-step, .highlight-item, .benefit-item, .nav-cta,
             .scroll-top-btn, .visit-btn, .hamburger,
             .form-modal input, .form-modal textarea, .form-modal select,
             .form-modal .form-submit, .form-modal .form-close { cursor: pointer !important; }
+            /* Scale cockpit effects for performance on touch */
+            .viewfinder { display:none; }
+            .cockpit-frame { background:
+              radial-gradient(ellipse at center, transparent 62%, rgba(10,20,40,0.18) 100%),
+              linear-gradient(180deg, rgba(10,20,40,0.22) 0%, transparent 12%, transparent 88%, rgba(10,20,40,0.30) 100%);
+            }
+            .orb { filter:blur(70px); opacity:0.45 !important; }
+            .blip { font-size:0.55rem; }
         }
 
         /* Hamburger menu */
@@ -1223,6 +1362,14 @@
 <div class="bg-datastream ds6"></div>
 <div class="bg-hud-axis axis-h"></div>
 <div class="bg-hud-axis axis-v"></div>
+
+<!-- Battlefield / Gundam-cockpit background -->
+<div class="battlefield" id="battlefield"></div>
+<div class="cockpit-frame"></div>
+<div class="viewfinder"><span></span></div>
+<div class="muzzle-flash" id="muzzleFlash"></div>
+<div class="radar-label">◉ RADAR // RDR-078</div>
+<canvas id="radarCanvas" width="320" height="320"></canvas>
 
 <canvas id="codeRain"></canvas>
 
@@ -1647,17 +1794,37 @@
             resizeBeam();
             window.addEventListener('resize', resizeBeam, { passive:true });
             function fireBeam(tx,ty) {
-                // from bottom-center (imaginary vulcan cannon position)
+                // from bottom-center (cockpit beam rifle origin)
                 const ox = innerWidth/2, oy = innerHeight + 20;
                 beams.push({ x:ox, y:oy, tx, ty, t:0, dur:12 });
-                // sparks at impact
                 for (let i=0;i<12;i++){
                     const a = Math.random()*Math.PI*2, sp = 2+Math.random()*4;
                     sparks.push({ x:tx, y:ty, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp, life:20+Math.random()*12, col: Math.random()<0.5 ? '#ffd100' : '#c8102e' });
                 }
-                // HUD flash
                 const hudBr = document.getElementById('hudBr');
                 if (hudBr) { hudBr.textContent = 'FIRING BEAM RIFLE'; hudBr.style.color = '#ff7a7a'; setTimeout(()=>{ hudBr.textContent='RX-78-2 · COMBAT READY'; hudBr.style.color='var(--armor-yellow)'; },600); }
+            }
+            function triggerShot(tx,ty) {
+                fireBeam(tx,ty);
+                // muzzle flash
+                const mf = document.getElementById('muzzleFlash');
+                if (mf) {
+                    const fx = (tx/innerWidth)*100, fy = (ty/innerHeight)*100;
+                    mf.style.setProperty('--fx', fx+'%'); mf.style.setProperty('--fy', fy+'%');
+                    mf.classList.add('on');
+                    setTimeout(()=>mf.classList.remove('on'), 90);
+                }
+                // screen shake
+                document.body.classList.remove('shake');
+                void document.body.offsetWidth;
+                document.body.classList.add('shake');
+                setTimeout(()=>document.body.classList.remove('shake'), 300);
+                // crosshair impact
+                const r = document.createElement('div');
+                r.style.cssText = `position:fixed;left:${tx}px;top:${ty}px;width:20px;height:20px;border:2px solid rgba(255,209,0,0.8);transform:translate(-50%,-50%) rotate(45deg);pointer-events:none;z-index:99997;transition:all 0.45s ease-out;`;
+                document.body.appendChild(r);
+                requestAnimationFrame(()=>{ r.style.width='60px'; r.style.height='60px'; r.style.opacity='0'; r.style.borderColor='rgba(200,16,46,0)'; });
+                setTimeout(()=>r.remove(), 500);
             }
             function animBeam() {
                 bctx.clearRect(0,0,beamCv.width,beamCv.height);
@@ -1688,20 +1855,20 @@
             }
             animBeam();
             document.addEventListener('mousedown', (e) => {
-                if (e.target.closest('input,textarea,select,label')) return;
-                fireBeam(e.clientX, e.clientY);
-                // crosshair impact ripple square
-                const r = document.createElement('div');
-                r.style.cssText = `position:fixed;left:${e.clientX}px;top:${e.clientY}px;width:20px;height:20px;border:2px solid rgba(255,209,0,0.8);transform:translate(-50%,-50%) rotate(45deg);pointer-events:none;z-index:99997;transition:all 0.45s ease-out;`;
-                document.body.appendChild(r);
-                requestAnimationFrame(()=>{ r.style.width='60px'; r.style.height='60px'; r.style.opacity='0'; r.style.borderColor='rgba(200,16,46,0)'; });
-                setTimeout(()=>r.remove(), 500);
+                if (e.target.closest('input,textarea,select,label,.form-modal *,a[target="_blank"] *,button *,a *, .nav-cta *')) return;
+                triggerShot(e.clientX, e.clientY);
             });
+            // Mobile touch fire
+            document.addEventListener('touchstart', (e) => {
+                if (e.target.closest('input,textarea,select,label,.form-modal *,a,button,.nav-cta')) return;
+                const t = e.touches[0]; if (!t) return;
+                triggerShot(t.clientX, t.clientY);
+            }, { passive:true });
         }
 
-        /* ── Boot sequence (plays once per session) ── */
+        /* ── Boot sequence (plays once per session; works on mobile too) ── */
         const boot = document.getElementById('bootSeq');
-        if (boot && isFine && !reducedMotion && !sessionStorage.getItem('booted_kmm')) {
+        if (boot && !reducedMotion && !sessionStorage.getItem('booted_kmm')) {
             const fill = document.getElementById('bootFill');
             const line = document.getElementById('bootLine');
             const lines = [
@@ -1737,12 +1904,120 @@
         if (hudBr) {
             setTimeout(()=>{ hudBr.textContent = 'RX-78-2 · COMBAT READY'; }, 1200);
         }
-        // SP bar depletes slightly on click, regenerates over time
+        // SP bar depletes slightly on click/tap, regenerates over time
         if (hudBl) {
             let sp = 100;
             setInterval(()=>{ sp = Math.min(100, sp+1); hudBl.textContent = `SP: ${Math.floor(sp)}%`; hudBl.style.color = sp<30 ? '#ff7a7a' : 'var(--armor-yellow)'; }, 180);
-            document.addEventListener('mousedown', ()=>{ sp = Math.max(10, sp-4); });
+            const drain = ()=>{ sp = Math.max(10, sp-4); };
+            document.addEventListener('mousedown', drain);
+            document.addEventListener('touchstart', drain, { passive:true });
         }
+
+        /* ── Radar (bottom-right, rotating sweep + target blips) ── */
+        const radarCv = document.getElementById('radarCanvas');
+        if (radarCv && !reducedMotion) {
+            const rctx = radarCv.getContext('2d');
+            const dpr = Math.min(window.devicePixelRatio||1, 2);
+            function sizeRadar(){
+                const rect = radarCv.getBoundingClientRect();
+                radarCv.width = rect.width*dpr;
+                radarCv.height = rect.height*dpr;
+            }
+            sizeRadar(); window.addEventListener('resize', sizeRadar, { passive:true });
+            const blips = [];
+            // Pre-populate some moving targets
+            for (let i=0;i<5;i++){
+                blips.push({
+                    a:Math.random()*Math.PI*2, r:0.2+Math.random()*0.7,
+                    sp:(Math.random()*0.3+0.06)*(Math.random()<0.5?-1:1),
+                    life:120+Math.random()*200, col: Math.random()<0.8 ? '#ffd100' : '#c8102e'
+                });
+            }
+            let sweep=0;
+            function drawRadar(){
+                const w=radarCv.width, h=radarCv.height, cx=w/2, cy=h/2, R=Math.min(w,h)/2-2*dpr;
+                rctx.clearRect(0,0,w,h);
+                // grid circles
+                rctx.strokeStyle = 'rgba(255,209,0,0.35)'; rctx.lineWidth=1*dpr;
+                for (let i=1;i<=4;i++){
+                    rctx.beginPath(); rctx.arc(cx,cy,R*(i/4),0,Math.PI*2); rctx.stroke();
+                }
+                rctx.beginPath(); rctx.moveTo(cx-R,cy); rctx.lineTo(cx+R,cy); rctx.moveTo(cx,cy-R); rctx.lineTo(cx,cy+R); rctx.stroke();
+                // cross tick marks
+                rctx.strokeStyle='rgba(158,203,255,0.5)';
+                rctx.beginPath(); rctx.moveTo(cx,cy); rctx.lineTo(cx+Math.cos(sweep)*R, cy+Math.sin(sweep)*R); rctx.stroke();
+                // sweep gradient
+                const grad = rctx.createConicGradient ? rctx.createConicGradient(sweep-Math.PI/2, cx, cy) : null;
+                if (grad){
+                    grad.addColorStop(0, 'rgba(255,209,0,0.0)');
+                    grad.addColorStop(0.12,'rgba(255,209,0,0.35)');
+                    grad.addColorStop(0.2, 'rgba(255,209,0,0.0)');
+                    rctx.fillStyle = grad;
+                    rctx.beginPath(); rctx.moveTo(cx,cy); rctx.arc(cx,cy,R,sweep-0.5,sweep); rctx.closePath(); rctx.fill();
+                }
+                // blips
+                for (let i=blips.length-1;i>=0;i--){
+                    const b=blips[i]; b.a+=b.sp*0.02; b.life--;
+                    const bx=cx+Math.cos(b.a)*R*b.r, by=cy+Math.sin(b.a)*R*b.r;
+                    // only show if near sweep
+                    const diff = ((b.a - sweep + Math.PI*4) % (Math.PI*2));
+                    const visible = diff < 0.35 || diff > Math.PI*2-0.1;
+                    if (visible) {
+                        rctx.fillStyle = b.col; rctx.shadowColor=b.col; rctx.shadowBlur=6*dpr;
+                        rctx.fillRect(bx-2*dpr,by-2*dpr,4*dpr,4*dpr);
+                        rctx.shadowBlur=0;
+                    }
+                    if (b.life<=0 || b.r<0.05 || b.r>0.95){
+                        blips.splice(i,1);
+                        blips.push({ a:Math.random()*Math.PI*2, r:0.15+Math.random()*0.75, sp:(Math.random()*0.3+0.05)*(Math.random()<0.5?-1:1), life:150+Math.random()*250, col: Math.random()<0.85 ? '#ffd100' : '#c8102e' });
+                    }
+                }
+                // center dot
+                rctx.fillStyle='#ffd100';
+                rctx.beginPath(); rctx.arc(cx,cy,2*dpr,0,Math.PI*2); rctx.fill();
+                sweep = (sweep+0.04) % (Math.PI*2);
+                requestAnimationFrame(drawRadar);
+            }
+            drawRadar();
+        }
+
+        /* ── Battlefield parallax + shaking walk cycle ── */
+        const bf = document.getElementById('battlefield');
+        if (bf) {
+            let by=0, lastY=window.scrollY;
+            let walk=0;
+            function tickBF(){
+                const y = window.scrollY;
+                const dy = y - lastY; lastY = y;
+                walk += Math.abs(dy)*0.05 + 0.005;
+                // Simulate "walking": slight bobbing vertical + horizontal sway
+                const bobX = Math.sin(walk)*4;
+                const bobY = Math.abs(Math.cos(walk*2))*3 + y*0.2;
+                bf.style.transform = `translate3d(${bobX}px, ${-y*0.12 - bobY}px, 0)`;
+                requestAnimationFrame(tickBF);
+            }
+            tickBF();
+        }
+
+        /* ── Spawn random enemy blips across the background ── */
+        function spawnBlip(){
+            if (reducedMotion) return;
+            const label = ['ENEMY','ZAKU','GOUF','DOM','UNIT','TGT','MS-06','MS-07','ZEON'][Math.floor(Math.random()*9)];
+            const id = 'T-'+Math.floor(Math.random()*9000+1000);
+            const el = document.createElement('div');
+            el.className='blip';
+            el.textContent = label+' '+id;
+            const x = 5 + Math.random()*90;
+            const y = 15 + Math.random()*65;
+            el.style.left = x+'vw'; el.style.top = y+'vh';
+            document.body.appendChild(el);
+            setTimeout(()=>{ el.style.transition='opacity 1s'; el.style.opacity='0'; }, 3500+Math.random()*3500);
+            setTimeout(()=>el.remove(), 8500);
+        }
+        setInterval(spawnBlip, 2200);
+        // initial blips
+        for (let i=0;i<3;i++) setTimeout(spawnBlip, i*700);
+
         // Konami-ish secret: type "gundam" → screen flash + fun console msg + small transform sound (silent text)
         let seq='';
         document.addEventListener('keydown', (e)=>{
