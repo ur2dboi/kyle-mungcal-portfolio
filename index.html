@@ -143,7 +143,6 @@
         html.dark .hamburger span { background:#9ecbff; }
         html.dark .hamburger span:nth-child(2) { background:#ff7a7a; }
         html.dark .hamburger span:nth-child(3) { background:var(--armor-yellow); }
-        html.dark .hamburger.open span { background:#fff; }
         html.dark .section-subtitle { color:#9ab0d4; }
         html.dark .nav-links {
             background:var(--surface);
@@ -204,7 +203,6 @@
         html.dark .nav-links a::before { color:var(--armor-yellow); }
         html.dark .glitch-tag { color:var(--armor-yellow); background:var(--surface2); border-color:var(--armor-yellow); }
         html.dark .glitch-tag::before, html.dark .glitch-tag::after { background:repeating-linear-gradient(-45deg, var(--armor-yellow) 0 4px, var(--armor-blue) 4px 6px); }
-        html.dark .hamburger.open span { background:#fff; }
         html.dark .card-status { color:var(--armor-yellow); }
         html.dark .card-status::before { color:#5dff95; text-shadow:0 0 6px #5dff95; }
         html.dark .visit-arrow { color:var(--armor-yellow); }
@@ -283,7 +281,6 @@
         html.game .hamburger span { background:#9ecbff; }
         html.game .hamburger span:nth-child(2) { background:#ff7a7a; }
         html.game .hamburger span:nth-child(3) { background:var(--armor-yellow); }
-        html.game .hamburger.open span { background:#fff; }
         html.game p { color:var(--text2); }
         html.game h1, html.game h2, html.game h3, html.game h4 { color:var(--text); }
         html.game .project-card, html.game .about-card, html.game .expertise-card,
@@ -496,13 +493,17 @@
             font-family:'Inter','Segoe UI',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
             background:var(--bg); color:var(--text);
             line-height:1.6; margin:0; padding:0;
+            padding-bottom: env(safe-area-inset-bottom, 0);
+            overflow-x:hidden;
             -webkit-overflow-scrolling: touch;
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
             text-rendering: optimizeLegibility;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            min-height:100vh; min-height:100dvh;
         }
+        html { overflow-x:hidden; }
         /* Pause heavy/annoying animations when tab is in background */
         body.tab-hidden .bg-slow-scan,
         body.tab-hidden #codeRain,
@@ -525,7 +526,7 @@
 
         .perspective-wrap {
             position: relative; z-index: 1;
-            contain: layout style;
+            padding-bottom: 0.5rem;
         }
 
         /* Mecha panel background — blueprint-style crosshatch grid */
@@ -1280,11 +1281,12 @@
         .contact-item .icon-text { font-size:1.05rem; }
 
         footer {
-            position:relative; text-align:center; padding:1.6rem 2rem 1.2rem; margin:0;
-            color:var(--surface); font-size:0.78rem;
+            position:relative; text-align:center; padding:1.6rem 2rem calc(1.2rem + env(safe-area-inset-bottom,0px)); margin:0;
+            color:var(--surface); font-size:0.78rem; width:100%;
             background:var(--armor-blue);
             font-family:var(--font-mono); letter-spacing:2px; text-transform:uppercase; font-weight:700;
             border-top:4px solid var(--armor-red);
+            z-index:50; clear:both; display:block;
         }
         footer::before {
             content:''; position:absolute; top:0; left:0; right:0; height:4px;
@@ -1580,13 +1582,20 @@
         }
         .hamburger span:nth-child(2) { background:var(--armor-red); width:22px; }
         .hamburger span:nth-child(3) { background:var(--armor-yellow); }
-        .hamburger.open span:nth-child(1) { transform:rotate(45deg) translate(6px,6px); background:#fff; box-shadow:none; }
+        .hamburger.open span:nth-child(1) { transform:rotate(45deg) translate(7px,7px); background:var(--armor-red) !important; box-shadow:none; width:28px; height:4px; }
         .hamburger.open span:nth-child(2) { opacity:0; }
-        .hamburger.open span:nth-child(3) { transform:rotate(-45deg) translate(6px,-6px); background:#fff; box-shadow:none; }
+        .hamburger.open span:nth-child(3) { transform:rotate(-45deg) translate(7px,-7px); background:var(--armor-red) !important; box-shadow:none; width:28px; height:4px; }
+        /* Open-state X color per theme: light=red, dark=white, game=yellow */
+        html.dark .hamburger.open span,
+        html.dark .hamburger.open span:nth-child(1),
+        html.dark .hamburger.open span:nth-child(3) { background:#fff !important; }
+        html.game .hamburger.open span,
+        html.game .hamburger.open span:nth-child(1),
+        html.game .hamburger.open span:nth-child(3) { background:var(--armor-yellow) !important; }
 
         /* ── Scroll-to-Top Button (Gundam armor plate) ── */
         .scroll-top-btn {
-            position: fixed; right: 1.4rem; bottom: 1.4rem;
+            position: fixed; right: 1.4rem; bottom: calc(1.4rem + env(safe-area-inset-bottom,0px));
             z-index: 9999; width:48px; height:48px;
             background:var(--armor-blue); border:2px solid var(--trim);
             clip-path:var(--armor-clip-sm); display: flex; align-items: center;
@@ -1619,7 +1628,7 @@
         }
         .scroll-top-btn:hover svg { stroke:#fff; }
         @media (max-width: 850px) {
-            .scroll-top-btn { right: 0.9rem; bottom: 0.9rem; width: 44px; height: 44px; }
+            .scroll-top-btn { right: 0.9rem; bottom: calc(0.9rem + env(safe-area-inset-bottom,0px)); width: 44px; height: 44px; }
             .scroll-top-btn svg { width: 16px; height: 16px; }
         }
 
@@ -1648,8 +1657,32 @@
                 content:''; display:block; height:6px; flex-shrink:0;
                 background:linear-gradient(90deg, var(--armor-red) 0 34%, var(--armor-yellow) 34% 66%, var(--armor-blue) 66% 100%);
             }
-        .nav-links.open { max-height:620px; padding:0.4rem 0 0.9rem; }
+        .nav-links.open { max-height:720px; padding:0.4rem 0 0.9rem; }
         .nav-links li { padding:0; list-style:none; }
+        /* Explicit CLOSE MENU item — big, obvious tap target */
+        .nav-links li.mobile-close {
+            display:flex; align-items:center; justify-content:center; gap:0.6rem;
+            padding:1rem 1.2rem; margin:0 0.6rem;
+            background:var(--armor-red); color:#fff; border:2px solid var(--trim);
+            font-family:var(--font-mono); font-weight:900; letter-spacing:3px;
+            font-size:1rem; text-transform:uppercase; cursor:pointer;
+            clip-path:var(--armor-clip-sm); box-shadow:3px 3px 0 var(--armor-yellow-dark);
+            transition:all 0.15s; user-select:none; -webkit-user-select:none;
+            margin-top:0.5rem;
+        }
+        .nav-links li.mobile-close:active { transform:translate(2px,2px); box-shadow:1px 1px 0 var(--armor-yellow-dark); }
+        .nav-links li.mobile-close .mobile-close-x {
+            display:inline-flex; align-items:center; justify-content:center;
+            width:28px; height:28px; background:#fff; color:var(--armor-red);
+            font-weight:900; font-size:1.05rem;
+            clip-path:var(--armor-clip-sm); border:2px solid var(--trim);
+        }
+        .nav-links li.mobile-close .mobile-close-label { font-size:0.95rem; }
+        html.dark .nav-links li.mobile-close { background:var(--armor-red); box-shadow:3px 3px 0 var(--armor-yellow); }
+        html.dark .nav-links li.mobile-close .mobile-close-x { background:var(--armor-yellow); color:var(--trim); }
+        html.game .nav-links li.mobile-close { background:var(--armor-yellow); color:var(--trim); box-shadow:3px 3px 0 var(--armor-red); }
+        html.game .nav-links li.mobile-close .mobile-close-x { background:var(--trim); color:var(--armor-yellow); }
+
         .nav-links li > a {
             display:block; padding:1.05rem 1.4rem; font-size:1rem;
             border-bottom:1px solid var(--border-c);
@@ -1729,7 +1762,7 @@
             .process-step p { font-size:0.85rem; }
 
             /* Contact */
-            .contact-section { padding:1.6rem 1rem 1.3rem; margin:0 auto 2.5rem; box-shadow:4px 4px 0 var(--armor-blue); }
+            .contact-section { padding:1.6rem 1rem 1.3rem; margin:0 auto 3.5rem; box-shadow:4px 4px 0 var(--armor-blue); }
             .contact-section::before { height:4px; }
             .contact-section::after { content:'LET\'S TALK'; font-size:0.5rem; top:7px; right:10px; padding:0.18rem 0.45rem; }
             .contact-section:hover { box-shadow:6px 6px 0 var(--armor-red); transform:translate(-2px,-2px); }
@@ -1743,7 +1776,7 @@
             .contact-item { font-size:0.7rem; padding:0.35rem 0.6rem; box-shadow:2px 2px 0 var(--armor-blue); }
 
             /* Footer */
-            footer { padding:1rem; font-size:0.68rem; letter-spacing:1.5px; }
+            footer { padding:1rem 1rem calc(1rem + env(safe-area-inset-bottom,0px)); font-size:0.68rem; letter-spacing:1.5px; display:block !important; position:relative !important; width:100%; z-index:50; clear:both; }
 
             /* Modal devices */
 
@@ -1853,6 +1886,36 @@
     window.addEventListener('load', function(){ setTimeout(function(){ kill(false); }, 800); }, { once:true });
     // DOMContentLoaded fallback: if load never fires, kill at 3.5s
     document.addEventListener('DOMContentLoaded', function(){ setTimeout(function(){ kill(false); }, 3200); }, { once:true });
+
+    // ── AGGRESSIVE BOOT-LOCK CLEANUP (belt-and-suspenders) ──
+    // Ensures the body never gets stuck as position:fixed on any mobile browser
+    function aggressiveCleanup(){
+        try{
+            document.documentElement.classList.remove('boot-visible');
+            document.documentElement.style.position='';
+            document.documentElement.style.inset='';
+            document.documentElement.style.width='';
+            document.documentElement.style.height='';
+            document.documentElement.style.overflow='';
+            if(document.body){
+                document.body.classList.remove('boot-visible');
+                document.body.style.position='';
+                document.body.style.inset='';
+                document.body.style.width='';
+                document.body.style.height='';
+                document.body.style.overflow='';
+                document.body.style.touchAction='';
+                document.body.style.overscrollBehavior='';
+            }
+        }catch(e){}
+    }
+    // Cleanup on pageshow (handles bfcache on iOS Safari)
+    window.addEventListener('pageshow', aggressiveCleanup);
+    window.addEventListener('visibilitychange', function(){ if(!document.hidden) aggressiveCleanup(); });
+    // Hard failsafes at multiple timings
+    setTimeout(aggressiveCleanup, 2500);
+    setTimeout(aggressiveCleanup, 4000);
+    setTimeout(aggressiveCleanup, 6000);
 })();
 </script>
 
@@ -1900,6 +1963,10 @@
         <button class="hamburger" id="hamburgerBtn" aria-label="Menu"><span></span><span></span><span></span></button>
         <div class="nav-logo"><img src="favicon.png" alt="KMM"></div>
         <ul class="nav-links" id="navMenu">
+            <li class="mobile-close" onclick="document.getElementById('hamburgerBtn').classList.remove('open');document.getElementById('navMenu').classList.remove('open');" role="button" aria-label="Close menu" tabindex="0">
+                <span class="mobile-close-x">✕</span>
+                <span class="mobile-close-label">CLOSE MENU</span>
+            </li>
             <li><a href="#about">About</a></li><li><a href="#services">Services</a></li><li><a href="#expertise">Expertise</a></li><li><a href="#projects">Projects</a></li><li><a href="#process">Process</a></li><li><a href="#contact">Contact</a></li>
             <li class="mobile-cta" style="list-style:none;">
                 <div class="nav-cta-wrap" id="mobileCta">
