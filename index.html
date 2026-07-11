@@ -259,10 +259,6 @@
             font-family:var(--font-mono); font-size:0.6rem; letter-spacing:2px;
             color:var(--armor-yellow); text-shadow:0 0 6px rgba(255,209,0,0.6); font-weight:800;
         }
-        @media (max-width:850px) {
-            #radarCanvas { width:110px; height:110px; right:10px; bottom:60px; opacity:0.75; }
-            .radar-label { right:10px; bottom:170px; font-size:0.55rem; }
-        }
 
         /* Cockpit frame edges (subtle vignette that feels like being inside the suit) */
         .cockpit-frame {
@@ -1134,10 +1130,11 @@
             .process-step:active .lock-brackets, .about-card:active .lock-brackets { opacity:1; animation:bracketPulse 0.8s steps(2) infinite; }
             .project-card:active .lock-tag { opacity:1; }
         }
+        @media (max-width:850px), (pointer:coarse) {
+            #radarCanvas, .radar-label { display:none !important; }
+        }
         @media (max-width:600px) {
             .hud-corner { display:none !important; }
-            #radarCanvas { width:90px; height:90px; right:8px; bottom:58px; }
-            .radar-label { right:8px; bottom:148px; font-size:0.5rem; }
         }
 
         /* Hamburger menu */
@@ -1981,6 +1978,8 @@
             const dpr = Math.min(window.devicePixelRatio||1, 2);
             function sizeRadar(){
                 const rect = radarCv.getBoundingClientRect();
+                if (rect.width < 4 || rect.height < 4) { radarCv._hidden = true; return; }
+                radarCv._hidden = false;
                 radarCv.width = rect.width*dpr;
                 radarCv.height = rect.height*dpr;
             }
@@ -1996,6 +1995,7 @@
             }
             let sweep=0;
             function drawRadar(){
+                if (radarCv._hidden) { requestAnimationFrame(drawRadar); return; }
                 const w=radarCv.width, h=radarCv.height, cx=w/2, cy=h/2, R=Math.min(w,h)/2-2*dpr;
                 rctx.clearRect(0,0,w,h);
                 // grid circles
