@@ -145,6 +145,25 @@
         html.dark .hamburger span:nth-child(3) { background:var(--armor-yellow); }
         html.dark .hamburger.open span { background:#fff; }
         html.dark .section-subtitle { color:#9ab0d4; }
+        html.dark .nav-links {
+            background:var(--surface);
+            border-color:var(--armor-yellow);
+            box-shadow:6px 6px 0 var(--armor-red), 0 20px 40px rgba(0,0,0,0.75);
+        }
+        html.dark .nav-links li > a {
+            color:var(--text);
+            border-bottom-color:var(--border-c);
+        }
+        html.dark .nav-links li > a::before { color:var(--armor-yellow); }
+        html.dark .nav-links li > a:active, html.dark .nav-links li > a:hover { background:var(--surface2); color:var(--armor-yellow); }
+        html.dark .nav-cta {
+            background:var(--armor-red); color:#fff; border-color:var(--armor-red-dark);
+            box-shadow:3px 3px 0 var(--armor-yellow-dark);
+        }
+        html.dark .mobile-cta .mode-toggle {
+            background:var(--surface2); color:var(--armor-yellow); border-color:var(--armor-yellow);
+            box-shadow:3px 3px 0 var(--armor-red);
+        }
         html.dark p { color:var(--text2); }
         html.dark .project-info h4, html.dark .expertise-card h4,
         html.dark .service-card h4, html.dark .process-step h4, html.dark .about-card h3,
@@ -163,15 +182,59 @@
         html.dark .mode-toggle { background:var(--surface2); color:var(--text); }
         html.dark .form-modal { background:var(--surface); }
         html.dark .form-modal input, html.dark .form-modal textarea, html.dark .form-modal select { background:var(--surface2); color:var(--text); }
+        html.dark .form-modal label { color:var(--text); }
+        html.dark .form-modal .form-sub { color:var(--armor-yellow); }
+        html.dark .form-modal .form-close { background:var(--surface2); color:var(--text); border-color:var(--border-c); }
+        html.dark .form-modal h3 { color:var(--text); }
+        html.dark .form-success h3 { color:var(--armor-yellow); }
+        html.dark .form-success p { color:var(--text2); }
+        html.dark .form-success .success-icon svg { stroke:#7fffb0; }
+        html.dark .btn-outline { color:var(--text); border-color:var(--armor-yellow); background:rgba(255,209,0,0.08); box-shadow:4px 4px 0 var(--armor-red); }
+        html.dark .btn-outline:hover { color:var(--armor-yellow); border-color:var(--armor-yellow); background:rgba(255,209,0,0.18); box-shadow:6px 6px 0 var(--armor-blue); }
+        html.dark .expertise-tags span { color:var(--text); background:rgba(120,170,255,0.18); border:1px solid rgba(120,170,255,0.35); }
+        html.dark .expertise-card:nth-child(2) .expertise-tags span { color:#ffb4ba; background:rgba(200,16,46,0.18); border-color:rgba(255,120,130,0.45); }
+        html.dark .expertise-card:nth-child(3) .expertise-tags span { color:var(--armor-yellow); background:rgba(255,209,0,0.12); border-color:rgba(255,209,0,0.4); }
+        html.dark .project-info .domain { color:#7da9e8; background:rgba(31,78,140,0.35); border-left-color:var(--armor-yellow); }
+        html.dark .benefit-item { color:var(--text); }
+        html.dark .benefit-item:hover { color:var(--trim); background:var(--armor-yellow); }
+        html.dark .benefit-item .check { color:var(--armor-yellow); }
+        html.dark .contact-item .icon-text { color:var(--armor-yellow); }
+        html.dark .contact-item:hover .icon-text { color:var(--trim); }
+        html.dark .scroll-top-btn svg { stroke:#fff; }
+        html.dark .nav-links a::before { color:var(--armor-yellow); }
+        html.dark .glitch-tag { color:var(--armor-yellow); background:var(--surface2); border-color:var(--armor-yellow); }
+        html.dark .glitch-tag::before, html.dark .glitch-tag::after { background:repeating-linear-gradient(-45deg, var(--armor-yellow) 0 4px, var(--armor-blue) 4px 6px); }
+        html.dark .hamburger.open span { background:#fff; }
+        html.dark .card-status { color:var(--armor-yellow); }
+        html.dark .card-status::before { color:#5dff95; text-shadow:0 0 6px #5dff95; }
+        html.dark .visit-arrow { color:var(--armor-yellow); }
+        html.dark .cursor { background:var(--armor-yellow); }
+        html.dark .hero p.subtitle .cursor { background:var(--armor-yellow); box-shadow:0 0 6px var(--armor-yellow); }
+        html.dark .nav-logo img { filter: drop-shadow(0 2px 0 rgba(0,0,0,0.4)) drop-shadow(0 0 8px rgba(80,150,255,0.35)); }
+        html.dark footer p { color:#c8d4ef; }
+        html.dark .section-title .green { color:#7da9e8; }
+        html.dark .section-title .gold { color:var(--armor-yellow); }
+        html.dark .hero-stat .label { color:#9ab0d4; }
+        html.dark .hero-stat:not(:last-child)::after { background:repeating-linear-gradient(180deg, var(--armor-yellow) 0, var(--armor-yellow) 4px, transparent 4px, transparent 8px); opacity:0.6; }
+        html.dark .contact-item:hover { color:var(--trim); }
+        html.dark .success-icon svg { color:#5dff95 !important; }
         html.dark footer { background:#060c1b; color:var(--text2); }
-        html.dark .green { color:#6ba4ff; }
+        html.dark .green { color:#7da9e8; }
         html.dark .gold { color:#ffd94a; }
         html.dark .hero h1 { color:#fff; }
-        html.dark .name { color:#fff; }
+        html.dark .name { color:#9ecbff; }
         html.dark .hero-stat .num { color:#ffd94a; }
         html.dark .hero-stat:nth-child(2) .num { color:#ff6573; }
-        html.dark .hero-stat:nth-child(3) .num { color:#6ba4ff; }
+        html.dark .hero-stat:nth-child(3) .num { color:#7da9e8; }
         html.dark .name::after { background:linear-gradient(90deg,var(--armor-red),var(--armor-yellow),var(--armor-blue)); }
+        html.dark p.subtitle, html.dark .lead { color:#c8d4ef !important; }
+        html.dark .hero-badge, html.dark .section-subtitle { color:#9ab0d4; }
+        html.dark .controls-tip { color:#7a90b5; }
+        html.dark .mobile-tip { color:#7a90b5; }
+        html.dark .hud-corner { color:var(--armor-yellow); text-shadow:0 0 8px rgba(255,209,0,0.7); }
+        html.dark .hud-tl::after { color:#ff6573; }
+        html.dark .hud-tr::after { color:#9ecbff; }
+        html.dark .boot-txt b { color:var(--armor-yellow); }
 
         /* Game mode — combat-HUD styling with yellow trim */
         html.game {
@@ -253,15 +316,17 @@
         html.game-active::-webkit-scrollbar, html.game-active body::-webkit-scrollbar { display:none !important; }
         html.game-active { scrollbar-width:none !important; -ms-overflow-style:none !important; }
 
-        /* Dedicated PLAY GAME button in hero */
-        .btn-game {
+        /* Dedicated PLAY GAME button in hero — hidden in light/dark, shown only in GAME theme */
+        .btn-game { display:none; }
+        html.game .btn-game {
+            display:inline-block;
             background:var(--armor-red); color:#fff; border-color:var(--armor-red-dark);
             background-image:linear-gradient(135deg,var(--armor-red) 0%,var(--armor-red) 60%,var(--armor-yellow) 60%,var(--armor-yellow) 100%);
             background-size:220% 100%; background-position:0% 0;
             clip-path:var(--armor-clip); box-shadow:4px 4px 0 var(--armor-yellow-dark);
             transition:all 0.25s;
         }
-        .btn-game:hover { background-position:100% 0; color:var(--trim); transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--armor-blue); }
+        html.game .btn-game:hover { background-position:100% 0; color:var(--trim); transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--armor-blue); }
 
         /* Return-to-site button in the game-over menu */
         .btn-return {
