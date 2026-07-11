@@ -1353,6 +1353,32 @@
     <div class="boot-txt" id="bootLine" style="margin-top:0.4rem;">LOADING...</div>
     <div class="boot-sub">PREPARING INTERFACE // PLEASE WAIT</div>
 </div>
+<script>
+// ── EMERGENCY BOOT KILL-SWITCH (independent of main script) ──
+// Guarantees the loading screen never gets stuck, even if main JS throws.
+(function(){
+    var el = document.getElementById('bootSeq');
+    function kill(){
+        if(!el || el.dataset.killed==='1') return;
+        el.dataset.killed='1';
+        el.classList.add('done');
+        document.documentElement.classList.remove('boot-visible');
+        document.body && document.body.classList.remove('boot-visible');
+        setTimeout(function(){ try{ el.remove(); }catch(e){ el.style.display='none'; } }, 700);
+    }
+    // Hard timeout (always fires)
+    setTimeout(kill, 4200);
+    // On user interaction (tap/click/key), dismiss fast
+    function onInteract(){ kill(); document.removeEventListener('click',onInteract); document.removeEventListener('touchstart',onInteract); document.removeEventListener('keydown',onInteract); }
+    document.addEventListener('click', onInteract, { passive:true, once:true });
+    document.addEventListener('touchstart', onInteract, { passive:true, once:true });
+    document.addEventListener('keydown', onInteract, { once:true });
+    // On window load, ensure kill runs after ~1.5s regardless of main script
+    window.addEventListener('load', function(){ setTimeout(kill, 1200); }, { once:true });
+    // On DOMContentLoaded, if load never fires, kill at 3s
+    document.addEventListener('DOMContentLoaded', function(){ setTimeout(kill, 2800); }, { once:true });
+})();
+</script>
 
 <!-- HUD corner readouts -->
 <div class="hud-corner hud-tl">NORZAGARAY, PH</div>
@@ -1888,13 +1914,13 @@
                 boot.classList.add('done');
                 document.documentElement.classList.remove('boot-visible');
                 document.body.classList.remove('boot-visible');
-                setTimeout(() => boot.remove(), 700);
-            }, 450);
+                setTimeout(() => { try { boot.remove(); } catch(e){ boot.style.display='none'; } }, 700);
+            }, 300);
         }
-        // Tap/click on boot screen to dismiss instantly (mobile-friendly)
-        boot.addEventListener('click', dismissBoot, { passive:true });
-        boot.addEventListener('touchend', dismissBoot, { passive:true });
         if (boot) {
+            // Tap/click on boot screen to dismiss instantly (mobile-friendly)
+            boot.addEventListener('click', dismissBoot, { passive:true });
+            boot.addEventListener('touchend', dismissBoot, { passive:true });
             const fill = document.getElementById('bootFill');
             const line = document.getElementById('bootLine');
             const lines = [
