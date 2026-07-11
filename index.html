@@ -317,9 +317,9 @@
         html.game-active { scrollbar-width:none !important; -ms-overflow-style:none !important; }
 
         /* Dedicated PLAY GAME button in hero — hidden in light/dark, shown only in GAME theme */
-        .btn-game { display:none; }
-        html.game .btn-game {
-            display:inline-block;
+        button.btn.btn-game, a.btn.btn-game, .btn-game { display:none !important; }
+        html.game button.btn.btn-game, html.game .btn-game {
+            display:inline-block !important;
             background:var(--armor-red); color:#fff; border-color:var(--armor-red-dark);
             background-image:linear-gradient(135deg,var(--armor-red) 0%,var(--armor-red) 60%,var(--armor-yellow) 60%,var(--armor-yellow) 100%);
             background-size:220% 100%; background-position:0% 0;
