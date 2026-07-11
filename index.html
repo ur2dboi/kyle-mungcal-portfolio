@@ -348,15 +348,22 @@
         .btn-outline { background:var(--surface); color:var(--trim); border-color:var(--trim); clip-path:var(--armor-clip); box-shadow:4px 4px 0 var(--armor-yellow); }
         .btn-outline:hover { border-color:var(--armor-blue); color:var(--armor-blue); background:rgba(31,78,140,0.05); transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--armor-yellow); }
 
-        section { padding:3rem 2rem 1rem; max-width:1280px; margin:0 auto; position:relative; z-index:1; scroll-margin-top:84px; }
+        section { padding:3rem 2rem 1rem; max-width:1280px; margin:0 auto; position:relative; z-index:1; scroll-margin-top:84px; text-align:center; }
         .section-title { font-size:clamp(1.8rem,4vw,2.6rem); font-weight:900; text-align:center; margin-bottom:0.2rem; font-family:var(--font-mono); letter-spacing:-0.5px; text-transform:uppercase; }
         .section-title .green { color:var(--armor-blue); }
         .section-title .gold { color:var(--armor-yellow-dark); }
         .section-subtitle {
-            text-align:center; color:var(--text2); margin-bottom:2.5rem;
+            text-align:center; color:var(--text2); margin:0 auto 2.5rem;
             font-size:0.95rem; font-family:var(--font-mono); letter-spacing:2px;
             text-transform:uppercase; font-weight:600;
+            display:block;
         }
+        /* Ensure grids don't inherit text-align:center to cards */
+        .about-grid, .services-grid, .expertise-grid, .projects-grid,
+        .process-timeline, .about-highlights, .contact-benefits, .contact-info-row {
+            text-align:left;
+        }
+        .contact-section { text-align:center; }
         /* Gundam-style corner brackets (sensor/rivet markers) */
         .corner-deco { position:absolute; width:20px; height:20px; border-color:var(--armor-red); border-style:solid; pointer-events:none; transition:all 0.3s; }
         .corner-tl { top:-2px; left:-2px; border-width:3px 0 0 3px; }
@@ -560,8 +567,16 @@
         .project-card:hover .project-info p { color:var(--text); }
 
         /* ── GUNDAM HUD SECTION TITLES ── */
-        .section-title-wrap { text-align:center; margin-bottom:0.4rem; position:relative; }
-        #projects .section-title-wrap { margin-bottom:0.4rem; }
+        .section-title-wrap { text-align:center; margin:0 auto 0.2rem; position:relative; display:flex; flex-direction:column; align-items:center; }
+        #projects .section-title-wrap { margin-bottom:0.2rem; }
+        /* Non-wrapped section headings: center them via auto margin */
+        section > h2.glitch, section > h2.glitch-subtle { display:inline-block; margin:0 auto; }
+        section > h2.glitch-subtle + p.section-subtitle { margin-top:0.4rem; }
+        section > h2:not(.contact-section h2) { display:inline-block; }
+        /* Contact section: align items center */
+        .contact-section .lead, .contact-section .contact-benefits,
+        .contact-section .btn-primary, .contact-section .contact-info-row { margin-left:auto; margin-right:auto; }
+        .contact-section .contact-info-row { justify-content:center; }
         .glitch, .glitch-subtle {
             position:relative; display:inline-block; text-align:center;
             font-size:2.4rem; font-weight:900; font-family:var(--font-mono);
