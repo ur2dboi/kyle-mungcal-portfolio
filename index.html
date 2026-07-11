@@ -139,6 +139,11 @@
         html.dark .glitch, html.dark .glitch-subtle { color:#fff; }
         html.dark .nav-links a { color:#c8d4ef; }
         html.dark .nav-links a:hover { color:var(--armor-yellow); }
+        html.dark .hamburger { background:var(--surface2); border-color:var(--armor-yellow); box-shadow:3px 3px 0 var(--armor-blue); }
+        html.dark .hamburger span { background:#9ecbff; }
+        html.dark .hamburger span:nth-child(2) { background:#ff7a7a; }
+        html.dark .hamburger span:nth-child(3) { background:var(--armor-yellow); }
+        html.dark .hamburger.open span { background:#fff; }
         html.dark .section-subtitle { color:#9ab0d4; }
         html.dark p { color:var(--text2); }
         html.dark .project-info h4, html.dark .expertise-card h4,
@@ -211,6 +216,11 @@
         }
         html.game .nav-links a { color:#c8d4ef; }
         html.game .nav-links a:hover { color:var(--armor-yellow); }
+        html.game .hamburger { background:var(--surface2); border-color:var(--armor-yellow); box-shadow:3px 3px 0 var(--armor-red); }
+        html.game .hamburger span { background:#9ecbff; }
+        html.game .hamburger span:nth-child(2) { background:#ff7a7a; }
+        html.game .hamburger span:nth-child(3) { background:var(--armor-yellow); }
+        html.game .hamburger.open span { background:#fff; }
         html.game p { color:var(--text2); }
         html.game h1, html.game h2, html.game h3, html.game h4 { color:var(--text); }
         html.game .project-card, html.game .about-card, html.game .expertise-card,
@@ -231,10 +241,17 @@
         html.game .form-modal input, html.game .form-modal textarea, html.game .form-modal select { background:var(--surface2); color:var(--text); border-color:var(--armor-yellow); }
 
 
-        /* When game is active, hide everything except the overlay so the game is full-screen / standalone */
-        html.game-active body > *:not(#gameOverlay):not(.cursor-dot):not(.cursor-ring) { display:none !important; }
-        html.game-active body { background:#05090f; overflow:hidden; }
-        html.game-active #gameOverlay { z-index:100002; }
+        /* When game is active: hide EVERYTHING except the game overlay so it's a standalone page */
+        html.game-active body > *:not(#gameOverlay) { display:none !important; }
+        html.game-active, html.game-active body { background:#05090f !important; overflow:hidden !important; margin:0 !important; padding:0 !important; }
+        html.game-active body { height:100vh; height:100dvh; width:100vw; }
+        html.game-active #gameOverlay {
+            z-index:100002; position:fixed !important; inset:0 !important;
+            width:100vw !important; height:100vh !important; height:100dvh !important;
+        }
+        /* Kill scrollbars during game */
+        html.game-active::-webkit-scrollbar, html.game-active body::-webkit-scrollbar { display:none !important; }
+        html.game-active { scrollbar-width:none !important; -ms-overflow-style:none !important; }
 
         /* Dedicated PLAY GAME button in hero */
         .btn-game {
@@ -357,12 +374,7 @@
             content:''; position:absolute; top:0; left:0; right:0; height:6px;
             background:linear-gradient(90deg, var(--armor-red) 0 34%, var(--armor-yellow) 34% 66%, var(--armor-blue) 66% 100%);
         }
-        .game-center::after {
-            content:'◉ COMBAT SIM'; position:absolute; top:10px; right:18px;
-            font-family:var(--font-mono); font-size:0.58rem; letter-spacing:2px;
-            color:#fff; background:var(--armor-red); padding:0.2rem 0.5rem; font-weight:800;
-            clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%);
-        }
+        /* corner tag removed for a cleaner standalone game page */
         .game-center h2 { font-size:clamp(1.4rem,4vw,2rem); font-weight:900; letter-spacing:3px; color:var(--armor-yellow); margin:0.6rem 0 0.3rem; text-transform:uppercase; text-shadow:0 0 12px rgba(255,209,0,0.6); }
         .game-center p { font-size:0.8rem; color:#b9c8e6; margin-bottom:0.8rem; letter-spacing:1.5px; text-transform:uppercase; }
         .game-center .btn-start {
@@ -1468,21 +1480,27 @@
             .hud-corner { display:none !important; }
         }
 
-        /* Hamburger menu */
+        /* Hamburger menu button — clearly visible with armor plate */
         .hamburger {
             display:none; flex-direction:column; gap:5px; cursor:pointer;
-            z-index:1001; background:none; border:none; padding:4px;
+            z-index:1001; background:var(--surface); border:2px solid var(--trim);
+            padding:10px 9px; clip-path:var(--armor-clip-sm);
+            box-shadow:3px 3px 0 var(--armor-red);
+            transition:all 0.2s;
+            position:relative;
+            width:48px; height:44px; align-items:center; justify-content:center;
         }
+        .hamburger:hover, .hamburger.open { transform:translate(-1px,-1px); box-shadow:4px 4px 0 var(--armor-yellow-dark); }
         .hamburger span {
             display:block; width:26px; height:3px; background:var(--armor-blue);
             transition:all 0.3s;
-            box-shadow:2px 2px 0 var(--armor-red);
+            box-shadow:1px 1px 0 rgba(0,0,0,0.25);
         }
-        .hamburger span:nth-child(2) { background:var(--armor-red); box-shadow:2px 2px 0 var(--armor-yellow); }
-        .hamburger span:nth-child(3) { background:var(--armor-yellow); box-shadow:2px 2px 0 var(--armor-blue); }
-        .hamburger.open span:nth-child(1) { transform:rotate(45deg) translate(5px,5px); }
+        .hamburger span:nth-child(2) { background:var(--armor-red); width:22px; }
+        .hamburger span:nth-child(3) { background:var(--armor-yellow); }
+        .hamburger.open span:nth-child(1) { transform:rotate(45deg) translate(6px,6px); background:#fff; box-shadow:none; }
         .hamburger.open span:nth-child(2) { opacity:0; }
-        .hamburger.open span:nth-child(3) { transform:rotate(-45deg) translate(5px,-5px); }
+        .hamburger.open span:nth-child(3) { transform:rotate(-45deg) translate(6px,-6px); background:#fff; box-shadow:none; }
 
         /* ── Scroll-to-Top Button (Gundam armor plate) ── */
         .scroll-top-btn {
@@ -1527,30 +1545,42 @@
         @media (max-width:850px) {
             /* Nav hamburger */
             /* Mobile nav */
-            .nav-inner { height:56px; padding:0 0.5rem; display:flex !important; justify-content:space-between; align-items:center; position:relative; }
+            .nav-inner { height:60px; padding:0 0.8rem; display:flex !important; justify-content:space-between; align-items:center; position:relative; }
             .nav-logo { position:absolute; left:50%; transform:translateX(-50%); }
-            .nav-logo img { height:28px; }
+            .nav-logo img { height:30px; }
             .hamburger { display:flex; }
             .nav-inner > .nav-cta-wrap { display:none !important; }
             .nav-links {
                 display:flex !important; flex-direction:column; gap:0;
-                position:fixed; top:56px; left:0; right:0;
-                background:rgba(255,255,255,0.98); backdrop-filter:blur(16px);
-                border-bottom:1px solid var(--border-c);
-                box-shadow:0 8px 30px rgba(13,15,18,0.08);
+                position:fixed; top:60px; left:10px; right:10px;
+                background:var(--surface);
+                border:3px solid var(--trim);
+                clip-path:var(--armor-clip);
+                box-shadow:6px 6px 0 var(--armor-red), 0 20px 40px rgba(0,0,0,0.35);
                 padding:0; max-height:0; overflow:hidden;
                 transition:max-height 0.35s ease, padding 0.35s ease;
-                grid-column:auto;
+                z-index:1000;
             }
-        .nav-links.open { max-height:520px; padding:0.5rem 0; }
-        .nav-links li { padding:0; }
-        .nav-links a {
-            display:block; padding:0.9rem 2rem; font-size:0.95rem;
+            /* Tricolor top stripe on mobile menu panel */
+            .nav-links::before {
+                content:''; display:block; height:6px; flex-shrink:0;
+                background:linear-gradient(90deg, var(--armor-red) 0 34%, var(--armor-yellow) 34% 66%, var(--armor-blue) 66% 100%);
+            }
+        .nav-links.open { max-height:620px; padding:0.4rem 0 0.9rem; }
+        .nav-links li { padding:0; list-style:none; }
+        .nav-links li > a {
+            display:block; padding:1.05rem 1.4rem; font-size:1rem;
             border-bottom:1px solid var(--border-c);
+            color:var(--text); font-weight:800; letter-spacing:2px;
+            font-family:var(--font-mono); text-transform:uppercase;
+            position:relative; padding-left:2rem;
         }
-        .nav-links .nav-cta-wrap { display:flex !important; gap:0.5rem; align-items:center; justify-content:center; padding:0.8rem 2rem 1rem; }
-        .nav-links .nav-cta-wrap .mode-toggle { margin-left:0; }
-        .nav-links .nav-cta { padding:0.5rem 1.4rem; font-size:0.75rem; }
+        .nav-links li > a::before { content:'▸'; color:var(--armor-red); position:absolute; left:1rem; opacity:1; font-weight:900; }
+        .nav-links li > a:active, .nav-links li > a:hover { background:var(--surface2); color:var(--armor-blue); }
+        .nav-links .mobile-cta { border-bottom:0; margin-top:0.4rem; }
+        .nav-links .nav-cta-wrap { display:flex !important; gap:0.6rem; align-items:center; justify-content:center; padding:0.9rem 1rem 0.2rem; flex-wrap:wrap; }
+        .nav-links .nav-cta-wrap .mode-toggle { margin-left:0; padding:0.65rem 0.9rem; font-size:0.78rem; box-shadow:3px 3px 0 var(--armor-yellow-dark); }
+        .nav-links .nav-cta { padding:0.7rem 1.6rem; font-size:0.85rem; box-shadow:3px 3px 0 var(--armor-blue); }
         #desktopCta { display:none !important; }
 
             /* Hero */
@@ -2085,13 +2115,10 @@
         <div class="hud-pill time" id="hudTime">TIME: 30</div>
         <div class="hud-pill hud-exit" id="gameExit">✕ EXIT</div>
     </div>
-    <div class="game-titlebar" id="gameTitle">◉ COMBAT SIMULATOR
-        <div class="sub">TARGET DESTROY — BEAM RIFLE ARMED</div>
-    </div>
     <button class="mobile-fire" id="mobileFire" type="button">● FIRE</button>
     <div class="game-center" id="gameMenu">
         <h2>◉ COMBAT SIMULATOR</h2>
-        <p>Destroy enemy drones with the beam rifle before time runs out!</p>
+        <p>Destroy enemy drones before time runs out.</p>
         <div class="game-stats">
             <div><span class="stat-val" id="bestScore">0</span><span>BEST</span></div>
             <div><span class="stat-val" id="lastScore">0</span><span>LAST</span></div>
@@ -2672,7 +2699,6 @@
     const bestEl  = document.getElementById('bestScore');
     const lastEl  = document.getElementById('lastScore');
     const accEl   = document.getElementById('bestAcc');
-    const gameTitle = document.getElementById('gameTitle');
     const mobileFireBtn = document.getElementById('mobileFire');
     let gctx=null, score=0, combo=1, maxCombo=0, timeLeft=0, running=false, targets=[], bullets=[], particles=[], floatTexts=[];
     let animId=null, timerId=null, gW=0, gH=0, mx=0, my=0, shots=0, hits=0, shake=0;
@@ -2714,7 +2740,7 @@
         if (h2) h2.textContent='◉ COMBAT SIMULATOR';
         const p = gameMenu && gameMenu.querySelector('p');
         if (p && !p.classList.contains('controls-tip') && !p.classList.contains('mobile-tip')) {
-            p.textContent='Destroy enemy drones with the beam rifle before time runs out!';
+            p.textContent='Destroy enemy drones before time runs out.';
         }
     }
     function exitGame(){
@@ -2734,7 +2760,6 @@
         score=0; combo=1; maxCombo=0; timeLeft=30; shots=0; hits=0; shake=0; targets=[]; bullets=[]; particles=[]; floatTexts=[];
         running=true;
         gameMenu.style.display='none';
-        if (gameTitle) gameTitle.style.display='block';
         resizeGame();
         // center aim
         mx=gW/2; my=gH*0.6;
@@ -2766,7 +2791,6 @@
         if (lastEl) lastEl.textContent = last();
         if (accEl) accEl.textContent = bestAcc+'%';
         gameMenu.style.display='';
-        if (gameTitle) gameTitle.style.display='none';
         const h = gameMenu.querySelector('h2'); if(h) h.textContent='◉ MISSION COMPLETE';
         const p = gameMenu.querySelector('p'); if(p) p.textContent=`SCORE ${score}  ·  ACCURACY ${acc}%  ·  BEST COMBO ×${maxCombo}  ·  BEST ${best()}`;
         startBtn.textContent='▶ PLAY AGAIN';
