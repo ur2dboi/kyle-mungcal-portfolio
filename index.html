@@ -25,7 +25,7 @@
         "@type": "Person",
         "name": "Kyle Mheler Mungcal",
         "jobTitle": "Full Stack Web Developer",
-        "url": "https://kyle-mungcal-portfolio.vercel.app/",
+        "url": "https://www.connectsociety.cc/",
         "email": "kylemheler02@gmail.com",
         "telephone": "+639197826561",
         "address": {
@@ -61,7 +61,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* RX-78-2 Gundam color palette */
+            /* Armor color palette */
             --bg: #eef1f6;
             --surface: #ffffff;
             --surface2: #f0f3f8;
@@ -231,6 +231,31 @@
         html.game .form-modal input, html.game .form-modal textarea, html.game .form-modal select { background:var(--surface2); color:var(--text); border-color:var(--armor-yellow); }
 
 
+        /* When game is active, hide everything except the overlay so the game is full-screen / standalone */
+        html.game-active body > *:not(#gameOverlay):not(.cursor-dot):not(.cursor-ring) { display:none !important; }
+        html.game-active body { background:#05090f; overflow:hidden; }
+        html.game-active #gameOverlay { z-index:100002; }
+
+        /* Dedicated PLAY GAME button in hero */
+        .btn-game {
+            background:var(--armor-red); color:#fff; border-color:var(--armor-red-dark);
+            background-image:linear-gradient(135deg,var(--armor-red) 0%,var(--armor-red) 60%,var(--armor-yellow) 60%,var(--armor-yellow) 100%);
+            background-size:220% 100%; background-position:0% 0;
+            clip-path:var(--armor-clip); box-shadow:4px 4px 0 var(--armor-yellow-dark);
+            transition:all 0.25s;
+        }
+        .btn-game:hover { background-position:100% 0; color:var(--trim); transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--armor-blue); }
+
+        /* Return-to-site button in the game-over menu */
+        .btn-return {
+            background:transparent; color:var(--armor-yellow); border:2px solid var(--armor-yellow);
+            padding:0.7rem 1.4rem; font-family:var(--font-mono); font-weight:900;
+            letter-spacing:3px; text-transform:uppercase; cursor:pointer;
+            clip-path:var(--armor-clip-sm); margin-top:0.6rem; font-size:0.78rem;
+            transition:all 0.2s; display:inline-block;
+        }
+        .btn-return:hover { background:var(--armor-yellow); color:var(--trim); transform:translate(-1px,-1px); box-shadow:3px 3px 0 var(--armor-red); }
+
         /* Mode toggle button */
         .mode-toggle {
             background:var(--surface2); color:var(--text); border:2px solid var(--trim);
@@ -333,7 +358,7 @@
             background:linear-gradient(90deg, var(--armor-red) 0 34%, var(--armor-yellow) 34% 66%, var(--armor-blue) 66% 100%);
         }
         .game-center::after {
-            content:'◉ RX-78-2 // COMBAT SIM'; position:absolute; top:10px; right:18px;
+            content:'◉ COMBAT SIM'; position:absolute; top:10px; right:18px;
             font-family:var(--font-mono); font-size:0.58rem; letter-spacing:2px;
             color:#fff; background:var(--armor-red); padding:0.2rem 0.5rem; font-weight:800;
             clip-path:polygon(6px 0,100% 0,calc(100% - 6px) 100%,0 100%);
@@ -1743,6 +1768,7 @@
         <div class="hero-buttons reveal">
             <a href="#projects" class="btn btn-primary">▶ View Projects</a>
             <button class="btn btn-outline" onclick="openFormModal()" style="font-family:inherit;font-size:inherit;">◇ Get In Touch</button>
+            <button class="btn btn-game" onclick="launchGame()" style="font-family:inherit;font-size:inherit;">◉ PLAY GAME</button>
         </div>
     </div>
 </section>
@@ -2033,6 +2059,40 @@
     </div>
 </div>
 
+
+<!-- ── GAME OVERLAY / GUNDAM TARGET SHOOTER ── -->
+<div id="gameOverlay" role="dialog" aria-label="Gundam Target Shooter">
+    <canvas id="gameCanvas"></canvas>
+    <div class="game-cross" id="gameCross">
+        <span class="ctl"></span><span class="ctr"></span><span class="cbl"></span><span class="cbr"></span>
+    </div>
+    <div class="damage-flash" id="damageFlash"></div>
+    <div class="game-hud">
+        <div class="hud-pill score" id="hudScore">SCORE: 0</div>
+        <div class="hud-pill combo" id="hudCombo">×1 COMBO</div>
+        <div class="hud-pill time" id="hudTime">TIME: 30</div>
+        <div class="hud-pill hud-exit" id="gameExit">✕ EXIT</div>
+    </div>
+    <div class="game-titlebar" id="gameTitle">◉ COMBAT SIMULATOR
+        <div class="sub">TARGET DESTROY — BEAM RIFLE ARMED</div>
+    </div>
+    <button class="mobile-fire" id="mobileFire" type="button">● FIRE</button>
+    <div class="game-center" id="gameMenu">
+        <h2>◉ COMBAT SIMULATOR</h2>
+        <p>Destroy enemy drones with the beam rifle before time runs out!</p>
+        <div class="game-stats">
+            <div><span class="stat-val" id="bestScore">0</span><span>BEST</span></div>
+            <div><span class="stat-val" id="lastScore">0</span><span>LAST</span></div>
+            <div><span class="stat-val" id="bestAcc">0%</span><span>ACC</span></div>
+        </div>
+        <button class="btn-start" id="startGame">▶ LAUNCH MISSION</button>
+        <div style="margin-top:0.7rem;">
+            <button class="btn-return" id="returnSite" type="button">◄ RETURN TO SITE</button>
+        </div>
+        <p class="controls-tip">BLUE +10 · RED +20 · GOLD +50 · CHAINS = MULTIPLIER</p>
+        <p class="mobile-tip">TAP THE SCREEN OR USE THE FIRE BUTTON</p>
+    </div>
+</div>
 
 <script>
 (function () {
@@ -2618,22 +2678,33 @@
     function enterGame(){
         overlay.classList.add('active');
         document.body.classList.add('no-scroll');
+        document.documentElement.classList.add('game-active');
         resizeGame();
         window.addEventListener('resize', resizeGame, {passive:true});
         gameMenu.style.display='';
         updateHUD();
         if (cross) { cross.style.display='none'; }
         overlay.classList.remove('aiming');
+        // reset the start-game button & heading text so re-entry is clean
+        if (startBtn) startBtn.textContent='▶ LAUNCH MISSION';
+        const h2 = gameMenu && gameMenu.querySelector('h2');
+        if (h2) h2.textContent='◉ COMBAT SIMULATOR';
+        const p = gameMenu && gameMenu.querySelector('p');
+        if (p && !p.classList.contains('controls-tip') && !p.classList.contains('mobile-tip')) {
+            p.textContent='Destroy enemy drones with the beam rifle before time runs out!';
+        }
     }
     function exitGame(){
         overlay.classList.remove('active');
         document.body.classList.remove('no-scroll');
+        document.documentElement.classList.remove('game-active');
         window.removeEventListener('resize', resizeGame);
         running=false;
         cancelAnimationFrame(animId);
         clearInterval(timerId);
         targets=[]; bullets=[]; particles=[]; floatTexts=[];
         overlay.classList.remove('aiming');
+        // If the site was already in light/dark theme when game launched, game mode stays applied by toggle — leave theme class as-is
     }
     // Enter game only when button pressed
     function startGame(){
@@ -2854,6 +2925,15 @@
     }
     if (startBtn) startBtn.addEventListener('click', (e)=>{ e.stopPropagation(); startGame(); });
     if (exitBtn) exitBtn.addEventListener('click', (e)=>{ e.stopPropagation(); exitGame(); });
+    const returnBtn = document.getElementById('returnSite');
+    if (returnBtn) returnBtn.addEventListener('click', (e)=>{ e.stopPropagation(); exitGame(); });
+    // ESC to exit game
+    document.addEventListener('keydown', (e)=>{
+        if (e.key === 'Escape' && overlay && overlay.classList.contains('active')) {
+            if (running) endGame();
+            else exitGame();
+        }
+    });
     // Mobile fire button (tap for single shot, hold for auto-fire)
     let autoFireInt=null;
     function fireBtnFire(e){
@@ -2878,45 +2958,25 @@
         mobileFireBtn.addEventListener('mouseleave', fireBtnUp);
     }
 
-    // Quick-start: triple-tap logo or Ctrl+G opens game menu (optional convenience)
-    // (kept simple — use Game mode + START MISSION button)
-    // Enter game overlay when user selects game theme and clicks a "start mission" affordance: hook start button already handles it; we also expose a global
+    // Expose globals
     window.openGame = enterGame;
     window.startGameMission = startGame;
+    window.launchGame = function(){
+        // Switch to game theme, open overlay, and (on first tap) show the start menu (user clicks LAUNCH MISSION)
+        applyTheme('game');
+        enterGame();
+    };
+    // Ctrl/Cmd + G = launch game
+    document.addEventListener('keydown', (e)=>{
+        if ((e.ctrlKey || e.metaKey) && (e.key === 'g' || e.key === 'G')) {
+            e.preventDefault();
+            window.launchGame();
+        }
+    });
 
 })();
 </script>
 
-<!-- ── GAME OVERLAY / GUNDAM TARGET SHOOTER ── -->
-<div id="gameOverlay" role="dialog" aria-label="Gundam Target Shooter">
-    <canvas id="gameCanvas"></canvas>
-    <div class="game-cross" id="gameCross">
-        <span class="ctl"></span><span class="ctr"></span><span class="cbl"></span><span class="cbr"></span>
-    </div>
-    <div class="damage-flash" id="damageFlash"></div>
-    <div class="game-hud">
-        <div class="hud-pill score" id="hudScore">SCORE: 0</div>
-        <div class="hud-pill combo" id="hudCombo">×1 COMBO</div>
-        <div class="hud-pill time" id="hudTime">TIME: 30</div>
-        <div class="hud-pill hud-exit" id="gameExit">✕ EXIT</div>
-    </div>
-    <div class="game-titlebar" id="gameTitle">◉ RX-78-2 COMBAT SIMULATOR
-        <div class="sub">TARGET DESTROY — BEAM RIFLE ARMED</div>
-    </div>
-    <button class="mobile-fire" id="mobileFire" type="button">● FIRE</button>
-    <div class="game-center" id="gameMenu">
-        <h2>◉ COMBAT SIMULATOR</h2>
-        <p>Destroy enemy drones with the beam rifle before time runs out!</p>
-        <div class="game-stats">
-            <div><span class="stat-val" id="bestScore">0</span><span>BEST</span></div>
-            <div><span class="stat-val" id="lastScore">0</span><span>LAST</span></div>
-            <div><span class="stat-val" id="bestAcc">0%</span><span>ACC</span></div>
-        </div>
-        <button class="btn-start" id="startGame">▶ LAUNCH MISSION</button>
-        <p class="controls-tip">BLUE +10 · RED +20 · GOLD +50 · CHAINS = MULTIPLIER</p>
-        <p class="mobile-tip">TAP THE SCREEN OR USE THE FIRE BUTTON</p>
-    </div>
-</div>
 
 </body>
 </html>
