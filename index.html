@@ -10,11 +10,11 @@
     <meta name="author" content="Kyle Mheler Mungcal">
     <meta name="robots" content="index, follow">
     <meta name="theme-color" content="#1f4e8c">
-    <link rel="canonical" href="https://kyle-mungcal-portfolio.vercel.app/">
+    <link rel="canonical" href="https://www.connectsociety.cc/">
     <meta property="og:type" content="website">
     <meta property="og:title" content="Kyle Mheler Mungcal — Full Stack Web Developer Portfolio">
     <meta property="og:description" content="5+ years crafting responsive, high-performance websites. Shopify, WordPress, and custom development for businesses worldwide. View 30+ client projects.">
-    <meta property="og:url" content="https://kyle-mungcal-portfolio.vercel.app/">
+    <meta property="og:url" content="https://www.connectsociety.cc/">
     <meta property="og:site_name" content="Kyle Mheler Mungcal Portfolio">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Kyle Mheler Mungcal — Full Stack Web Developer">
@@ -747,6 +747,12 @@
             box-shadow: 4px 4px 0 var(--armor-blue);
         }
         .nav-cta-wrap { display:flex; align-items:center; gap:0.5rem; }
+
+        /* Mobile CTA (inside hamburger) */
+        .mobile-cta { display:none; }
+        @media (max-width:850px) {
+            .mobile-cta { display:block; }
+        }
 
         /* ── HERO (Gundam cockpit intro) ── */
         .hero { min-height:72vh; display:flex; align-items:center; justify-content:center; padding:6rem 2rem 2rem; position:relative; }
@@ -1748,6 +1754,12 @@
         <div class="nav-logo"><img src="favicon.png" alt="KMM"></div>
         <ul class="nav-links" id="navMenu">
             <li><a href="#about">About</a></li><li><a href="#services">Services</a></li><li><a href="#expertise">Expertise</a></li><li><a href="#projects">Projects</a></li><li><a href="#process">Process</a></li><li><a href="#contact">Contact</a></li>
+            <li class="mobile-cta" style="list-style:none;">
+                <div class="nav-cta-wrap" id="mobileCta">
+                    <button class="mode-toggle" id="modeToggleMobile" title="Toggle theme"><span class="mode-icon" id="modeIconMobile">☀</span><span id="modeLabelMobile">LIGHT</span></button>
+                    <button class="nav-cta" onclick="openFormModal();document.getElementById('hamburgerBtn').classList.remove('open');document.getElementById('navMenu').classList.remove('open');" style="font-family:inherit;font-size:inherit;">[ Connect ]</button>
+                </div>
+            </li>
         </ul>
         <div class="nav-cta-wrap" id="desktopCta">
             <button class="mode-toggle" id="modeToggle" title="Toggle theme"><span class="mode-icon" id="modeIcon">☀</span><span id="modeLabel">LIGHT</span></button>
@@ -2598,6 +2610,10 @@
     const modeBtn = document.getElementById('modeToggle');
     const modeIcon = document.getElementById('modeIcon');
     const modeLabel = document.getElementById('modeLabel');
+    // Mobile (in-hamburger) clone
+    const modeBtnM = document.getElementById('modeToggleMobile');
+    const modeIconM = document.getElementById('modeIconMobile');
+    const modeLabelM = document.getElementById('modeLabelMobile');
     const THEME_ORDER = ['light','dark','game'];
     const THEME_LABELS = { light:'LIGHT ☀', dark:'DARK ☾', game:'GAME ◉' };
     const THEME_ICONS = { light:'☀', dark:'☾', game:'◉' };
@@ -2606,10 +2622,17 @@
         document.documentElement.classList.add(mode);
         if (modeIcon) modeIcon.textContent = THEME_ICONS[mode];
         if (modeLabel) modeLabel.textContent = mode.toUpperCase();
+        if (modeIconM) modeIconM.textContent = THEME_ICONS[mode];
+        if (modeLabelM) modeLabelM.textContent = mode.toUpperCase();
         if (modeBtn) {
             modeBtn.style.boxShadow = mode==='game' ? '3px 3px 0 var(--armor-red)' :
                                       mode==='dark' ? '3px 3px 0 var(--armor-blue)' :
                                       '3px 3px 0 var(--armor-yellow-dark)';
+        }
+        if (modeBtnM) {
+            modeBtnM.style.boxShadow = mode==='game' ? '3px 3px 0 var(--armor-red)' :
+                                       mode==='dark' ? '3px 3px 0 var(--armor-blue)' :
+                                       '3px 3px 0 var(--armor-yellow-dark)';
         }
         if (persist) { try { localStorage.setItem('kmm_theme', mode); } catch(e){} }
     }
@@ -2617,23 +2640,23 @@
     try { savedTheme = localStorage.getItem('kmm_theme') || 'light'; } catch(e){}
     if (!THEME_ORDER.includes(savedTheme)) savedTheme = 'light';
     applyTheme(savedTheme, false);
-    if (modeBtn) modeBtn.addEventListener('click', (e) => {
-        e.preventDefault(); e.stopPropagation();
+    function cycleTheme(e){
+        if (e) { e.preventDefault(); e.stopPropagation(); }
         const cur = THEME_ORDER.find(m => document.documentElement.classList.contains(m)) || 'light';
         const next = THEME_ORDER[(THEME_ORDER.indexOf(cur)+1) % THEME_ORDER.length];
         applyTheme(next);
         if (next === 'game') {
-            // open game menu
             enterGame();
         } else {
-            // exit game if running
             if (overlay && overlay.classList.contains('active') && !running) exitGame();
-            else if (overlay && overlay.classList.contains('active')) {
-                // end round but leave light/dark theme
-                endGame();
-            }
+            else if (overlay && overlay.classList.contains('active')) endGame();
         }
-    });
+        // close mobile hamburger after tap
+        if (hamburger) hamburger.classList.remove('open');
+        if (navMenu) navMenu.classList.remove('open');
+    }
+    if (modeBtn) modeBtn.addEventListener('click', cycleTheme);
+    if (modeBtnM) modeBtnM.addEventListener('click', cycleTheme);
 
     /* ── Target-practice shooter (works on desktop + mobile) ── */
     const overlay = document.getElementById('gameOverlay');
