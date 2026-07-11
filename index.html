@@ -1067,7 +1067,12 @@
         #bootSeq .boot-txt { font-size:0.75rem; margin:0.2rem 0; color:#9ecbff; letter-spacing:4px; }
         #bootSeq .boot-txt b { color:var(--armor-yellow); }
         #bootSeq .boot-sub { font-size:0.62rem; color:#6a8bbd; letter-spacing:3px; margin-top:0.8rem; }
-        @media (pointer: coarse) { #bootSeq { display:none; } }
+        @media (max-width:480px) {
+            #bootSeq .boot-logo { width:90px; height:90px; }
+            #bootSeq .boot-bar { height:6px; }
+            #bootSeq .boot-txt { font-size:0.62rem; letter-spacing:2px; }
+            #bootSeq .boot-sub { font-size:0.52rem; letter-spacing:2px; }
+        }
 
         /* ── HUD CORNER READOUTS (fixed on viewport, desktop only) ── */
         .hud-corner { position:fixed; font-family:var(--font-mono); font-size:0.62rem; letter-spacing:2px; font-weight:700; color:var(--armor-yellow); text-transform:uppercase; z-index:9990; pointer-events:none; text-shadow:0 0 6px rgba(255,209,0,0.5); }
@@ -1117,6 +1122,16 @@
               linear-gradient(180deg, rgba(10,20,40,0.22) 0%, transparent 12%, transparent 88%, rgba(10,20,40,0.30) 100%);
             }
             .orb { filter:blur(70px); opacity:0.45 !important; }
+            /* Touch feedback: show lock brackets & TARGET tags while finger is pressed */
+            .project-card:active .lock-brackets, .service-card:active .lock-brackets,
+            .expertise-card:active .lock-brackets, .highlight-item:active .lock-brackets,
+            .process-step:active .lock-brackets, .about-card:active .lock-brackets { opacity:1; animation:bracketPulse 0.8s steps(2) infinite; }
+            .project-card:active .lock-tag { opacity:1; }
+        }
+        @media (max-width:600px) {
+            .hud-corner { display:none !important; }
+            #radarCanvas { width:90px; height:90px; right:8px; bottom:58px; }
+            .radar-label { right:8px; bottom:148px; font-size:0.5rem; }
         }
 
         /* Hamburger menu */
@@ -1855,9 +1870,20 @@
             }, { passive:true });
         }
 
-        /* ── Boot sequence (plays once per session; works on mobile too) ── */
+        /* ── Boot / Loading sequence (plays every page open, all devices) ── */
         const boot = document.getElementById('bootSeq');
-        if (boot && !reducedMotion && !sessionStorage.getItem('booted_kmm')) {
+        function dismissBoot() {
+            if (!boot || boot.classList.contains('done')) return;
+            const fill = document.getElementById('bootFill');
+            const line = document.getElementById('bootLine');
+            if (fill) fill.style.width = '100%';
+            if (line) line.textContent = 'KYLE MUNGCAL // READY';
+            setTimeout(() => {
+                boot.classList.add('done');
+                setTimeout(() => boot.remove(), 700);
+            }, 450);
+        }
+        if (boot) {
             const fill = document.getElementById('bootFill');
             const line = document.getElementById('bootLine');
             const lines = [
@@ -1868,19 +1894,28 @@
                 'V-FIN ACTIVE // ALL SYSTEMS GREEN',
                 'KYLE MUNGCAL // READY'
             ];
-            let p=0, li=0;
-            const tick = setInterval(()=>{
-                p += 3 + Math.random()*6;
-                if (p>100) p=100;
-                if (fill) fill.style.width = p+'%';
-                const ni = Math.min(lines.length-1, Math.floor(p/18));
-                if (ni!==li){ li=ni; if (line) line.textContent = lines[li]; }
-                if (p>=100){
-                    clearInterval(tick);
-                    setTimeout(()=>{ boot.classList.add('done'); sessionStorage.setItem('booted_kmm','1'); setTimeout(()=>boot.remove(),700); }, 450);
-                }
-            }, 60);
-        } else if (boot) { boot.remove(); }
+            let p = 0, li = 0;
+            const startedAt = performance.now();
+            const tick = setInterval(() => {
+                p += 4 + Math.random() * 5;
+                if (p > 100) p = 100;
+                if (fill) fill.style.width = p + '%';
+                const ni = Math.min(lines.length - 1, Math.floor(p / 18));
+                if (ni !== li) { li = ni; if (line) line.textContent = lines[li]; }
+                if (p >= 100) { clearInterval(tick); }
+            }, reducedMotion ? 20 : 50);
+            // Dismiss when window loaded AND at least 1.3s elapsed
+            const minShow = 1300;
+            const tryDismiss = () => {
+                const elapsed = performance.now() - startedAt;
+                const wait = Math.max(0, minShow - elapsed);
+                setTimeout(dismissBoot, wait);
+            };
+            if (document.readyState === 'complete') tryDismiss();
+            else window.addEventListener('load', tryDismiss, { once: true });
+            // Safety fallback: force-dismiss after 6s even if load never fires
+            setTimeout(dismissBoot, 6000);
+        }
 
         /* ── Live HUD counters ── */
         const hudTr = document.getElementById('hudTr');
