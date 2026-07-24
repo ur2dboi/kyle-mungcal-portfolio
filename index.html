@@ -231,7 +231,18 @@
         .about-intro p { font-size:1rem; }
 
         /* ── ABOUT ── */
-        .about-grid { display:grid; grid-template-columns:1fr 1fr; gap:4rem; align-items:start; }
+        .about-grid { display:grid; grid-template-columns:320px 1fr; gap:4rem; align-items:center; }
+        .portrait-wrap { position:relative; }
+        .portrait {
+            width:100%; aspect-ratio:4/5; object-fit:cover;
+            border-radius:var(--radius); display:block;
+            border:1px solid var(--border); box-shadow:var(--shadow-lg);
+        }
+        .portrait-wrap::after {
+            content:''; position:absolute; inset:-12px -12px auto auto; width:60%; height:60%;
+            border-top:2px solid var(--gold); border-right:2px solid var(--gold);
+            border-radius:0 var(--radius) 0 0; z-index:-1;
+        }
         .about-intro p { font-size:1rem; color:var(--text-2); line-height:1.8; margin-bottom:1.25rem; }
         .about-intro p strong { color:var(--text); font-weight:600; }
         .about-highlights { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
@@ -490,7 +501,9 @@
             .service-card p, .process-step p { font-size:0.9rem; }
             .expertise-card p { font-size:0.92rem; }
             .project-body p { font-size:0.88rem; }
-            .about-grid { grid-template-columns:1fr; gap:2.5rem; }
+            .about-grid { grid-template-columns:1fr; gap:2.5rem; align-items:start; }
+            .portrait-wrap { max-width:280px; margin:0 auto; }
+            .portrait-wrap::after { display:none; }
             .about-highlights { grid-template-columns:1fr 1fr; }
             .services-grid { grid-template-columns:1fr 1fr; gap:1rem; }
             .service-card { padding:1.5rem 1.25rem; }
@@ -562,6 +575,9 @@
 <!-- ABOUT -->
 <section id="about">
     <div class="about-grid">
+        <div class="portrait-wrap reveal">
+            <img class="portrait" src="portrait.jpg" alt="Kyle Mheler Mungcal">
+        </div>
         <div class="about-intro">
             <div class="section-head reveal" style="margin-bottom:1.5rem;">
                 <div class="section-label">About</div>
@@ -569,27 +585,27 @@
             </div>
             <p class="reveal">I'm a <strong>Full Stack Web Developer</strong> based in Manila, Philippines with over <strong>5 years</strong> of experience turning ideas into polished, high-performing websites. I specialize in crafting responsive designs that feel effortless across every device.</p>
             <p class="reveal">From e-commerce storefronts to corporate sites to custom web applications, I deliver solutions that look refined, load fast, and convert. I treat every project like it's my own — because your website is often the first impression your business makes.</p>
-        </div>
-        <div class="about-highlights stagger">
-            <div class="highlight-card">
-                <div class="highlight-num">UI/UX</div>
-                <div class="highlight-lbl">Design</div>
-                <div class="highlight-desc">Intuitive interfaces that guide users naturally.</div>
-            </div>
-            <div class="highlight-card">
-                <div class="highlight-num">Dev</div>
-                <div class="highlight-lbl">Development</div>
-                <div class="highlight-desc">Clean, maintainable, high-performance code.</div>
-            </div>
-            <div class="highlight-card">
-                <div class="highlight-num">SEO</div>
-                <div class="highlight-lbl">Optimization</div>
-                <div class="highlight-desc">Technical SEO that drives organic traffic.</div>
-            </div>
-            <div class="highlight-card">
-                <div class="highlight-num">Brand</div>
-                <div class="highlight-lbl">Identity</div>
-                <div class="highlight-desc">Cohesive digital presence that feels premium.</div>
+            <div class="about-highlights stagger" style="margin-top:2rem;">
+                <div class="highlight-card">
+                    <div class="highlight-num">UI/UX</div>
+                    <div class="highlight-lbl">Design</div>
+                    <div class="highlight-desc">Intuitive interfaces that guide users naturally.</div>
+                </div>
+                <div class="highlight-card">
+                    <div class="highlight-num">Dev</div>
+                    <div class="highlight-lbl">Development</div>
+                    <div class="highlight-desc">Clean, maintainable, high-performance code.</div>
+                </div>
+                <div class="highlight-card">
+                    <div class="highlight-num">SEO</div>
+                    <div class="highlight-lbl">Optimization</div>
+                    <div class="highlight-desc">Technical SEO that drives organic traffic.</div>
+                </div>
+                <div class="highlight-card">
+                    <div class="highlight-num">Brand</div>
+                    <div class="highlight-lbl">Identity</div>
+                    <div class="highlight-desc">Cohesive digital presence that feels premium.</div>
+                </div>
             </div>
         </div>
     </div>
