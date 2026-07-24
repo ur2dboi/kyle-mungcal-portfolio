@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#c9a961">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Kyle Mungcal · Admin</title>
+<link rel="icon" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="admin-manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+    :root{
+        --bg:#0a0a0a; --bg-alt:#0f0f0f; --surface:#141414; --surface-elev:#1a1a1a;
+        --border:#262626; --border-strong:#333;
+        --text:#fafafa; --text-2:#d4d4d4; --text-3:#a3a3a3; --text-4:#737373;
+        --gold:#d4bb7e; --gold-soft:#e0cc9a; --gold-deep:#c9a961; --gold-bg:rgba(212,187,126,0.08);
+        --black:#0a0a0a; --danger:#ef4444; --success:#22c55e;
+        --radius:12px; --radius-sm:8px;
+    }
+    *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+    html,body{height:100%;overscroll-behavior-y:contain;}
+    body{
+        background:var(--bg); color:var(--text); font-family:'Inter',system-ui,-apple-system,sans-serif;
+        font-size:16px; line-height:1.6; padding-bottom:env(safe-area-inset-bottom);
+        touch-action:manipulation;
+    }
+    .app{max-width:680px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
+    /* ── top bar ── */
+    .topbar{
+        position:sticky; top:0; z-index:10; display:flex; align-items:center; gap:0.75rem;
+        padding:1rem 1rem; padding-top:calc(1rem + env(safe-area-inset-top));
+        background:linear-gradient(180deg,var(--bg) 60%,rgba(10,10,10,0));
+        border-bottom:1px solid var(--border);
+    }
+    .topbar .brand{display:flex;align-items:center;gap:0.6rem;flex:1;min-width:0;}
+    .topbar .brand img{height:28px;filter:drop-shadow(0 0 6px rgba(212,187,126,0.45));}
+    .topbar h1{font-size:1rem;font-weight:600;letter-spacing:-0.01em;}
+    .topbar h1 small{display:block;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--gold);font-weight:600;letter-spacing:0.1em;text-transform:uppercase;}
+    .icon-btn{
+        width:40px; height:40px; border-radius:50%; border:1px solid var(--border);
+        background:var(--surface); color:var(--text); display:flex; align-items:center; justify-content:center;
+        cursor:pointer; font-size:1rem; transition:border-color 0.2s, color 0.2s; flex-shrink:0;
+    }
+    .icon-btn:hover{border-color:var(--gold); color:var(--gold);}
+    .icon-btn.bell.on{color:var(--gold); border-color:var(--gold);}
+    .icon-btn.bell.off{color:var(--text-4);}
+    /* ── content ── */
+    .content{flex:1;padding:1rem;}
+    /* ── login ── */
+    .login-card{
+        max-width:360px; margin:4rem auto 0; text-align:center;
+        padding:2rem 1.5rem; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    }
+    .login-card .logo{height:56px;margin-bottom:1rem;filter:drop-shadow(0 0 10px rgba(212,187,126,0.5));}
+    .login-card h2{font-size:1.25rem;margin-bottom:0.35rem;}
+    .login-card p{color:var(--text-3);font-size:0.85rem;margin-bottom:1.25rem;}
+    .login-card input{
+        width:100%; padding:0.9rem 1rem; border:1px solid var(--border); border-radius:var(--radius-sm);
+        background:var(--bg-alt); color:var(--text); font-size:16px; font-family:inherit; margin-bottom:0.75rem;
+    }
+    .login-card input:focus{outline:none;border-color:var(--gold);}
+    .btn{
+        width:100%; padding:0.95rem; border:none; border-radius:var(--radius-sm); font-weight:600; font-size:0.95rem;
+        cursor:pointer; font-family:inherit; transition:transform 0.1s; touch-action:manipulation;
+    }
+    .btn:active{transform:scale(0.98);}
+    .btn-gold{background:var(--gold); color:var(--black);}
+    .btn-ghost{background:var(--surface);color:var(--text);border:1px solid var(--border);}
+    .err-msg{color:var(--danger);font-size:0.82rem;margin-top:0.5rem;min-height:1rem;}
+    /* ── status banner ── */
+    .status{padding:0.75rem 1rem;border-radius:var(--radius-sm);margin-bottom:1rem;font-size:0.85rem;font-weight:500;display:none;}
+    .status.ok{background:rgba(34,197,94,0.1);color:var(--success);border:1px solid rgba(34,197,94,0.25);}
+    .status.err{background:rgba(239,68,68,0.1);color:var(--danger);border:1px solid rgba(239,68,68,0.25);}
+    .status.info{background:var(--gold-bg);color:var(--gold);border:1px solid rgba(212,187,126,0.25);}
+    /* ── threads ── */
+    .stats-row{display:flex;gap:0.5rem;margin-bottom:1rem;}
+    .stat{flex:1;padding:0.75rem;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);text-align:center;}
+    .stat .n{font-size:1.25rem;font-weight:700;color:var(--gold);font-family:'JetBrains Mono',monospace;}
+    .stat .l{font-size:0.7rem;color:var(--text-4);text-transform:uppercase;letter-spacing:0.08em;font-family:'JetBrains Mono',monospace;}
+    .thread{
+        background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+        padding:1rem; margin-bottom:0.75rem;
+    }
+    .thread-head{display:flex;justify-content:space-between;align-items:flex-start;gap:0.5rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);margin-bottom:0.75rem;}
+    .thread-head .name{font-weight:600;display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;}
+    .thread-head .name .unread{background:var(--danger);color:#fff;padding:0.1rem 0.5rem;border-radius:999px;font-size:0.65rem;font-weight:700;}
+    .thread-head .meta{font-size:0.7rem;color:var(--text-4);font-family:'JetBrains Mono',monospace;margin-top:0.15rem;}
+    .thread-head .del{background:transparent;border:none;color:var(--text-4);cursor:pointer;padding:0.4rem;border-radius:50%;font-size:1rem;line-height:1;}
+    .thread-head .del:active{color:var(--danger);background:rgba(239,68,68,0.1);}
+    .msg{padding:0.4rem 0;}
+    .msg .who{font-size:0.65rem;font-family:'JetBrains Mono',monospace;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.15rem;}
+    .msg.visitor .who{color:var(--text-4);}
+    .msg.admin .who{color:var(--gold);}
+    .msg .body{font-size:0.9rem;color:var(--text-2);word-break:break-word;}
+    .reply{display:flex;gap:0.5rem;margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--border);}
+    .reply input{
+        flex:1; min-width:0; padding:0.75rem 0.9rem; border:1px solid var(--border); border-radius:var(--radius-sm);
+        background:var(--bg-alt); color:var(--text); font-size:16px; font-family:inherit;
+    }
+    .reply input:focus{outline:none;border-color:var(--gold);}
+    .reply button{
+        padding:0 1.1rem; background:var(--gold); color:var(--black); border:none; border-radius:var(--radius-sm);
+        font-weight:600; cursor:pointer; font-size:0.9rem; min-width:60px;
+    }
+    .empty{text-align:center;padding:4rem 1rem;color:var(--text-4);}
+    .empty .icon{font-size:3rem;margin-bottom:0.75rem;opacity:0.5;}
+    /* ── modal (change password) ── */
+    .modal-backdrop{
+        position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:50; display:none;
+        align-items:center; justify-content:center; padding:1rem;
+    }
+    .modal-backdrop.show{display:flex;}
+    .modal{
+        width:100%; max-width:380px; background:var(--surface); border:1px solid var(--border);
+        border-radius:var(--radius); padding:1.5rem;
+    }
+    .modal h3{font-size:1.1rem;margin-bottom:0.35rem;}
+    .modal p{color:var(--text-3);font-size:0.82rem;margin-bottom:1rem;}
+    .modal input{
+        width:100%; padding:0.85rem 1rem; border:1px solid var(--border); border-radius:var(--radius-sm);
+        background:var(--bg-alt); color:var(--text); font-size:16px; font-family:inherit; margin-bottom:0.6rem;
+    }
+    .modal input:focus{outline:none;border-color:var(--gold);}
+    .modal .actions{display:flex;gap:0.5rem;margin-top:0.5rem;}
+    .modal .actions .btn{padding:0.8rem;font-size:0.88rem;}
+    /* ── logout bottom sheet-style ── */
+    .foot{
+        padding:1rem; text-align:center; font-family:'JetBrains Mono',monospace;
+        font-size:0.7rem; color:var(--text-4); letter-spacing:0.08em; text-transform:uppercase;
+    }
+    .foot a{color:var(--gold);text-decoration:none;}
+    /* ── pull to refresh-like indicator ── */
+    .live-dot{display:inline-block;width:8px;height:8px;background:var(--success);border-radius:50%;margin-right:0.4rem;animation:pulse 2s infinite;}
+    @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+    /* focus visible */
+    :focus-visible{outline:2px solid var(--gold); outline-offset:2px;}
+</style>
+</head>
+<body>
+<div class="app">
+    <div class="topbar">
+        <div class="brand">
+            <img src="logo.webp" alt="KM">
+            <h1>
+                Messages
+                <small><span class="live-dot"></span>Admin Console</small>
+            </h1>
+        </div>
+        <button class="icon-btn bell off" id="bellBtn" title="Notifications" aria-label="Toggle notifications">🔔</button>
+        <button class="icon-btn" id="keyBtn" title="Change password" aria-label="Change password">🔑</button>
+        <button class="icon-btn" id="logoutBtn" title="Logout" aria-label="Logout">↩</button>
+    </div>
+
+    <div class="content" id="content"></div>
+
+    <div class="foot">
+        <a href="/">← Back to website</a>
+    </div>
+</div>
+
+<!-- Password change modal -->
+<div class="modal-backdrop" id="pwModal">
+    <div class="modal">
+        <h3>Change Password</h3>
+        <p>Choose a new admin password. Min 4 characters.</p>
+        <input type="password" id="pwCurrent" placeholder="Current password" autocomplete="current-password">
+        <input type="password" id="pwNew" placeholder="New password" autocomplete="new-password">
+        <input type="password" id="pwConfirm" placeholder="Confirm new password" autocomplete="new-password">
+        <div class="err-msg" id="pwErr"></div>
+        <div class="actions">
+            <button class="btn btn-ghost" id="pwCancel">Cancel</button>
+            <button class="btn btn-gold" id="pwSave">Save</button>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ── ChatStore (shares localStorage key with main site so messages sync across tabs) ── */
+const ChatStore = (function(){
+    const KEY = 'kmm_chat_threads_v1';
+    const ADMIN_KEY = 'kmm_chat_admin_session';
+    const PW_KEY = 'kmm_admin_pw_hash';
+    const DEFAULT_PASSWORD = 'kyle2026';
+    function hash(s){ let h=5381; for(let i=0;i<s.length;i++){ h=((h<<5)+h)+s.charCodeAt(i); h|=0;} return 'h_'+h.toString(36); }
+    function getPwHash(){ return localStorage.getItem(PW_KEY) || hash(DEFAULT_PASSWORD); }
+    function setPassword(n){ localStorage.setItem(PW_KEY, hash(n)); }
+    function read(){ try{return JSON.parse(localStorage.getItem(KEY)||'{}');}catch(e){return{};} }
+    function write(d){ localStorage.setItem(KEY, JSON.stringify(d)); }
+    function saveReply(tid,text){
+        const all=read(); if(!all[tid]) return;
+        all[tid].messages.push({from:'admin',text,ts:Date.now()});
+        all[tid].unread=0; all[tid].lastAt=Date.now(); write(all);
+    }
+    function deleteThread(tid){ const all=read(); delete all[tid]; write(all); }
+    function allThreads(){ return Object.values(read()).sort((a,b)=>(b.lastAt||b.createdAt)-(a.lastAt||a.createdAt)); }
+    function totalUnread(){ return Object.values(read()).reduce((s,t)=>s+(t.unread||0),0); }
+    function markRead(tid){ const all=read(); if(all[tid]){all[tid].unread=0;write(all);} }
+    function adminLogin(pw){ if(hash(pw)===getPwHash()){sessionStorage.setItem(ADMIN_KEY,'1');return true;} return false; }
+    function adminIsAuthed(){ return sessionStorage.getItem(ADMIN_KEY)==='1'; }
+    function adminLogout(){ sessionStorage.removeItem(ADMIN_KEY); }
+    function adminChangePassword(cur,nw,cf){
+        if(hash(cur)!==getPwHash()) return {ok:false,err:'Current password is incorrect.'};
+        if(!nw||nw.length<4) return {ok:false,err:'New password must be at least 4 characters.'};
+        if(nw!==cf) return {ok:false,err:'Passwords do not match.'};
+        setPassword(nw); return {ok:true};
+    }
+    return {saveReply,deleteThread,allThreads,totalUnread,markRead,adminLogin,adminIsAuthed,adminLogout,adminChangePassword};
+})();
+
+/* ── DOM refs ── */
+const content = document.getElementById('content');
+const bellBtn = document.getElementById('bellBtn');
+const keyBtn = document.getElementById('keyBtn');
+const logoutBtn = document.getElementById('logoutBtn');
+const pwModal = document.getElementById('pwModal');
+
+/* ── Helpers ── */
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fmtTime(ts){
+    const d=new Date(ts); const now=new Date();
+    const sameDay = d.toDateString()===now.toDateString();
+    if(sameDay) return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    return d.toLocaleDateString([],{month:'short',day:'numeric'})+' · '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+}
+function showStatus(msg, type='info', ms=3500){
+    const el = document.createElement('div');
+    el.className = 'status '+type;
+    el.textContent = msg;
+    el.style.display='block';
+    content.prepend(el);
+    setTimeout(()=>el.remove(), ms);
+}
+
+/* ── Notifications ── */
+let lastUnread = ChatStore.totalUnread();
+function updateBell(){
+    if(!('Notification' in window)){ bellBtn.textContent='🔕'; bellBtn.classList.remove('on'); bellBtn.classList.add('off'); bellBtn.title='Notifications unsupported'; return; }
+    const p = Notification.permission;
+    if(p==='granted'){ bellBtn.textContent='🔔'; bellBtn.classList.add('on'); bellBtn.classList.remove('off'); bellBtn.title='Notifications on (tap to test)'; }
+    else if(p==='denied'){ bellBtn.textContent='🔕'; bellBtn.classList.remove('on'); bellBtn.classList.add('off'); bellBtn.title='Notifications blocked'; }
+    else { bellBtn.textContent='🔔'; bellBtn.classList.remove('on'); bellBtn.classList.add('off'); bellBtn.title='Tap to enable notifications'; }
+}
+function requestNotif(){
+    if(!('Notification' in window)){ showStatus('Notifications not supported in this browser.','err'); return; }
+    if(Notification.permission==='granted'){
+        fireNotification('Notifications enabled', 'You will be alerted when new messages arrive.');
+        updateBell(); return;
+    }
+    if(Notification.permission==='denied'){ showStatus('Notifications blocked. Enable in Chrome → Site settings.','err'); return; }
+    Notification.requestPermission().then(p=>{
+        updateBell();
+        if(p==='granted') {
+            fireNotification('Notifications enabled', 'You will be alerted when new messages arrive.');
+            showStatus('Notifications enabled!','ok');
+        } else showStatus('Permission denied.','err');
+    });
+}
+function fireNotification(title,body){
+    if(!('Notification' in window) || Notification.permission!=='granted') return;
+    try{
+        const n=new Notification(title,{body,icon:'/icon-192.png',badge:'/icon-192.png',tag:'kmm-admin-msg',renotify:true});
+        n.onclick=()=>{window.focus();n.close();};
+    }catch(e){}
+}
+function playPing(){
+    try{
+        const ctx=new (window.AudioContext||window.webkitAudioContext)();
+        const o=ctx.createOscillator(), g=ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.type='sine'; o.frequency.value=880;
+        g.gain.setValueAtTime(0.0001,ctx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.15,ctx.currentTime+0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+0.25);
+        o.start(ctx.currentTime); o.stop(ctx.currentTime+0.25);
+        if(navigator.vibrate) navigator.vibrate([120,60,120]);
+    }catch(e){}
+}
+function checkNew(){
+    if(!ChatStore.adminIsAuthed()) return;
+    const now = ChatStore.totalUnread();
+    if(now>lastUnread){
+        const diff = now-lastUnread;
+        fireNotification('New message'+(diff>1?'s':''), diff+' new visitor message'+(diff>1?'s':''));
+        playPing();
+    }
+    lastUnread = now;
+    // Soft re-render if visible (but don't steal focus from reply input)
+    if(document.visibilityState==='visible'){
+        const af = document.activeElement;
+        const typing = af && af.closest && af.closest('.reply');
+        if(!typing) render();
+    }
+}
+
+/* ── Render ── */
+function renderLogin(){
+    content.innerHTML = `
+        <div class="login-card">
+            <img src="logo.webp" class="logo" alt="KM">
+            <h2>Admin Sign In</h2>
+            <p>Enter your password to view and reply to visitor messages.</p>
+            <input type="password" id="loginPw" placeholder="Password" autocomplete="current-password">
+            <button class="btn btn-gold" id="loginBtn">Sign in</button>
+            <div class="err-msg" id="loginErr"></div>
+        </div>`;
+    const pw = document.getElementById('loginPw');
+    const btn = document.getElementById('loginBtn');
+    const err = document.getElementById('loginErr');
+    function doLogin(){
+        if(ChatStore.adminLogin(pw.value)){ lastUnread=ChatStore.totalUnread(); render(); }
+        else { err.textContent='Incorrect password.'; pw.value=''; pw.focus(); }
+    }
+    btn.addEventListener('click', doLogin);
+    pw.addEventListener('keydown', e=>{ if(e.key==='Enter') doLogin(); });
+    setTimeout(()=>pw.focus(), 100);
+}
+function render(){
+    if(!ChatStore.adminIsAuthed()){ renderLogin(); updateBell(); return; }
+    const threads = ChatStore.allThreads();
+    const total = threads.length;
+    const unread = ChatStore.totalUnread();
+    let html = `
+        <div class="stats-row">
+            <div class="stat"><div class="n">${unread}</div><div class="l">Unread</div></div>
+            <div class="stat"><div class="n">${total}</div><div class="l">Threads</div></div>
+        </div>`;
+    if(threads.length===0){
+        html += `<div class="empty"><div class="icon">📭</div><div>No messages yet.</div><div style="font-size:0.8rem;margin-top:0.35rem;">Visitors will appear here when they message from the website.</div></div>`;
+    } else {
+        threads.forEach(t=>{
+            html += `<div class="thread" data-tid="${t.id}">
+                <div class="thread-head">
+                    <div>
+                        <div class="name">Visitor${t.unread?'<span class="unread">'+t.unread+' new</span>':''}</div>
+                        <div class="meta">${fmtTime(t.createdAt)} · ${t.messages.length} msg${t.messages.length>1?'s':''}</div>
+                    </div>
+                    <button class="del" data-del="${t.id}" aria-label="Delete">🗑</button>
+                </div>
+                <div class="msgs">`;
+            t.messages.slice(-20).forEach(m=>{
+                html += `<div class="msg ${m.from}">
+                    <div class="who">${m.from==='admin'?'You':'Visitor'} · ${fmtTime(m.ts)}</div>
+                    <div class="body">${escapeHtml(m.text)}</div>
+                </div>`;
+            });
+            html += `</div>
+                <div class="reply">
+                    <input type="text" placeholder="Write a reply…" maxlength="500">
+                    <button>Send</button>
+                </div>
+            </div>`;
+        });
+    }
+    content.innerHTML = html;
+    // Wire events
+    content.querySelectorAll('[data-del]').forEach(b=>{
+        b.addEventListener('click', e=>{
+            const tid = b.getAttribute('data-del');
+            if(confirm('Delete this conversation?')){ ChatStore.deleteThread(tid); render(); }
+        });
+    });
+    content.querySelectorAll('.thread').forEach(wrap=>{
+        const tid = wrap.getAttribute('data-tid');
+        const inp = wrap.querySelector('input');
+        const btn = wrap.querySelector('.reply button');
+        function send(){
+            const v=inp.value.trim(); if(!v) return;
+            ChatStore.saveReply(tid, v); inp.value=''; render();
+        }
+        btn.addEventListener('click', send);
+        inp.addEventListener('keydown', e=>{ if(e.key==='Enter') send(); });
+    });
+    // Mark all read when admin views
+    threads.forEach(t=>{ if(t.unread) ChatStore.markRead(t.id); });
+    lastUnread = 0;
+    updateBell();
+}
+
+/* ── Password modal ── */
+function openPwModal(){
+    pwModal.classList.add('show');
+    document.getElementById('pwCurrent').value='';
+    document.getElementById('pwNew').value='';
+    document.getElementById('pwConfirm').value='';
+    document.getElementById('pwErr').textContent='';
+    setTimeout(()=>document.getElementById('pwCurrent').focus(),50);
+}
+function closePwModal(){ pwModal.classList.remove('show'); }
+document.getElementById('pwCancel').addEventListener('click', closePwModal);
+pwModal.addEventListener('click', e=>{ if(e.target===pwModal) closePwModal(); });
+document.getElementById('pwSave').addEventListener('click', ()=>{
+    const c=document.getElementById('pwCurrent').value;
+    const n=document.getElementById('pwNew').value;
+    const cf=document.getElementById('pwConfirm').value;
+    const res=ChatStore.adminChangePassword(c,n,cf);
+    if(res.ok){ closePwModal(); showStatus('Password changed.','ok'); }
+    else document.getElementById('pwErr').textContent=res.err;
+});
+
+/* ── Button events ── */
+bellBtn.addEventListener('click', requestNotif);
+keyBtn.addEventListener('click', openPwModal);
+logoutBtn.addEventListener('click', ()=>{
+    if(confirm('Log out of admin?')){ ChatStore.adminLogout(); renderLogin(); }
+});
+
+/* ── Poll for new messages ── */
+setInterval(checkNew, 1500);
+window.addEventListener('storage', checkNew);
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden){ lastUnread=ChatStore.totalUnread(); render(); } });
+
+/* ── Service worker ── */
+if('serviceWorker' in navigator){
+    window.addEventListener('load', ()=>{
+        navigator.serviceWorker.register('/sw.js').catch(()=>{});
+    });
+}
+
+/* ── Boot ── */
+render();
+</script>
+</body>
+</html>

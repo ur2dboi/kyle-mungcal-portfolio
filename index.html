@@ -1138,6 +1138,12 @@
         .admin-thread-head .meta { font-size:0.8rem; color:var(--text-3); font-family:'JetBrains Mono',monospace; }
         .admin-thread-head .name { font-weight:600; color:var(--text); }
         .admin-thread-head .unread { background:var(--gold); color:var(--black); padding:0.15rem 0.5rem; border-radius:999px; font-size:0.7rem; font-weight:700; }
+        .unread-badge { display:inline-block; background:#ef4444; color:#fff; font-size:0.75rem; font-weight:700; padding:0.1rem 0.55rem; border-radius:999px; margin-left:0.5rem; vertical-align:middle; }
+        .admin-delete { background:transparent; border:none; color:var(--text-4); cursor:pointer; font-size:1rem; padding:0.35rem; border-radius:50%; transition:color 0.2s, background 0.2s; line-height:1; }
+        .admin-delete:hover { color:#ef4444; background:rgba(239,68,68,0.1); }
+        .admin-status { padding:0.75rem 1rem; border-radius:var(--radius-sm); margin-bottom:1rem; font-size:0.85rem; font-weight:500; }
+        .admin-status.ok { background:rgba(34,197,94,0.1); color:#22c55e; border:1px solid rgba(34,197,94,0.25); }
+        .admin-status.err { background:rgba(239,68,68,0.1); color:#ef4444; border:1px solid rgba(239,68,68,0.25); }
         .admin-msg { padding:0.5rem 0; font-size:0.9rem; line-height:1.5; }
         .admin-msg .who { font-size:0.7rem; font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.15rem; }
         .admin-msg.visitor .who { color:var(--text-3); }
@@ -1157,6 +1163,7 @@
         @media (max-width:600px){
             .admin-panel { padding:1rem 0.75rem; }
             .admin-thread { padding:0.85rem; }
+            .admin-head h2 { font-size:1.15rem; }
         }
         html.dark .admin-login input { background:#0a0a0a; }
         html.dark .admin-reply input { background:#0a0a0a; }
@@ -2086,7 +2093,12 @@
     const ChatStore = (function(){
         const KEY = 'kmm_chat_threads_v1';
         const ADMIN_KEY = 'kmm_chat_admin_session';
-        const ADMIN_PASSWORD = 'kyle2026'; // CHANGE THIS to your own password
+        const PW_KEY = 'kmm_admin_pw_hash';
+        const DEFAULT_PASSWORD = 'kyle2026';
+        // Simple hash (djb2) — not crypto-strong, just avoids plaintext in storage
+        function hash(s){ let h=5381; for(let i=0;i<s.length;i++){ h=((h<<5)+h)+s.charCodeAt(i); h|=0;} return 'h_'+h.toString(36); }
+        function getPwHash(){ return localStorage.getItem(PW_KEY) || hash(DEFAULT_PASSWORD); }
+        function setPassword(newPw){ localStorage.setItem(PW_KEY, hash(newPw)); }
         function read() { try { return JSON.parse(localStorage.getItem(KEY)||'{}'); } catch(e){ return {}; } }
         function write(d) { localStorage.setItem(KEY, JSON.stringify(d)); }
         function uid() { return 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
@@ -2123,6 +2135,11 @@
             all[tid].lastAt = Date.now();
             write(all);
         }
+        function deleteThread(tid){
+            const all = read();
+            delete all[tid];
+            write(all);
+        }
         function allThreads() {
             const all = read();
             return Object.values(all).sort((a,b) => (b.lastAt||b.createdAt) - (a.lastAt||a.createdAt));
@@ -2135,12 +2152,18 @@
             return Object.values(read()).reduce((s,t) => s + (t.unread||0), 0);
         }
         function adminLogin(pw) {
-            if (pw === ADMIN_PASSWORD) { sessionStorage.setItem(ADMIN_KEY, '1'); return true; }
+            if (hash(pw) === getPwHash()) { sessionStorage.setItem(ADMIN_KEY, '1'); return true; }
             return false;
+        }
+        function adminChangePassword(currentPw, newPw) {
+            if (hash(currentPw) !== getPwHash()) return { ok:false, err:'Current password is incorrect.' };
+            if (!newPw || newPw.length < 4) return { ok:false, err:'New password must be at least 4 characters.' };
+            setPassword(newPw);
+            return { ok:true };
         }
         function adminIsAuthed() { return sessionStorage.getItem(ADMIN_KEY) === '1'; }
         function adminLogout() { sessionStorage.removeItem(ADMIN_KEY); }
-        return { getOrCreateThread, loadMsgs, saveMsg, saveReply, allThreads, markRead, totalUnread, adminLogin, adminIsAuthed, adminLogout };
+        return { getOrCreateThread, loadMsgs, saveMsg, saveReply, deleteThread, allThreads, markRead, totalUnread, adminLogin, adminIsAuthed, adminLogout, adminChangePassword };
     })();
 
     /* ---- Visitor chat widget ---- */
@@ -2267,19 +2290,31 @@
         function render() {
             if (!ChatStore.adminIsAuthed()) { loginView(); return; }
             const threads = ChatStore.allThreads();
+            const total = ChatStore.totalUnread();
+            const notifPerm = ('Notification' in window) ? Notification.permission : 'unsupported';
             panel.innerHTML = `
                 <div class="admin-inner">
                     <div class="admin-head">
-                        <h2>Messages</h2>
-                        <div style="display:flex;gap:0.5rem;">
+                        <h2>Messages ${total>0?'<span class="unread-badge">'+total+'</span>':''}</h2>
+                        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:flex-end;">
+                            <button class="admin-close" id="adminNotifBtn" title="Enable notifications" style="width:auto;padding:0 0.9rem;border-radius:2rem;font-size:0.8rem;font-weight:600;">
+                                ${notifPerm==='granted'?'🔔 On':(notifPerm==='denied'?'🔕 Blocked':'🔔 Enable Alerts')}
+                            </button>
+                            <button class="admin-close" id="adminPwBtn" title="Change password" style="width:auto;padding:0 0.9rem;border-radius:2rem;font-size:0.8rem;font-weight:600;">🔑 Password</button>
                             <button class="admin-close" id="adminLogout" title="Logout" style="width:auto;padding:0 0.9rem;border-radius:2rem;font-size:0.8rem;font-weight:600;">Logout</button>
                             <button class="admin-close" id="adminCloseBtn" aria-label="Close">✕</button>
                         </div>
                     </div>
+                    <div id="adminStatus" class="admin-status" style="display:none;"></div>
+                    <p style="font-size:0.78rem;color:var(--text-3);margin:0 0 1rem;font-family:'JetBrains Mono',monospace;">
+                        💡 Tip: open <a href="/admin.html" target="_blank" style="color:var(--gold);">/admin.html</a> on your phone and "Add to Home screen" to install as an Android app with push notifications.
+                    </p>
                     <div id="threadList"></div>
                 </div>`;
             panel.querySelector('#adminCloseBtn').addEventListener('click', () => { location.hash=''; hide(); });
             panel.querySelector('#adminLogout').addEventListener('click', logout);
+            panel.querySelector('#adminPwBtn').addEventListener('click', showChangePw);
+            panel.querySelector('#adminNotifBtn').addEventListener('click', requestNotif);
 
             const list = panel.querySelector('#threadList');
             if (threads.length === 0) {
@@ -2294,9 +2329,10 @@
                 wrap.innerHTML = `
                     <div class="admin-thread-head">
                         <div>
-                            <div class="name">${t.name} ${unreadBadge}</div>
+                            <div class="name">${escapeHtml(t.name)} ${unreadBadge}</div>
                             <div class="meta">${when} · ${t.messages.length} msgs</div>
                         </div>
+                        <button class="admin-delete" data-tid="${t.id}" title="Delete thread" aria-label="Delete thread">🗑</button>
                     </div>
                     <div class="admin-msgs"></div>
                     <div class="admin-reply">
@@ -2307,7 +2343,7 @@
                 t.messages.forEach(m => {
                     const mEl = document.createElement('div');
                     mEl.className = 'admin-msg ' + (m.from === 'admin' ? 'admin' : 'visitor');
-                    mEl.innerHTML = `<div class="who">${m.from === 'admin' ? 'You (admin)' : 'Visitor'}</div><div class="body"></div>`;
+                    mEl.innerHTML = `<div class="who">${m.from === 'admin' ? 'You (admin)' : 'Visitor'} · ${new Date(m.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div><div class="body"></div>`;
                     mEl.querySelector('.body').textContent = m.text;
                     msgsEl.appendChild(mEl);
                 });
@@ -2319,19 +2355,116 @@
                 }
                 btn.addEventListener('click', reply);
                 inp.addEventListener('keydown', e => { if(e.key==='Enter') reply(); });
+                wrap.querySelector('.admin-delete').addEventListener('click', () => {
+                    if (confirm('Delete this conversation? This cannot be undone.')) {
+                        ChatStore.deleteThread(t.id); render();
+                    }
+                });
                 list.appendChild(wrap);
             });
             // Mark all as read on open
             threads.forEach(t => ChatStore.markRead(t.id));
+            updateBadge();
+        }
+        function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+        function showStatus(msg, isErr){
+            const el = panel.querySelector('#adminStatus');
+            if(!el) return;
+            el.textContent = msg;
+            el.className = 'admin-status ' + (isErr?'err':'ok');
+            el.style.display = 'block';
+            setTimeout(()=>{ el.style.display='none'; }, 4000);
+        }
+        function showChangePw(){
+            const current = prompt('Enter current password:');
+            if (current === null) return;
+            const newPw = prompt('Enter new password (min 4 characters):');
+            if (newPw === null) return;
+            const res = ChatStore.adminChangePassword(current, newPw);
+            if (res.ok) showStatus('Password changed successfully.');
+            else showStatus(res.err, true);
+        }
+        function requestNotif(){
+            if (!('Notification' in window)) { showStatus('Notifications not supported in this browser.', true); return; }
+            if (Notification.permission === 'granted') { showStatus('Notifications already enabled.'); return; }
+            if (Notification.permission === 'denied') { showStatus('Notifications blocked. Please enable them in your browser settings.', true); return; }
+            Notification.requestPermission().then(p => {
+                if (p === 'granted') { showStatus('Notifications enabled! You will be alerted when new messages arrive.'); render(); }
+                else showStatus('Notification permission denied.', true);
+            });
+        }
+        // Track last-known total unread to detect new messages
+        let lastUnreadCount = ChatStore.totalUnread();
+        function checkNewMessages() {
+            const nowUnread = ChatStore.totalUnread();
+            if (nowUnread > lastUnreadCount && ChatStore.adminIsAuthed()) {
+                const diff = nowUnread - lastUnreadCount;
+                fireNotification('New message' + (diff>1?'s':''), 'You have ' + diff + ' unread message' + (diff>1?'s':''));
+                playPing();
+            }
+            lastUnreadCount = nowUnread;
+            if (panel.classList.contains('active') && ChatStore.adminIsAuthed()) {
+                // Re-render thread list without replacing input focus
+                const activeInp = document.activeElement;
+                const isReply = activeInp && activeInp.closest('.admin-reply');
+                if (!isReply) render();
+                else {
+                    // Just update badge + thread counts softly
+                    const titleEl = panel.querySelector('h2');
+                    if (titleEl) {
+                        const total = ChatStore.totalUnread();
+                        titleEl.innerHTML = 'Messages ' + (total>0?'<span class="unread-badge">'+total+'</span>':'');
+                    }
+                }
+            }
+            updateBadge();
+        }
+        function fireNotification(title, body) {
+            if (!('Notification' in window)) return;
+            if (Notification.permission !== 'granted') return;
+            // Don't notify if the admin panel is open, visible, and focused
+            if (panel.classList.contains('active') && document.visibilityState === 'visible' && document.hasFocus()) return;
+            try {
+                const n = new Notification(title, {
+                    body: body,
+                    icon: '/icon-192.png',
+                    badge: '/icon-192.png',
+                    tag: 'kmm-new-msg',
+                    renotify: true
+                });
+                n.onclick = () => {
+                    window.focus();
+                    location.hash = '#admin';
+                    n.close();
+                };
+            } catch(e) {}
+        }
+        function playPing() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const o = ctx.createOscillator();
+                const g = ctx.createGain();
+                o.connect(g); g.connect(ctx.destination);
+                o.type='sine'; o.frequency.value=880;
+                g.gain.setValueAtTime(0.0001, ctx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime+0.01);
+                g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+0.25);
+                o.start(ctx.currentTime); o.stop(ctx.currentTime+0.25);
+            } catch(e) {}
         }
         function routeHash() {
-            if (location.hash === '#admin') { show(); render(); }
+            if (location.hash === '#admin') { show(); lastUnreadCount = ChatStore.totalUnread(); render(); }
             else hide();
         }
         window.addEventListener('hashchange', routeHash);
         routeHash();
-        // Storage events re-render admin live when messages come in from other tabs
-        window.addEventListener('storage', () => { if (panel.classList.contains('active')) render(); });
+        // Check for new messages every 2s (covers same-tab saves) and on storage events (cross-tab)
+        setInterval(checkNewMessages, 2000);
+        window.addEventListener('storage', () => {
+            lastUnreadCount = ChatStore.totalUnread();
+            checkNewMessages();
+        });
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) checkNewMessages(); });
     }
     // Init admin (panel is in DOM above this script)
     initAdmin();
