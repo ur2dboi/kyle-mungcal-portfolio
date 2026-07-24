@@ -1629,7 +1629,7 @@
             <button class="chat-close" id="chatClose" aria-label="Close chat">✕</button>
         </div>
         <div class="chat-body" id="chatBody">
-            <div class="chat-msg bot">Hi there! 👋<br>Type your message below and tap Send — it'll open straight to my Messenger so I get it instantly.</div>
+            <div class="chat-msg bot">Hi there!<br>Type your message below and tap Send — it'll open straight to my Messenger so I get it instantly.</div>
         </div>
         <div class="chat-foot">
             <input type="text" class="chat-input" id="chatInput" placeholder="Type a message…" maxlength="500" aria-label="Your message">
@@ -2057,7 +2057,7 @@
             // and open Messenger where they hit send (this is the only reliable way
             // to deliver to a personal Facebook profile).
             setTimeout(() => {
-                addBotMsg('Opening Messenger…<br><small style="opacity:.7">Your message is in your draft — tap Send in Messenger and I\'ll get it right away. 👍</small>');
+                addBotMsg('Opening Messenger…<br><small style="opacity:.7">Your message is in your draft — tap Send in Messenger and I\'ll get it right away.</small>');
                 window.open(MESSENGER_URL, '_blank', 'noopener,noreferrer');
                 // Clear badge permanently once opened
                 sessionStorage.setItem('msChatOpened', '1');
