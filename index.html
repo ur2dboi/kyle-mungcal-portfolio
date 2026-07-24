@@ -251,16 +251,16 @@
         .about-intro .section-label::after { display:none; }
         .about-intro p { font-size:1.05rem; color:var(--text-2); line-height:1.8; margin-bottom:1.25rem; }
         .about-intro p strong { color:var(--text); font-weight:600; }
-        .about-highlights { display:grid; grid-template-columns:repeat(4,1fr); gap:1.25rem; margin-top:3rem; text-align:left; }
+        .about-highlights { display:grid; grid-template-columns:repeat(4,1fr); gap:1.25rem; margin-top:3.5rem; text-align:left; max-width:100%; }
         .highlight-card {
-            padding:1.75rem 1.4rem; border:1px solid var(--border); border-radius:var(--radius);
+            padding:2rem 1.6rem; border:1px solid var(--border); border-radius:var(--radius);
             background:var(--surface); transition:all 0.25s var(--ease);
         }
-        .highlight-card:hover { border-color:var(--gold); transform:translateY(-3px); box-shadow:var(--shadow); }
-        .highlight-num { font-family:'Inter', sans-serif; font-size:1.35rem; font-weight:700;
-            color:var(--gold); margin-bottom:0.4rem; line-height:1; letter-spacing:-0.01em; }
-        .highlight-lbl { font-size:0.75rem; color:var(--text-3); text-transform:uppercase; letter-spacing:0.12em; font-weight:600; margin-bottom:0.6rem; }
-        .highlight-desc { font-size:0.85rem; color:var(--text-2); margin-top:0; line-height:1.6; }
+        .highlight-card:hover { border-color:var(--gold); transform:translateY(-4px); box-shadow:var(--shadow-lg); }
+        .highlight-num { font-family:'Inter', sans-serif; font-size:1.65rem; font-weight:700;
+            color:var(--gold); margin-bottom:0.5rem; line-height:1; letter-spacing:-0.02em; }
+        .highlight-lbl { font-size:0.72rem; color:var(--text-3); text-transform:uppercase; letter-spacing:0.14em; font-weight:600; margin-bottom:0.75rem; }
+        .highlight-desc { font-size:0.9rem; color:var(--text-2); margin-top:0; line-height:1.65; }
 
         /* ── SERVICES ── */
         .services-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1.25rem; }
@@ -601,7 +601,8 @@
             </div>
             <p class="reveal">I'm a <strong>Full Stack Web Developer</strong> based in Manila, Philippines with over <strong>5 years</strong> of experience turning ideas into polished, high-performing websites. I specialize in crafting responsive designs that feel effortless across every device.</p>
             <p class="reveal">From e-commerce storefronts to corporate sites to custom web applications, I deliver solutions that look refined, load fast, and convert. I treat every project like it's my own — because your website is often the first impression your business makes.</p>
-            <div class="about-highlights stagger">
+        </div>
+        <div class="about-highlights stagger">
                 <div class="highlight-card">
                     <div class="highlight-num">UI/UX</div>
                     <div class="highlight-lbl">Design</div>
@@ -623,7 +624,6 @@
                     <div class="highlight-desc">Cohesive digital presence that feels premium.</div>
                 </div>
             </div>
-        </div>
     </div>
 </section>
 
