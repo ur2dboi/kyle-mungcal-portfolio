@@ -560,13 +560,13 @@
 
         /* ── TRUSTED BY / CLIENTS MARQUEE ── */
         .clients-marquee {
-            padding: 3.5rem 0; overflow:hidden; position:relative;
+            padding: 2rem 0; overflow:hidden; position:relative;
             background:var(--bg-alt); border-top:1px solid var(--border); border-bottom:1px solid var(--border);
             mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
             -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
         }
         .marquee-track {
-            display:flex; gap:4rem; width:max-content; align-items:center;
+            display:flex; gap:3rem; width:max-content; align-items:center;
             animation: marquee 40s linear infinite;
         }
         .marquee-track:hover { animation-play-state: paused; }
@@ -580,7 +580,7 @@
         }
         .marquee-item:hover { opacity:1; }
         .marquee-item img {
-            height:38px; width:auto; max-width:220px; object-fit:contain;
+            height:32px; width:auto; max-width:200px; object-fit:contain;
             filter: grayscale(1) opacity(0.55);
             transition: filter 0.3s;
         }
@@ -771,7 +771,7 @@
             .project-body h4 { font-size:1rem; }
             .project-body p { font-size:0.87rem; }
             /* Marquee */
-            .clients-marquee { padding:2rem 0; }
+            .clients-marquee { padding:1.5rem 0; }
             .marquee-track { gap:2.5rem; }
             .marquee-item img { height:28px; max-width:150px; }
             /* Testimonials */
@@ -816,6 +816,8 @@
             .contact-wrap { padding:2rem 1.15rem; }
             .contact-perks { justify-content:center; }
             .marquee-item img { height:24px; max-width:120px; }
+            .marquee-track { gap:2rem; }
+            .clients-marquee { padding:1.25rem 0; }
         }
         @media (max-width: 420px) {
             .hero h1 { font-size:1.65rem; }
@@ -884,6 +886,30 @@
         </div>
     </div>
 </section>
+
+<!-- TRUSTED BY MARQUEE -->
+<div class="clients-marquee" aria-hidden="true">
+    <div class="marquee-track">
+        <span class="marquee-item"><img src="client-logos/northwestaerosolutions.png" alt="Northwest Aero" loading="lazy"></span>
+        <span class="marquee-item"><img src="client-logos/giantexhaust.png" alt="Giant Exhaust" loading="lazy"></span>
+        <span class="marquee-item"><img src="client-logos/useeverest.png" alt="Everest AI" loading="lazy"></span>
+        <span class="marquee-item"><img src="client-logos/zalynartenails.png" alt="Zalyn Arte Nails" loading="lazy"></span>
+        <span class="marquee-item"><img src="client-logos/lilysyutoriguesthouse.png" alt="Lily's Yutori Guesthouse" loading="lazy"></span>
+        <span class="marquee-item"><img src="client-logos/invictaexecutivesolutions.png" alt="Invicta Executive" loading="lazy"></span>
+        <span class="marquee-item"><img src="client-logos/mamicurvesofficial.png" alt="Mami Curves" loading="lazy"></span>
+        <span class="marquee-item"><img src="client-logos/ipartyrentalandmore.png" alt="iParty Rental" loading="lazy"></span>
+        <span class="marquee-item"><img src="client-logos/usstrut.png" alt="US Strut" loading="lazy"></span>
+        <span class="marquee-item"><img src="client-logos/northwestaerosolutions.png" alt="Northwest Aero" loading="lazy"></span>
+        <span class="marquee-item"><img src="client-logos/giantexhaust.png" alt="Giant Exhaust" loading="lazy"></span>
+        <span class="marquee-item"><img src="client-logos/useeverest.png" alt="Everest AI" loading="lazy"></span>
+        <span class="marquee-item"><img src="client-logos/zalynartenails.png" alt="Zalyn Arte Nails" loading="lazy"></span>
+        <span class="marquee-item"><img src="client-logos/lilysyutoriguesthouse.png" alt="Lily's Yutori Guesthouse" loading="lazy"></span>
+        <span class="marquee-item"><img src="client-logos/invictaexecutivesolutions.png" alt="Invicta Executive" loading="lazy"></span>
+        <span class="marquee-item"><img src="client-logos/mamicurvesofficial.png" alt="Mami Curves" loading="lazy"></span>
+        <span class="marquee-item"><img src="client-logos/ipartyrentalandmore.png" alt="iParty Rental" loading="lazy"></span>
+        <span class="marquee-item"><img src="client-logos/usstrut.png" alt="US Strut" loading="lazy"></span>
+    </div>
+</div>
 
 <!-- ABOUT -->
 <section id="about" class="section-gold">
@@ -1164,30 +1190,6 @@
         </div>
     </div>
 </section>
-
-<!-- TRUSTED BY MARQUEE -->
-<div class="clients-marquee" aria-hidden="true">
-    <div class="marquee-track">
-        <span class="marquee-item"><img src="client-logos/northwestaerosolutions.png" alt="Northwest Aero" loading="lazy"></span>
-        <span class="marquee-item"><img src="client-logos/giantexhaust.png" alt="Giant Exhaust" loading="lazy"></span>
-        <span class="marquee-item"><img src="client-logos/useeverest.png" alt="Everest AI" loading="lazy"></span>
-        <span class="marquee-item"><img src="client-logos/zalynartenails.png" alt="Zalyn Arte Nails" loading="lazy"></span>
-        <span class="marquee-item"><img src="client-logos/lilysyutoriguesthouse.png" alt="Lily's Yutori Guesthouse" loading="lazy"></span>
-        <span class="marquee-item"><img src="client-logos/invictaexecutivesolutions.png" alt="Invicta Executive" loading="lazy"></span>
-        <span class="marquee-item"><img src="client-logos/mamicurvesofficial.png" alt="Mami Curves" loading="lazy"></span>
-        <span class="marquee-item"><img src="client-logos/ipartyrentalandmore.png" alt="iParty Rental" loading="lazy"></span>
-        <span class="marquee-item"><img src="client-logos/usstrut.png" alt="US Strut" loading="lazy"></span>
-        <span class="marquee-item"><img src="client-logos/northwestaerosolutions.png" alt="Northwest Aero" loading="lazy"></span>
-        <span class="marquee-item"><img src="client-logos/giantexhaust.png" alt="Giant Exhaust" loading="lazy"></span>
-        <span class="marquee-item"><img src="client-logos/useeverest.png" alt="Everest AI" loading="lazy"></span>
-        <span class="marquee-item"><img src="client-logos/zalynartenails.png" alt="Zalyn Arte Nails" loading="lazy"></span>
-        <span class="marquee-item"><img src="client-logos/lilysyutoriguesthouse.png" alt="Lily's Yutori Guesthouse" loading="lazy"></span>
-        <span class="marquee-item"><img src="client-logos/invictaexecutivesolutions.png" alt="Invicta Executive" loading="lazy"></span>
-        <span class="marquee-item"><img src="client-logos/mamicurvesofficial.png" alt="Mami Curves" loading="lazy"></span>
-        <span class="marquee-item"><img src="client-logos/ipartyrentalandmore.png" alt="iParty Rental" loading="lazy"></span>
-        <span class="marquee-item"><img src="client-logos/usstrut.png" alt="US Strut" loading="lazy"></span>
-    </div>
-</div>
 
 <!-- PROCESS -->
 <section id="process" class="section-gray">
