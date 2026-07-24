@@ -1,5 +1,5 @@
-// Visitor tracking — logs page visits to Supabase via the existing kmm_threads table.
-// Visitor rows are stored with id "v_<iphash>" and data._type="visitor".
+// Visitor tracking — logs page visits to Supabase via kmm_threads table.
+// Visitor rows: id = "v_<iphash>", data._type = "visitor".
 export const config = { runtime: 'edge' };
 
 const SB_URL = 'https://gdpcgtxyfbttsaascomw.supabase.co';
@@ -7,12 +7,6 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 const TABLE = 'kmm_threads';
 
 function hashIp(s){ let h=0; for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0;} return 'v_'+Math.abs(h).toString(36); }
-
-async function sb(path, opts){
-  return fetch(`${SB_URL}/rest/v1${path}`, Object.assign({
-    headers: {'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'content-type':'application/json'}
-  }, opts||{}));
-}
 
 export default async function handler(req){
   if(req.method==='OPTIONS') return new Response(null,{status:204,headers:{'access-control-allow-origin':'*','access-control-allow-methods':'GET,POST,OPTIONS'}});
@@ -29,41 +23,38 @@ export default async function handler(req){
   const nowIso = new Date(now).toISOString();
   const vkey = hashIp(rawIp);
 
+  let existing = null;
   try{
-    // Fetch existing record
-    let existing = null;
-    const get = await sb(`/${TABLE}?id=eq.${encodeURIComponent(vkey)}&select=id,data`);
+    const get = await fetch(`${SB_URL}/rest/v1/${TABLE}?id=eq.${encodeURIComponent(vkey)}&select=data`,{
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY}
+    });
     if(get.ok){
       const arr = await get.json();
       if(Array.isArray(arr)&&arr[0]) existing = arr[0].data;
     }
-    const visits = (existing?.visits||0)+1;
-    const paths = existing?.paths||[];
-    paths.push({p:path_,t:now});
-    if(paths.length>20) paths.splice(0,paths.length-20);
-    const referrers = existing?.referrers||[];
-    if(ref && !referrers.includes(ref)){ referrers.push(ref); if(referrers.length>10) referrers.shift(); }
-    const record = Object.assign({}, existing||{}, {
-      id:vkey, _type:'visitor', ip:rawIp, country, region, city, ua,
-      visits, first_seen:existing?.first_seen||now, last_seen:now, last_path:path_,
-      paths, referrers,
-      messaged: existing?.messaged||isMessaged||false,
-      last_messaged: (existing?.messaged||isMessaged) ? (existing?.last_messaged||now) : existing?.last_messaged
+  }catch(e){}
+
+  const visits = (existing?.visits||0)+1;
+  const paths = existing?.paths||[];
+  paths.push({p:path_,t:now});
+  if(paths.length>20) paths.splice(0,paths.length-20);
+  const referrers = existing?.referrers||[];
+  if(ref && !referrers.includes(ref)){ referrers.push(ref); if(referrers.length>10) referrers.shift(); }
+  const record = Object.assign({}, existing||{}, {
+    id:vkey, _type:'visitor', ip:rawIp, country, region, city, ua,
+    visits, first_seen:existing?.first_seen||now, last_seen:now, last_path:path_,
+    paths, referrers,
+    messaged: existing?.messaged||isMessaged||false,
+    last_messaged: (existing?.messaged||isMessaged) ? (existing?.last_messaged||now) : existing?.last_messaged
+  });
+
+  try{
+    await fetch(`${SB_URL}/rest/v1/${TABLE}`,{
+      method:'POST',
+      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'content-type':'application/json','prefer':'resolution=merge-duplicates,return=minimal'},
+      body: JSON.stringify({id:vkey, data:record, updated_at:nowIso})
     });
-    // Try PATCH first (update), fall back to POST (insert)
-    const patch = await sb(`/${TABLE}?id=eq.${encodeURIComponent(vkey)}`,{
-      method:'PATCH',
-      headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'content-type':'application/json','prefer':'return=minimal'},
-      body: JSON.stringify({data:record, updated_at:nowIso})
-    });
-    if(!patch.ok || patch.status===404){
-      await sb(`/${TABLE}`,{
-        method:'POST',
-        headers:{'apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY,'content-type':'application/json','prefer':'return=minimal,resolution=merge-duplicates'},
-        body: JSON.stringify({id:vkey, data:record, updated_at:nowIso})
-      });
-    }
-  }catch(e){ console.warn('track error',e); }
+  }catch(e){}
 
   // 1x1 transparent GIF
   const bin = atob('R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
