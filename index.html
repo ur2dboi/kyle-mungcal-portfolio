@@ -111,8 +111,7 @@
 
         /* ── NAV ── */
         nav {
-            position:fixed; top:0; left:0; right:0; z-index:100;
-            background:var(--bg); border-bottom:1px solid var(--border);
+            position:fixed; top:0; left:0; right:0; z-index:100;            background:var(--bg); border-bottom:1px solid var(--border);
             backdrop-filter:saturate(180%) blur(12px); -webkit-backdrop-filter:saturate(180%) blur(12px);
             background:rgba(255,255,255,0.85);
         }
@@ -123,6 +122,9 @@
         .section-gray   { background:var(--bg-alt); }
         .section-gold   { background:var(--gold-bg); }
         .section-dark   { background:var(--black); color:#fafafa; }
+        /* Sections need position:relative so bg canvas sits behind them */
+        section { position:relative; }
+        nav { position:fixed; }
         .section-dark .section-title,
         .section-dark h2, .section-dark h3, .section-dark h4 { color:#fafafa; }
         .section-dark .section-lede,
@@ -821,6 +823,9 @@
 </head>
 <body>
 
+<!-- GLOBAL 3D BACKGROUND CANVAS -->
+<canvas id="bg-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none;opacity:0.55;"></canvas>
+
 <!-- NAV -->
 <nav>
     <div class="nav-inner">
@@ -1438,7 +1443,7 @@
     };
 
     /* ── 3D TILT CARDS ── */
-    document.querySelectorAll('.service-card, .expertise-card, .process-step, .highlight-card, .project-card, .testimonial-card, .contact-wrap').forEach(card => {
+    document.querySelectorAll('.service-card, .expertise-card, .process-step, .project-card, .testimonial-card, .contact-wrap, .highlight-card, .gallery-item').forEach(card => {
         card.classList.add('tilt-card');
         card.style.position = card.style.position || 'relative';
         const shine = document.createElement('div');
@@ -1450,155 +1455,233 @@
             const y = e.clientY - r.top;
             const cx = r.width / 2;
             const cy = r.height / 2;
-            const rx = ((y - cy) / cy) * -8;
-            const ry = ((x - cx) / cx) * 8;
-            card.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-4px)`;
+            const rx = ((y - cy) / cy) * -7;
+            const ry = ((x - cx) / cx) * 7;
+            card.style.transform = `perspective(1100px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-5px) scale(1.01)`;
+            shine.style.opacity = '1';
+            shine.style.background = `radial-gradient(circle at ${(x/r.width)*100}% ${(y/r.height)*100}%, rgba(212,187,126,0.15), transparent 50%)`;
         });
         card.addEventListener('mouseleave', () => {
             card.style.transform = '';
+            shine.style.opacity = '0';
         });
     });
 
-    /* ── THREE.JS 3D HERO SCENE ── */
+    /* ── GLOBAL THREE.JS SCENE ── */
     function initThree() {
         if (typeof THREE === 'undefined') { setTimeout(initThree, 200); return; }
-        // Skip on small mobile for performance
-        if (window.innerWidth < 640) return;
-        const canvas = document.getElementById('hero-canvas');
-        if (!canvas) return;
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(50, canvas.clientWidth/canvas.clientHeight, 0.1, 100);
-        camera.position.z = 6;
-        const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
-        renderer.setClearColor(0x000000, 0);
+        const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduced) return;
+        const isMobile = window.innerWidth < 768;
+
+        /* --- BG canvas: global floating particles + shapes --- */
+        const bgCanvas = document.getElementById('bg-canvas');
+        const bgScene = new THREE.Scene();
+        const bgCam = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 200);
+        bgCam.position.z = 20;
+        const bgRen = new THREE.WebGLRenderer({ canvas: bgCanvas, antialias:!isMobile, alpha:true });
+        bgRen.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
+        bgRen.setSize(window.innerWidth, window.innerHeight);
+        bgRen.setClearColor(0x000000, 0);
 
         const isDark = () => document.documentElement.classList.contains('dark');
-        const goldColor = () => isDark() ? 0xd4bb7e : 0xc9a961;
+        const goldHex = () => isDark() ? 0xd4bb7e : 0xc9a961;
 
-        // Central KM monogram: build from geometric shapes (stylized K + M)
-        const group = new THREE.Group();
-
-        const mat = () => new THREE.MeshStandardMaterial({
-            color: goldColor(), metalness:0.85, roughness:0.25,
-        });
-
-        // Build a stylized monogram using boxes — K (left stem + two diagonals), M (two stems + middle V)
-        function makeBar(w,h,d,x,y,z,ry=0) {
-            const g = new THREE.BoxGeometry(w,h,d);
-            const m = mat();
-            const mesh = new THREE.Mesh(g,m);
-            mesh.position.set(x,y,z);
-            mesh.rotation.y = ry;
-            return mesh;
-        }
-
-        // K - left stem
-        group.add(makeBar(0.18, 2.2, 0.3, -1.35, 0, 0));
-        // K - upper diagonal
-        const kd1 = makeBar(0.18, 1.4, 0.3, -0.6, 0.55, 0, Math.PI/4);
-        group.add(kd1);
-        // K - lower diagonal
-        const kd2 = makeBar(0.18, 1.4, 0.3, -0.6, -0.55, 0, -Math.PI/4);
-        group.add(kd2);
-        // M - left stem
-        group.add(makeBar(0.18, 2.2, 0.3, 0.2, 0, 0));
-        // M - right stem
-        group.add(makeBar(0.18, 2.2, 0.3, 1.5, 0, 0));
-        // M - left diagonal
-        group.add(makeBar(0.16, 1.25, 0.3, 0.65, 0.3, 0, -Math.PI/3.5));
-        // M - right diagonal
-        group.add(makeBar(0.16, 1.25, 0.3, 1.05, 0.3, 0, Math.PI/3.5));
-
-        // Position the monogram to the right side (over the portrait area)
-        group.position.set(1.8, 0, 0);
-        group.scale.set(0.55, 0.55, 0.55);
-        scene.add(group);
-
-        // Floating gold particles
-        const pCount = 180;
+        // Big particle field covering the whole page
+        const PARTICLES = isMobile ? 250 : 600;
         const pGeo = new THREE.BufferGeometry();
-        const positions = new Float32Array(pCount*3);
-        const speeds = new Float32Array(pCount);
-        for (let i=0; i<pCount; i++){
-            positions[i*3]   = (Math.random()-0.5)*14;
-            positions[i*3+1] = (Math.random()-0.5)*8;
-            positions[i*3+2] = (Math.random()-0.5)*6 - 2;
-            speeds[i] = 0.2 + Math.random()*0.5;
+        const pPos = new Float32Array(PARTICLES*3);
+        const pVel = new Float32Array(PARTICLES*3);
+        const pSize = new Float32Array(PARTICLES);
+        const pageH = Math.max(document.body.scrollHeight, window.innerHeight*3);
+        for (let i=0;i<PARTICLES;i++){
+            pPos[i*3]   = (Math.random()-0.5)*50;
+            pPos[i*3+1] = -Math.random()*pageH*0.03 - 5;
+            pPos[i*3+2] = (Math.random()-0.5)*25 - 10;
+            pVel[i*3]   = (Math.random()-0.5)*0.005;
+            pVel[i*3+1] = 0.008 + Math.random()*0.015;
+            pVel[i*3+2] = (Math.random()-0.5)*0.005;
+            pSize[i]    = isMobile ? 0.03+Math.random()*0.06 : 0.04+Math.random()*0.08;
         }
-        pGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        const pMat = new THREE.PointsMaterial({ color:goldColor(), size:0.04, transparent:true, opacity:0.55 });
+        pGeo.setAttribute('position', new THREE.BufferAttribute(pPos,3));
+        const pMat = new THREE.PointsMaterial({
+            color: goldHex(), size:0.08, transparent:true, opacity: isMobile?0.35:0.5,
+            sizeAttenuation:true, depthWrite:false, blending:THREE.AdditiveBlending
+        });
         const particles = new THREE.Points(pGeo, pMat);
-        scene.add(particles);
+        bgScene.add(particles);
+
+        // Floating geometric shapes distributed across the page depth
+        const shapes = [];
+        const geoms = [
+            new THREE.IcosahedronGeometry(0.6, 0),
+            new THREE.OctahedronGeometry(0.55, 0),
+            new THREE.TetrahedronGeometry(0.55, 0),
+            new THREE.TorusGeometry(0.45, 0.15, 12, 24),
+            new THREE.BoxGeometry(0.6,0.6,0.6),
+        ];
+        const sections = document.querySelectorAll('section');
+        const SHAPES_PER_SECTION = isMobile ? 1 : 3;
+        sections.forEach((sec, si) => {
+            const rect = sec.getBoundingClientRect();
+            const yCenter = -(rect.top + rect.height/2 - window.innerHeight/2 + window.scrollY) * 0.015;
+            for (let k=0;k<SHAPES_PER_SECTION;k++){
+                const g = geoms[Math.floor(Math.random()*geoms.length)];
+                const m = new THREE.MeshStandardMaterial({
+                    color: goldHex(), metalness:0.7, roughness:0.3,
+                    transparent:true, opacity: isMobile?0.12:0.22,
+                    wireframe: Math.random() > 0.5
+                });
+                const mesh = new THREE.Mesh(g,m);
+                mesh.position.set(
+                    (Math.random()-0.5)*22,
+                    yCenter + (Math.random()-0.5)*3,
+                    (Math.random()-0.5)*12 - 8
+                );
+                const s = 0.4 + Math.random()*0.8;
+                mesh.scale.set(s,s,s);
+                mesh.userData = {
+                    rotSpeed: {
+                        x: (Math.random()-0.5)*0.008,
+                        y: (Math.random()-0.5)*0.008,
+                        z: (Math.random()-0.5)*0.005
+                    },
+                    floatPhase: Math.random()*Math.PI*2,
+                    floatSpeed: 0.3 + Math.random()*0.5,
+                    baseY: mesh.position.y
+                };
+                shapes.push(mesh);
+                bgScene.add(mesh);
+            }
+        });
 
         // Lights
-        const ambient = new THREE.AmbientLight(0xffffff, 0.5);
-        scene.add(ambient);
-        const key = new THREE.DirectionalLight(0xffffff, 1.2);
-        key.position.set(5,5,5);
-        scene.add(key);
-        const rim = new THREE.DirectionalLight(goldColor(), 0.8);
-        rim.position.set(-5,-3,3);
-        scene.add(rim);
+        bgScene.add(new THREE.AmbientLight(0xffffff, 0.4));
+        const key = new THREE.DirectionalLight(0xffffff, 0.8);
+        key.position.set(10,10,10);
+        bgScene.add(key);
+        const rim = new THREE.PointLight(goldHex(), 1.2, 30);
+        rim.position.set(-5,5,5);
+        bgScene.add(rim);
 
-        // Mouse parallax
-        let mx=0, my=0, tmx=0, tmy=0;
+        /* --- Hero canvas: the prominent KM monogram --- */
+        const heroCanvas = document.getElementById('hero-canvas');
+        let heroScene, heroCam, heroRen, heroGroup = null;
+        function initHeroScene() {
+            if (!heroCanvas || heroCanvas.clientWidth < 640) return;
+            heroScene = new THREE.Scene();
+            heroCam = new THREE.PerspectiveCamera(50, heroCanvas.clientWidth/heroCanvas.clientHeight, 0.1, 100);
+            heroCam.position.z = 7;
+            heroRen = new THREE.WebGLRenderer({ canvas: heroCanvas, antialias:true, alpha:true });
+            heroRen.setPixelRatio(Math.min(window.devicePixelRatio,2));
+            heroRen.setSize(heroCanvas.clientWidth, heroCanvas.clientHeight, false);
+
+            const mat = () => new THREE.MeshStandardMaterial({ color: goldHex(), metalness:0.9, roughness:0.2 });
+            heroGroup = new THREE.Group();
+            function bar(w,h,d,x,y,z,ry=0){ const g=new THREE.BoxGeometry(w,h,d);const m=new THREE.Mesh(g,mat());m.position.set(x,y,z);m.rotation.y=ry;return m; }
+            heroGroup.add(bar(0.2, 2.4, 0.35, -1.5,0,0));
+            heroGroup.add(bar(0.2, 1.5, 0.35, -0.7, 0.6, 0, Math.PI/4));
+            heroGroup.add(bar(0.2, 1.5, 0.35, -0.7,-0.6, 0,-Math.PI/4));
+            heroGroup.add(bar(0.2, 2.4, 0.35,  0.1,0,0));
+            heroGroup.add(bar(0.2, 2.4, 0.35,  1.6,0,0));
+            heroGroup.add(bar(0.18,1.4, 0.35, 0.6, 0.35,0,-Math.PI/3.2));
+            heroGroup.add(bar(0.18,1.4, 0.35, 1.1, 0.35,0, Math.PI/3.2));
+            heroGroup.position.set(2, 0, 0);
+            heroGroup.scale.set(0.6,0.6,0.6);
+            heroScene.add(heroGroup);
+
+            // extra small particles near hero
+            const hpGeo = new THREE.BufferGeometry();
+            const hpPos = new Float32Array(80*3);
+            for(let i=0;i<80;i++){ hpPos[i*3]=(Math.random()-0.5)*10; hpPos[i*3+1]=(Math.random()-0.5)*6; hpPos[i*3+2]=(Math.random()-0.5)*5-1; }
+            hpGeo.setAttribute('position', new THREE.BufferAttribute(hpPos,3));
+            const hp = new THREE.Points(hpGeo, new THREE.PointsMaterial({color:goldHex(),size:0.05,transparent:true,opacity:0.4,blending:THREE.AdditiveBlending,depthWrite:false}));
+            heroScene.add(hp);
+
+            heroScene.add(new THREE.AmbientLight(0xffffff,0.5));
+            const hk = new THREE.DirectionalLight(0xffffff,1.3); hk.position.set(6,6,6); heroScene.add(hk);
+            const hr = new THREE.PointLight(goldHex(),1.5,20); hr.position.set(-5,-2,4); heroScene.add(hr);
+        }
+        initHeroScene();
+
+        /* --- Mouse parallax --- */
+        let mx=0,my=0,mxT=0,myT=0;
         window.addEventListener('mousemove', e => {
-            tmx = (e.clientX/window.innerWidth - 0.5)*2;
-            tmy = (e.clientY/window.innerHeight - 0.5)*2;
-        }, { passive:true });
+            mxT = (e.clientX/window.innerWidth - 0.5)*2;
+            myT = (e.clientY/window.innerHeight - 0.5)*2;
+        }, {passive:true});
 
-        // Resize
-        function resize() {
-            const w = canvas.clientWidth;
-            const h = canvas.clientHeight;
-            if (w < 640) return;
-            camera.aspect = w/h;
-            camera.updateProjectionMatrix();
-            renderer.setSize(w, h, false);
+        /* --- Scroll tracking for camera Y --- */
+        let scrollY = 0, scrollT = 0;
+        window.addEventListener('scroll', () => { scrollY = window.scrollY; }, {passive:true});
+
+        /* --- Resize --- */
+        function resize(){
+            const w=window.innerWidth, h=window.innerHeight;
+            bgCam.aspect=w/h; bgCam.updateProjectionMatrix();
+            bgRen.setSize(w,h);
+            if(heroRen && heroCanvas){
+                const hw=heroCanvas.clientWidth, hh=heroCanvas.clientHeight;
+                if(hw>0 && hh>0){ heroCam.aspect=hw/hh; heroCam.updateProjectionMatrix(); heroRen.setSize(hw,hh,false); }
+            }
         }
         window.addEventListener('resize', resize);
-        resize();
 
-        // Update material colors when theme toggles
-        const toggle2 = document.getElementById('modeToggle');
-        if (toggle2) toggle2.addEventListener('click', () => {
-            setTimeout(() => {
-                const gc = goldColor();
-                group.traverse(o => { if(o.isMesh && o.material) o.material.color.setHex(gc); });
-                pMat.color.setHex(gc);
-                rim.color.setHex(gc);
-            }, 50);
-        });
+        /* --- Theme updates --- */
+        const tog = document.getElementById('modeToggle');
+        if(tog) tog.addEventListener('click', () => setTimeout(() => {
+            const c = goldHex();
+            pMat.color.setHex(c);
+            rim.color.setHex(c);
+            shapes.forEach(s => s.material.color.setHex(c));
+            if(heroGroup) heroGroup.traverse(o => { if(o.isMesh && o.material) o.material.color.setHex(c); });
+        },60));
 
         const clock = new THREE.Clock();
-        function animate() {
+        function animate(){
             requestAnimationFrame(animate);
             const t = clock.getElapsedTime();
-            group.rotation.y = Math.sin(t*0.4)*0.3;
-            group.rotation.x = Math.sin(t*0.25)*0.1;
-            // Particles drift upward
-            const pos = pGeo.attributes.position.array;
-            for (let i=0; i<pCount; i++){
-                pos[i*3+1] += speeds[i]*0.003;
-                if (pos[i*3+1] > 4) pos[i*3+1] = -4;
-                pos[i*3] += Math.sin(t+i)*0.0005;
+
+            // scroll parallax
+            scrollT += (scrollY - scrollT)*0.06;
+            particles.position.y = scrollT * 0.008;
+            shapes.forEach(s => {
+                s.rotation.x += s.userData.rotSpeed.x;
+                s.rotation.y += s.userData.rotSpeed.y;
+                s.rotation.z += s.userData.rotSpeed.z;
+                s.position.y = s.userData.baseY + Math.sin(t*s.userData.floatSpeed + s.userData.floatPhase)*0.25;
+            });
+
+            // particle drift
+            const pa = pGeo.attributes.position.array;
+            for(let i=0;i<PARTICLES;i++){
+                pa[i*3]   += pVel[i*3] + Math.sin(t+i)*0.0003;
+                pa[i*3+1] += pVel[i*3+1];
+                pa[i*3+2] += pVel[i*3+2];
+                if(pa[i*3+1] > 10) pa[i*3+1] = -pageH*0.03 - 5;
             }
             pGeo.attributes.position.needsUpdate = true;
-            particles.rotation.y = t*0.05;
-            // Mouse parallax
-            mx += (tmx-mx)*0.04;
-            my += (tmy-my)*0.04;
-            camera.position.x = mx*0.6;
-            camera.position.y = -my*0.4;
-            camera.lookAt(0,0,0);
-            renderer.render(scene, camera);
+
+            // camera shift from mouse
+            mx += (mxT-mx)*0.03;
+            my += (myT-my)*0.03;
+            bgCam.position.x = mx*3;
+            bgCam.position.y = -scrollT*0.015 - my*2;
+            bgCam.lookAt(0, -scrollT*0.015, 0);
+
+            if(heroRen && heroGroup && heroCam) {
+                heroGroup.rotation.y = Math.sin(t*0.4)*0.35 + mx*0.3;
+                heroGroup.rotation.x = Math.sin(t*0.25)*0.12 - my*0.2;
+                heroCam.position.x = mx*0.8;
+                heroCam.position.y = -my*0.5;
+                heroCam.lookAt(2,0,0);
+                heroRen.render(heroScene, heroCam);
+            }
+            bgRen.render(bgScene, bgCam);
         }
         animate();
     }
-    // Start Three after load so it doesn't block first paint
-    if (document.readyState === 'complete') initThree();
+    if(document.readyState === 'complete') initThree();
     else window.addEventListener('load', initThree);
 })();
 </script>
