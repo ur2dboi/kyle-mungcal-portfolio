@@ -131,6 +131,8 @@
         .nav-links {
             display:flex; gap:2.25rem; list-style:none; align-items:center;
         }
+        /* Hide mobile-only items on desktop */
+        .nav-links .mobile-close { display:none; }
         .nav-links a {
             font-size:0.85rem; font-weight:500; color:var(--text-2); letter-spacing:0.01em;
             transition:color 0.2s; position:relative; padding:0.3rem 0;
