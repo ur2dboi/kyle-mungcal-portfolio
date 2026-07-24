@@ -560,7 +560,7 @@
 
         /* ── TRUSTED BY / CLIENTS MARQUEE ── */
         .clients-marquee {
-            padding: 2rem 0; overflow:hidden; position:relative;
+            padding: 1.25rem 0; overflow:hidden; position:relative;
             background:var(--bg-alt); border-top:1px solid var(--border); border-bottom:1px solid var(--border);
             mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
             -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
@@ -569,7 +569,7 @@
             display:flex; gap:3rem; width:max-content; align-items:center;
             animation: marquee 40s linear infinite;
         }
-        .marquee-track:hover { animation-play-state: paused; }
+        .marquee-track:hover { /* unstoppable — no pause on hover */ }
         @keyframes marquee {
             from { transform: translateX(0); }
             to   { transform: translateX(-50%); }
@@ -771,7 +771,7 @@
             .project-body h4 { font-size:1rem; }
             .project-body p { font-size:0.87rem; }
             /* Marquee */
-            .clients-marquee { padding:1.5rem 0; }
+            .clients-marquee { padding:1rem 0; }
             .marquee-track { gap:2.5rem; }
             .marquee-item img { height:28px; max-width:150px; }
             /* Testimonials */
@@ -817,7 +817,7 @@
             .contact-perks { justify-content:center; }
             .marquee-item img { height:24px; max-width:120px; }
             .marquee-track { gap:2rem; }
-            .clients-marquee { padding:1.25rem 0; }
+            .clients-marquee { padding:0.85rem 0; }
         }
         @media (max-width: 420px) {
             .hero h1 { font-size:1.65rem; }
