@@ -237,7 +237,10 @@
             min-height:100vh; min-height:100dvh; display:flex; align-items:center;
             padding:8rem 2rem 4rem; max-width:1200px; margin:0 auto; position:relative;
         }
-        /* 3D canvas background layer behind hero content */
+        /* 3D canvas background layer */
+        #bg-canvas { opacity:0.9; }
+        html.dark #bg-canvas { opacity:0.45; }
+        html.dark #hero-canvas { opacity:0.4; }
         #hero-canvas {
             position:absolute; inset:0; width:100%; height:100%; z-index:0;
             pointer-events:none;
@@ -715,25 +718,78 @@
         .gallery-caption .g-title { font-size:0.9rem; font-weight:600; margin-bottom:0.2rem; }
         .gallery-caption .g-sub { font-size:0.72rem; font-family:'JetBrains Mono', monospace; opacity:0.8; letter-spacing:0.05em; text-transform:uppercase; }
 
+        /* Gallery controls (mobile-first; hidden on desktop) */
+        .gallery-wrap { position:relative; }
+        .gallery-nav { display:none; }
+        .gallery-dots { display:none; }
+        .gallery-mobile-caption { display:none; }
+
         /* Mobile slideshow */
         @media (max-width: 768px) {
             .gallery-grid {
                 display:flex; gap:0.75rem; overflow-x:auto; overflow-y:hidden;
                 scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch;
-                scrollbar-width:none; padding:0.5rem 1.25rem 1.25rem;
-                margin:0 -1.25rem;
+                scrollbar-width:none;
+                padding:0.5rem 2.5rem 1rem;
+                margin:0; scroll-behavior:smooth;
             }
             .gallery-grid::-webkit-scrollbar { display:none; }
             .gallery-item {
                 flex:0 0 78%; scroll-snap-align:center; aspect-ratio:3/4;
-                border-radius:var(--radius);
+                border-radius:var(--radius); position:relative;
             }
-            .gallery-item:first-child { margin-left:0; }
-            .gallery-item:last-child { margin-right:0; }
-            .gallery-overlay { display:none; } /* no vignette/caption on mobile */
+            .gallery-overlay { display:none; }
+
+            /* Prev / Next buttons */
+            .gallery-nav {
+                display:flex; align-items:center; justify-content:center;
+                position:absolute; top:40%; transform:translateY(-50%);
+                width:40px; height:40px; border-radius:50%;
+                background:var(--surface); border:1px solid var(--border);
+                color:var(--text); font-size:1.1rem; z-index:3; cursor:pointer;
+                box-shadow:0 4px 14px rgba(0,0,0,0.15);
+                transition: all 0.2s;
+                touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+            }
+            .gallery-nav:hover { color:var(--gold); border-color:var(--gold); }
+            .gallery-nav.prev { left:0.25rem; }
+            .gallery-nav.next { right:0.25rem; }
+            html.dark .gallery-nav { background:#1a1a1a; border-color:#333; color:#fafafa; }
+            html.dark .gallery-nav:hover { color:var(--gold); border-color:var(--gold); }
+
+            /* Caption shown below active image */
+            .gallery-mobile-caption {
+                display:block; text-align:center; margin-top:0.75rem;
+                padding:0 1.5rem;
+            }
+            .gallery-mobile-caption .g-m-title {
+                font-size:0.95rem; font-weight:600; color:var(--text); margin-bottom:0.2rem;
+            }
+            .gallery-mobile-caption .g-m-sub {
+                font-size:0.72rem; font-family:'JetBrains Mono',monospace;
+                color:var(--gold); letter-spacing:0.15em; text-transform:uppercase;
+            }
+
+            /* Dot indicators */
+            .gallery-dots {
+                display:flex; gap:0.5rem; justify-content:center; margin-top:1rem;
+            }
+            .gallery-dots button {
+                width:8px; height:8px; border-radius:50%; border:none;
+                background:var(--border); padding:0; cursor:pointer;
+                transition:all 0.25s;
+                touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+            }
+            .gallery-dots button.active {
+                background:var(--gold); width:22px; border-radius:4px;
+            }
+            html.dark .gallery-dots button { background:#333; }
+            html.dark .gallery-dots button.active { background:var(--gold); }
         }
         @media (max-width: 480px) {
-            .gallery-item { flex:0 0 85%; }
+            .gallery-item { flex:0 0 82%; }
+            .gallery-grid { padding:0.5rem 2.25rem 0.75rem; }
+            .gallery-nav { width:36px; height:36px; }
         }
 
         /* ── RESPONSIVE ── */
@@ -898,7 +954,7 @@
 <body>
 
 <!-- GLOBAL 3D BACKGROUND CANVAS -->
-<canvas id="bg-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none;opacity:0.85;"></canvas>
+<canvas id="bg-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none;"></canvas>
 
 <!-- NAV -->
 <nav>
@@ -1305,34 +1361,43 @@
         <h2 class="section-title">Moments with <em>clients</em>.</h2>
         <p class="section-lede">A glimpse into meetings, collaborations, and the work that goes into every launch.</p>
     </div>
-    <div class="gallery-grid stagger">
-        <div class="gallery-item">
-            <img src="client-gallery/meeting-2.jpg" alt="Client meeting with team" loading="lazy">
-            <div class="gallery-overlay">
-                <div class="gallery-caption">
-                    <div class="g-title">Strategy Session</div>
-                    <div class="g-sub">Client Collaboration</div>
+    <div class="gallery-wrap reveal">
+        <button class="gallery-nav prev" id="galPrev" aria-label="Previous photo">‹</button>
+        <div class="gallery-grid stagger" id="galGrid">
+            <div class="gallery-item" data-title="Strategy Session" data-sub="Client Collaboration">
+                <img src="client-gallery/meeting-2.jpg" alt="Client strategy session" loading="lazy">
+                <div class="gallery-overlay">
+                    <div class="gallery-caption">
+                        <div class="g-title">Strategy Session</div>
+                        <div class="g-sub">Client Collaboration</div>
+                    </div>
+                </div>
+            </div>
+            <div class="gallery-item" data-title="Project Workshop" data-sub="Planning &amp; Alignment">
+                <img src="client-gallery/meeting-3.jpg" alt="Project workshop with team" loading="lazy">
+                <div class="gallery-overlay">
+                    <div class="gallery-caption">
+                        <div class="g-title">Project Workshop</div>
+                        <div class="g-sub">Planning &amp; Alignment</div>
+                    </div>
+                </div>
+            </div>
+            <div class="gallery-item" data-title="Boardroom Presentation" data-sub="Official Meeting">
+                <img src="client-gallery/meeting-1.jpg" alt="Boardroom client presentation" loading="lazy">
+                <div class="gallery-overlay">
+                    <div class="gallery-caption">
+                        <div class="g-title">Boardroom Presentation</div>
+                        <div class="g-sub">Official Meeting</div>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="gallery-item">
-            <img src="client-gallery/meeting-3.jpg" alt="Team workshop" loading="lazy">
-            <div class="gallery-overlay">
-                <div class="gallery-caption">
-                    <div class="g-title">Project Workshop</div>
-                    <div class="g-sub">Planning &amp; Alignment</div>
-                </div>
-            </div>
+        <button class="gallery-nav next" id="galNext" aria-label="Next photo">›</button>
+        <div class="gallery-mobile-caption" id="galCaption">
+            <div class="g-m-title">Strategy Session</div>
+            <div class="g-m-sub">Client Collaboration</div>
         </div>
-        <div class="gallery-item">
-            <img src="client-gallery/meeting-1.jpg" alt="Boardroom presentation" loading="lazy">
-            <div class="gallery-overlay">
-                <div class="gallery-caption">
-                    <div class="g-title">Boardroom Presentation</div>
-                    <div class="g-sub">Official Meeting</div>
-                </div>
-            </div>
-        </div>
+        <div class="gallery-dots" id="galDots"></div>
     </div>
 </section>
 
@@ -1626,7 +1691,7 @@
             color: goldHex(),
             size: 0.14,
             transparent: true,
-            opacity: isMobile ? 0.7 : 0.95,
+            opacity: isMobile ? 0.35 : 0.5,
             sizeAttenuation: true,
             depthWrite: false,
             blending: THREE.AdditiveBlending
@@ -1768,6 +1833,60 @@
     }
     if(document.readyState === 'complete') initThree();
     else window.addEventListener('load', initThree);
+
+    /* ── MOBILE GALLERY SLIDESHOW CONTROLS ── */
+    (function initGallery(){
+        const grid = document.getElementById('galGrid');
+        const prev = document.getElementById('galPrev');
+        const next = document.getElementById('galNext');
+        const caption = document.getElementById('galCaption');
+        const dotsWrap = document.getElementById('galDots');
+        if (!grid) return;
+        const items = grid.querySelectorAll('.gallery-item');
+        let curIdx = 0;
+
+        // Build dot indicators
+        items.forEach((_, i) => {
+            const b = document.createElement('button');
+            b.setAttribute('aria-label', 'Go to slide ' + (i+1));
+            b.addEventListener('click', () => scrollToItem(i));
+            dotsWrap.appendChild(b);
+        });
+        const dots = dotsWrap.querySelectorAll('button');
+
+        function scrollToItem(i) {
+            curIdx = Math.max(0, Math.min(items.length - 1, i));
+            items[curIdx].scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
+        }
+        function updateCaption() {
+            const item = items[curIdx];
+            const t = item.getAttribute('data-title') || '';
+            const s = item.getAttribute('data-sub') || '';
+            caption.innerHTML = '<div class="g-m-title">'+t+'</div><div class="g-m-sub">'+s+'</div>';
+            dots.forEach((d,di) => d.classList.toggle('active', di===curIdx));
+        }
+        function detectActive() {
+            const c = grid.getBoundingClientRect().left + grid.clientWidth/2;
+            let best = 0, bestDist = Infinity;
+            items.forEach((it,i) => {
+                const r = it.getBoundingClientRect();
+                const dist = Math.abs((r.left + r.width/2) - c);
+                if (dist < bestDist) { bestDist = dist; best = i; }
+            });
+            if (best !== curIdx) { curIdx = best; updateCaption(); }
+        }
+        prev.addEventListener('click', () => scrollToItem(curIdx - 1));
+        next.addEventListener('click', () => scrollToItem(curIdx + 1));
+        let scrollT;
+        grid.addEventListener('scroll', () => {
+            clearTimeout(scrollT);
+            scrollT = setTimeout(detectActive, 80);
+        }, {passive:true});
+        window.addEventListener('resize', detectActive);
+        // initial state
+        setTimeout(updateCaption, 200);
+        setTimeout(detectActive, 400);
+    })();
 })();
 </script>
 
