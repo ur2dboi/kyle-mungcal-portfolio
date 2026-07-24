@@ -236,8 +236,8 @@
         }
         .section-label::after { content:''; flex:0 0 40px; height:1px; background:var(--gold); }
         .section-title {
-            font-family:'Inter', sans-serif; font-size:clamp(1.75rem, 3.5vw, 2.35rem);
-            font-weight:700; letter-spacing:-0.02em; line-height:1.2; color:var(--text);
+            font-family:'Inter', sans-serif; font-size:clamp(2.15rem, 4.2vw, 3rem);
+            font-weight:700; letter-spacing:-0.025em; line-height:1.15; color:var(--text);
             margin-bottom:1rem;
         }
         .section-title em { font-style:normal; color:var(--gold); font-weight:700; }
@@ -251,16 +251,16 @@
         .about-intro .section-label::after { display:none; }
         .about-intro p { font-size:1.05rem; color:var(--text-2); line-height:1.8; margin-bottom:1.25rem; }
         .about-intro p strong { color:var(--text); font-weight:600; }
-        .about-highlights { display:grid; grid-template-columns:repeat(4,1fr); gap:1.25rem; margin-top:3.5rem; text-align:left; max-width:100%; }
+        .about-highlights { display:grid; grid-template-columns:repeat(4,1fr); gap:1.5rem; margin-top:4rem; text-align:left; }
         .highlight-card {
-            padding:2rem 1.6rem; border:1px solid var(--border); border-radius:var(--radius);
-            background:var(--surface); transition:all 0.25s var(--ease);
+            padding:2.5rem 1.75rem; border:1px solid var(--border); border-radius:var(--radius);
+            background:var(--surface); transition:all 0.3s var(--ease);
         }
         .highlight-card:hover { border-color:var(--gold); transform:translateY(-4px); box-shadow:var(--shadow-lg); }
-        .highlight-num { font-family:'Inter', sans-serif; font-size:1.65rem; font-weight:700;
-            color:var(--gold); margin-bottom:0.5rem; line-height:1; letter-spacing:-0.02em; }
-        .highlight-lbl { font-size:0.72rem; color:var(--text-3); text-transform:uppercase; letter-spacing:0.14em; font-weight:600; margin-bottom:0.75rem; }
-        .highlight-desc { font-size:0.9rem; color:var(--text-2); margin-top:0; line-height:1.65; }
+        .highlight-num { font-family:'Inter', sans-serif; font-size:2rem; font-weight:700;
+            color:var(--gold); margin-bottom:0.7rem; line-height:1; letter-spacing:-0.02em; }
+        .highlight-lbl { font-size:0.75rem; color:var(--text-3); text-transform:uppercase; letter-spacing:0.15em; font-weight:600; margin-bottom:1rem; }
+        .highlight-desc { font-size:0.95rem; color:var(--text-2); margin-top:0; line-height:1.7; }
 
         /* ── SERVICES ── */
         .services-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1.25rem; }
@@ -508,7 +508,7 @@
             .hero-meta { gap:1.75rem; }
             .hero-stat .num { font-size:1.5rem; }
             section { padding:3.5rem 1.25rem; }
-            .section-title { font-size:1.6rem; }
+            .section-title { font-size:1.85rem; }
             .section-lede { font-size:0.98rem; }
             .about-intro { text-align:left; }
             .about-intro .section-head { text-align:left; margin-bottom:1.25rem; }
@@ -530,7 +530,8 @@
         }
         @media (max-width: 420px) {
             .services-grid, .process-grid, .about-highlights { grid-template-columns:1fr; }
-            .hero h1 { font-size:2.1rem; }
+            .hero h1 { font-size:2.2rem; }
+            .section-title { font-size:1.7rem; }
             .hero-meta { justify-content:center; gap:1.5rem; }
             .contact-wrap { padding:2rem 1.25rem; }
         }
