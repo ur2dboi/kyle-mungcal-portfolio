@@ -734,7 +734,7 @@
             section[class*="section-"] > * { padding-left:1.25rem; padding-right:1.25rem; }
             /* Hero */
             .hero { padding:5.5rem 1.25rem 3rem; min-height:auto; overflow:hidden; }
-            #hero-canvas { opacity:0.3; }
+            #hero-canvas { opacity:0.5; }
             .hero-content { grid-template-columns:1fr; gap:2rem; text-align:center; }
             .hero-text { max-width:none; }
             .hero-portrait-wrap { max-width:220px; order:-1; margin:0 auto; }
@@ -842,7 +842,7 @@
 <body>
 
 <!-- GLOBAL 3D BACKGROUND CANVAS -->
-<canvas id="bg-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none;opacity:0.55;"></canvas>
+<canvas id="bg-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;pointer-events:none;opacity:0.85;"></canvas>
 
 <!-- NAV -->
 <nav>
@@ -1485,140 +1485,95 @@
         });
     });
 
-    /* ── GLOBAL THREE.JS SCENE ── */
+    /* ── GLOBAL THREE.JS SCENE (particles/dots only) ── */
     function initThree() {
         if (typeof THREE === 'undefined') { setTimeout(initThree, 200); return; }
         const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (reduced) return;
         const isMobile = window.innerWidth < 768;
 
-        /* --- BG canvas: global floating particles + shapes --- */
+        /* --- BG canvas: gold particle dots only (no shapes) --- */
         const bgCanvas = document.getElementById('bg-canvas');
         const bgScene = new THREE.Scene();
-        const bgCam = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 200);
-        bgCam.position.z = 20;
+        const bgCam = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 300);
+        bgCam.position.z = 25;
         const bgRen = new THREE.WebGLRenderer({ canvas: bgCanvas, antialias:!isMobile, alpha:true });
         bgRen.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
         bgRen.setSize(window.innerWidth, window.innerHeight);
         bgRen.setClearColor(0x000000, 0);
 
         const isDark = () => document.documentElement.classList.contains('dark');
+        // Gold color that reads well on both themes
         const goldHex = () => isDark() ? 0xd4bb7e : 0xc9a961;
 
-        // Big particle field covering the whole page
-        const PARTICLES = isMobile ? 250 : 600;
+        // Dense gold dot field covering the whole page (all sections)
+        const PARTICLES = isMobile ? 350 : 900;
         const pGeo = new THREE.BufferGeometry();
         const pPos = new Float32Array(PARTICLES*3);
         const pVel = new Float32Array(PARTICLES*3);
-        const pSize = new Float32Array(PARTICLES);
-        const pageH = Math.max(document.body.scrollHeight, window.innerHeight*3);
+        const pSizes = new Float32Array(PARTICLES);
+        const pageH = Math.max(document.body.scrollHeight, window.innerHeight*4);
+        // Distribute Y across the full page height so dots exist in every section
+        const worldH = pageH * 0.035;
         for (let i=0;i<PARTICLES;i++){
-            pPos[i*3]   = (Math.random()-0.5)*50;
-            pPos[i*3+1] = -Math.random()*pageH*0.03 - 5;
-            pPos[i*3+2] = (Math.random()-0.5)*25 - 10;
-            pVel[i*3]   = (Math.random()-0.5)*0.005;
-            pVel[i*3+1] = 0.008 + Math.random()*0.015;
-            pVel[i*3+2] = (Math.random()-0.5)*0.005;
-            pSize[i]    = isMobile ? 0.03+Math.random()*0.06 : 0.04+Math.random()*0.08;
+            pPos[i*3]   = (Math.random()-0.5)*60;
+            pPos[i*3+1] = -Math.random()*worldH + 8;
+            pPos[i*3+2] = (Math.random()-0.5)*30 - 12;
+            pVel[i*3]   = (Math.random()-0.5)*0.004;
+            pVel[i*3+1] = 0.010 + Math.random()*0.020;
+            pVel[i*3+2] = (Math.random()-0.5)*0.004;
+            pSizes[i]   = isMobile ? 0.04+Math.random()*0.08 : 0.05+Math.random()*0.10;
         }
         pGeo.setAttribute('position', new THREE.BufferAttribute(pPos,3));
         const pMat = new THREE.PointsMaterial({
-            color: goldHex(), size:0.08, transparent:true, opacity: isMobile?0.35:0.5,
-            sizeAttenuation:true, depthWrite:false, blending:THREE.AdditiveBlending
+            color: goldHex(),
+            size: 0.10,
+            transparent: true,
+            opacity: isMobile ? 0.55 : 0.75,
+            sizeAttenuation: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending
         });
         const particles = new THREE.Points(pGeo, pMat);
         bgScene.add(particles);
 
-        // Floating geometric shapes distributed across the page depth
-        const shapes = [];
-        const geoms = [
-            new THREE.IcosahedronGeometry(0.6, 0),
-            new THREE.OctahedronGeometry(0.55, 0),
-            new THREE.TetrahedronGeometry(0.55, 0),
-            new THREE.TorusGeometry(0.45, 0.15, 12, 24),
-            new THREE.BoxGeometry(0.6,0.6,0.6),
-        ];
-        const sections = document.querySelectorAll('section');
-        const SHAPES_PER_SECTION = isMobile ? 1 : 3;
-        sections.forEach((sec, si) => {
-            const rect = sec.getBoundingClientRect();
-            const yCenter = -(rect.top + rect.height/2 - window.innerHeight/2 + window.scrollY) * 0.015;
-            for (let k=0;k<SHAPES_PER_SECTION;k++){
-                const g = geoms[Math.floor(Math.random()*geoms.length)];
-                const m = new THREE.MeshStandardMaterial({
-                    color: goldHex(), metalness:0.7, roughness:0.3,
-                    transparent:true, opacity: isMobile?0.12:0.22,
-                    wireframe: Math.random() > 0.5
-                });
-                const mesh = new THREE.Mesh(g,m);
-                mesh.position.set(
-                    (Math.random()-0.5)*22,
-                    yCenter + (Math.random()-0.5)*3,
-                    (Math.random()-0.5)*12 - 8
-                );
-                const s = 0.4 + Math.random()*0.8;
-                mesh.scale.set(s,s,s);
-                mesh.userData = {
-                    rotSpeed: {
-                        x: (Math.random()-0.5)*0.008,
-                        y: (Math.random()-0.5)*0.008,
-                        z: (Math.random()-0.5)*0.005
-                    },
-                    floatPhase: Math.random()*Math.PI*2,
-                    floatSpeed: 0.3 + Math.random()*0.5,
-                    baseY: mesh.position.y
-                };
-                shapes.push(mesh);
-                bgScene.add(mesh);
-            }
-        });
+        // Subtle ambient so dots render cleanly — no lights needed for PointsMaterial
+        bgScene.add(new THREE.AmbientLight(0xffffff, 1));
 
-        // Lights
-        bgScene.add(new THREE.AmbientLight(0xffffff, 0.4));
-        const key = new THREE.DirectionalLight(0xffffff, 0.8);
-        key.position.set(10,10,10);
-        bgScene.add(key);
-        const rim = new THREE.PointLight(goldHex(), 1.2, 30);
-        rim.position.set(-5,5,5);
-        bgScene.add(rim);
-
-        /* --- Hero canvas: the prominent KM monogram --- */
+        /* --- Hero canvas: extra cluster of gold dots (no KM monogram / no bars) --- */
         const heroCanvas = document.getElementById('hero-canvas');
-        let heroScene, heroCam, heroRen, heroGroup = null;
+        let heroScene, heroCam, heroRen, heroDots = null;
         function initHeroScene() {
             if (!heroCanvas || heroCanvas.clientWidth < 640) return;
             heroScene = new THREE.Scene();
             heroCam = new THREE.PerspectiveCamera(50, heroCanvas.clientWidth/heroCanvas.clientHeight, 0.1, 100);
-            heroCam.position.z = 7;
+            heroCam.position.z = 8;
             heroRen = new THREE.WebGLRenderer({ canvas: heroCanvas, antialias:true, alpha:true });
             heroRen.setPixelRatio(Math.min(window.devicePixelRatio,2));
             heroRen.setSize(heroCanvas.clientWidth, heroCanvas.clientHeight, false);
 
-            const mat = () => new THREE.MeshStandardMaterial({ color: goldHex(), metalness:0.9, roughness:0.2 });
-            heroGroup = new THREE.Group();
-            function bar(w,h,d,x,y,z,ry=0){ const g=new THREE.BoxGeometry(w,h,d);const m=new THREE.Mesh(g,mat());m.position.set(x,y,z);m.rotation.y=ry;return m; }
-            heroGroup.add(bar(0.2, 2.4, 0.35, -1.5,0,0));
-            heroGroup.add(bar(0.2, 1.5, 0.35, -0.7, 0.6, 0, Math.PI/4));
-            heroGroup.add(bar(0.2, 1.5, 0.35, -0.7,-0.6, 0,-Math.PI/4));
-            heroGroup.add(bar(0.2, 2.4, 0.35,  0.1,0,0));
-            heroGroup.add(bar(0.2, 2.4, 0.35,  1.6,0,0));
-            heroGroup.add(bar(0.18,1.4, 0.35, 0.6, 0.35,0,-Math.PI/3.2));
-            heroGroup.add(bar(0.18,1.4, 0.35, 1.1, 0.35,0, Math.PI/3.2));
-            heroGroup.position.set(2, 0, 0);
-            heroGroup.scale.set(0.6,0.6,0.6);
-            heroScene.add(heroGroup);
-
-            // extra small particles near hero
+            // Extra hero cluster dots
+            const HP = 120;
             const hpGeo = new THREE.BufferGeometry();
-            const hpPos = new Float32Array(80*3);
-            for(let i=0;i<80;i++){ hpPos[i*3]=(Math.random()-0.5)*10; hpPos[i*3+1]=(Math.random()-0.5)*6; hpPos[i*3+2]=(Math.random()-0.5)*5-1; }
+            const hpPos = new Float32Array(HP*3);
+            const hpVel = new Float32Array(HP*3);
+            for(let i=0;i<HP;i++){
+                hpPos[i*3]   = (Math.random()-0.5)*12;
+                hpPos[i*3+1] = (Math.random()-0.5)*8;
+                hpPos[i*3+2] = (Math.random()-0.5)*6 - 1;
+                hpVel[i*3]   = (Math.random()-0.5)*0.003;
+                hpVel[i*3+1] = 0.006 + Math.random()*0.010;
+                hpVel[i*3+2] = (Math.random()-0.5)*0.003;
+            }
             hpGeo.setAttribute('position', new THREE.BufferAttribute(hpPos,3));
-            const hp = new THREE.Points(hpGeo, new THREE.PointsMaterial({color:goldHex(),size:0.05,transparent:true,opacity:0.4,blending:THREE.AdditiveBlending,depthWrite:false}));
-            heroScene.add(hp);
-
-            heroScene.add(new THREE.AmbientLight(0xffffff,0.5));
-            const hk = new THREE.DirectionalLight(0xffffff,1.3); hk.position.set(6,6,6); heroScene.add(hk);
-            const hr = new THREE.PointLight(goldHex(),1.5,20); hr.position.set(-5,-2,4); heroScene.add(hr);
+            const hpMat = new THREE.PointsMaterial({
+                color: goldHex(), size:0.08, transparent:true, opacity:0.65,
+                blending:THREE.AdditiveBlending, depthWrite:false
+            });
+            heroDots = new THREE.Points(hpGeo, hpMat);
+            heroDots.userData = { geo: hpGeo, vel: hpVel, count: HP };
+            heroScene.add(heroDots);
+            heroScene.add(new THREE.AmbientLight(0xffffff,1));
         }
         initHeroScene();
 
@@ -1629,7 +1584,7 @@
             myT = (e.clientY/window.innerHeight - 0.5)*2;
         }, {passive:true});
 
-        /* --- Scroll tracking for camera Y --- */
+        /* --- Scroll tracking --- */
         let scrollY = 0, scrollT = 0;
         window.addEventListener('scroll', () => { scrollY = window.scrollY; }, {passive:true});
 
@@ -1645,14 +1600,22 @@
         }
         window.addEventListener('resize', resize);
 
+        /* --- Re-measure page height when content settles --- */
+        function refreshPageH() {
+            const newH = Math.max(document.body.scrollHeight, window.innerHeight*4);
+            if (Math.abs(newH - pageH) > 200) {
+                // respawn any dots outside the new range (simple approach: just extend worldH usage via closure var)
+            }
+        }
+        setTimeout(refreshPageH, 500);
+        setTimeout(refreshPageH, 1500);
+
         /* --- Theme updates --- */
         const tog = document.getElementById('modeToggle');
         if(tog) tog.addEventListener('click', () => setTimeout(() => {
             const c = goldHex();
             pMat.color.setHex(c);
-            rim.color.setHex(c);
-            shapes.forEach(s => s.material.color.setHex(c));
-            if(heroGroup) heroGroup.traverse(o => { if(o.isMesh && o.material) o.material.color.setHex(c); });
+            if(heroDots) heroDots.material.color.setHex(c);
         },60));
 
         const clock = new THREE.Clock();
@@ -1660,39 +1623,54 @@
             requestAnimationFrame(animate);
             const t = clock.getElapsedTime();
 
-            // scroll parallax
-            scrollT += (scrollY - scrollT)*0.06;
-            particles.position.y = scrollT * 0.008;
-            shapes.forEach(s => {
-                s.rotation.x += s.userData.rotSpeed.x;
-                s.rotation.y += s.userData.rotSpeed.y;
-                s.rotation.z += s.userData.rotSpeed.z;
-                s.position.y = s.userData.baseY + Math.sin(t*s.userData.floatSpeed + s.userData.floatPhase)*0.25;
-            });
+            // smooth scroll parallax
+            scrollT += (scrollY - scrollT)*0.08;
 
-            // particle drift
+            // particle drift — dots drift upward continuously
             const pa = pGeo.attributes.position.array;
             for(let i=0;i<PARTICLES;i++){
-                pa[i*3]   += pVel[i*3] + Math.sin(t+i)*0.0003;
+                pa[i*3]   += pVel[i*3] + Math.sin(t*0.6 + i)*0.0004;
                 pa[i*3+1] += pVel[i*3+1];
                 pa[i*3+2] += pVel[i*3+2];
-                if(pa[i*3+1] > 10) pa[i*3+1] = -pageH*0.03 - 5;
+                if(pa[i*3+1] > 12) {
+                    // recycle dot back to the bottom of the page
+                    pa[i*3+1] = -worldH + 8;
+                    pa[i*3]   = (Math.random()-0.5)*60;
+                    pa[i*3+2] = (Math.random()-0.5)*30 - 12;
+                }
             }
             pGeo.attributes.position.needsUpdate = true;
 
+            // move particle field with scroll so dots stay tied to each section as you scroll
+            particles.position.y = scrollT * 0.015;
+
+            // Hero dots drift too
+            if(heroDots && heroRen){
+                const ha = heroDots.userData.geo.attributes.position.array;
+                const hv = heroDots.userData.vel;
+                const HC = heroDots.userData.count;
+                for(let i=0;i<HC;i++){
+                    ha[i*3]   += hv[i*3];
+                    ha[i*3+1] += hv[i*3+1];
+                    ha[i*3+2] += hv[i*3+2];
+                    if(ha[i*3+1] > 5) { ha[i*3+1] = -5; ha[i*3]=(Math.random()-0.5)*12; ha[i*3+2]=(Math.random()-0.5)*6-1; }
+                }
+                heroDots.userData.geo.attributes.position.needsUpdate = true;
+                heroDots.rotation.y = Math.sin(t*0.3)*0.15 + mx*0.2;
+                heroDots.rotation.x = Math.sin(t*0.2)*0.08 - my*0.15;
+            }
+
             // camera shift from mouse
-            mx += (mxT-mx)*0.03;
-            my += (myT-my)*0.03;
-            bgCam.position.x = mx*3;
-            bgCam.position.y = -scrollT*0.015 - my*2;
+            mx += (mxT-mx)*0.04;
+            my += (myT-my)*0.04;
+            bgCam.position.x = mx*2;
+            bgCam.position.y = -scrollT*0.015 - my*1.5;
             bgCam.lookAt(0, -scrollT*0.015, 0);
 
-            if(heroRen && heroGroup && heroCam) {
-                heroGroup.rotation.y = Math.sin(t*0.4)*0.35 + mx*0.3;
-                heroGroup.rotation.x = Math.sin(t*0.25)*0.12 - my*0.2;
-                heroCam.position.x = mx*0.8;
-                heroCam.position.y = -my*0.5;
-                heroCam.lookAt(2,0,0);
+            if(heroRen && heroCam) {
+                heroCam.position.x = mx*0.6;
+                heroCam.position.y = -my*0.4;
+                heroCam.lookAt(0,0,0);
                 heroRen.render(heroScene, heroCam);
             }
             bgRen.render(bgScene, bgCam);
