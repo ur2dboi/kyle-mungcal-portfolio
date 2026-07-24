@@ -180,14 +180,14 @@
             display:flex; align-items:center; height:100%;
         }
         .logo-img {
-            height:38px; width:auto; display:block;
-            /* logo is white on transparent webp — invert to black in light mode, add gold glow */
-            filter:brightness(0) saturate(100%) drop-shadow(0 0 6px rgba(201,169,97,0.25));
+            height:38px; width:auto; display:block; opacity:1;
+            /* logo is white on transparent webp — invert to pure black in light mode, add gold glow */
+            filter:brightness(0) invert(0) drop-shadow(0 0 6px rgba(201,169,97,0.35));
             transition:filter 0.25s;
         }
-        html.dark .logo-img { filter:drop-shadow(0 0 8px rgba(212,187,126,0.35)); }
-        .logo-img:hover { filter:brightness(0) saturate(100%) drop-shadow(0 0 10px rgba(201,169,97,0.55)); }
-        html.dark .logo-img:hover { filter:drop-shadow(0 0 14px rgba(212,187,126,0.6)) brightness(1.05); }
+        html.dark .logo-img { filter:brightness(1) drop-shadow(0 0 8px rgba(212,187,126,0.45)); }
+        .logo-img:hover { filter:brightness(0) invert(0) drop-shadow(0 0 12px rgba(201,169,97,0.6)); }
+        html.dark .logo-img:hover { filter:brightness(1) drop-shadow(0 0 16px rgba(212,187,126,0.75)); }
         @media (max-width:768px){ .logo-img { height:32px; } }
         .nav-links {
             display:flex; gap:2.25rem; list-style:none; align-items:center;
