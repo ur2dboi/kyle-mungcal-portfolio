@@ -673,6 +673,15 @@
         .chat-send svg { width:16px; height:16px; }
         .chat-note { font-size:0.68rem; color:var(--text-4); padding:0 1rem 0.75rem; text-align:center; }
         .chat-note a { color:var(--gold); text-decoration:none; }
+        .chat-contact-form { display:flex; flex-direction:column; gap:0.5rem; margin-top:0.25rem; padding:0.6rem; background:var(--gold-bg); border:1px solid rgba(212,187,126,0.25); border-radius:0.75rem; }
+        html.dark .chat-contact-form { background:rgba(212,187,126,0.06); border-color:rgba(212,187,126,0.2); }
+        .chat-contact-input { width:100%; padding:0.6rem 0.75rem; border:1px solid var(--border); border-radius:0.6rem; background:var(--bg-alt); color:var(--text); font-size:16px; font-family:inherit; outline:none; transition:border-color 0.2s; }
+        .chat-contact-input:focus { border-color:var(--gold); }
+        html.dark .chat-contact-input { background:#0a0a0a; border-color:#2a2a2a; }
+        .chat-contact-btn { padding:0.65rem 1rem; background:var(--gold); color:var(--black); border:none; border-radius:0.6rem; font-weight:600; font-size:0.85rem; cursor:pointer; transition:opacity 0.2s, transform 0.15s; font-family:inherit; }
+        .chat-contact-btn:disabled { opacity:0.4; cursor:not-allowed; }
+        .chat-contact-btn:not(:disabled):active { transform:scale(0.97); }
+        .chat-contact-note { font-size:0.68rem; color:var(--text-4); text-align:center; }
 
         /* Floating launcher button */
         .messenger-btn {
@@ -1137,6 +1146,9 @@
         }
         .admin-thread-head .meta { font-size:0.8rem; color:var(--text-3); font-family:'JetBrains Mono',monospace; }
         .admin-thread-head .name { font-weight:600; color:var(--text); }
+        .admin-contact { display:flex; flex-direction:column; gap:0.15rem; font-size:0.72rem; color:var(--text-3); font-family:'JetBrains Mono',monospace; margin-top:0.35rem; }
+        .admin-contact span { word-break:break-all; }
+        @media (min-width:601px){ .admin-contact { flex-direction:row; gap:1rem; } }
         .admin-thread-head .unread { background:var(--gold); color:var(--black); padding:0.15rem 0.5rem; border-radius:999px; font-size:0.7rem; font-weight:700; }
         .unread-badge { display:inline-block; background:#ef4444; color:#fff; font-size:0.75rem; font-weight:700; padding:0.1rem 0.55rem; border-radius:999px; margin-left:0.5rem; vertical-align:middle; }
         .admin-delete { background:transparent; border:none; color:var(--text-4); cursor:pointer; font-size:1rem; padding:0.35rem; border-radius:50%; transition:color 0.2s, background 0.2s; line-height:1; }
@@ -1711,16 +1723,14 @@
             </div>
             <button class="chat-close" id="chatClose" aria-label="Close chat">✕</button>
         </div>
-        <div class="chat-body" id="chatBody">
-            <div class="chat-msg bot">Hi there!<br>Type your message below and tap Send — it'll open straight to my Messenger so I get it instantly.</div>
-        </div>
+        <div class="chat-body" id="chatBody"></div>
         <div class="chat-foot">
             <input type="text" class="chat-input" id="chatInput" placeholder="Type a message…" maxlength="500" aria-label="Your message">
-            <button class="chat-send" id="chatSend" aria-label="Send to Messenger" disabled>
+            <button class="chat-send" id="chatSend" aria-label="Send message" disabled>
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.4 20.4L20.9 12.9c.7-.3.7-1.3 0-1.6L3.4 3.6c-.6-.3-1.3.2-1.2.9L4 11l11 1L4 13l-1.8 6.5c-.1.7.6 1.2 1.2.9z"/></svg>
             </button>
         </div>
-        <div class="chat-note">Delivered via <a href="https://m.me/kylemheler02" target="_blank" rel="noopener noreferrer">Facebook Messenger</a></div>
+        <div class="chat-note">Messages delivered directly to Kyle · He replies here</div>
     </div>
     <!-- Launcher button -->
     <button class="messenger-btn" id="messengerBtn" aria-label="Open chat" aria-expanded="false">
@@ -2090,164 +2100,366 @@
        Admin panel is at #admin (password-protected).
        To connect a real backend (Firebase, etc.), replace loadMsgs/saveMsg/saveReply
        with API calls. The UI is fully built. */
+    /* ── Firebase Realtime Database (optional cross-device sync) ── */
+    // To enable real-time cross-device sync, create a free Firebase project at
+    // https://console.firebase.google.com → Add Web App → copy the config object below.
+    // Then in Firebase console → Build → Realtime Database → Create DB (start in locked mode
+    // and use these rules so only admin can read everything; visitors can only write their own thread):
+    //
+    //   {
+    //     "rules": {
+    //       "kmm_threads": {
+    //         ".read": "auth != null && auth.uid === 'admin',",
+    //         "$tid": {
+    //           ".read": true,
+    //           ".write": "newData.exists()",
+    //           "messages": { ".validate": "newData.hasChildren(['from','text','ts'])" }
+    //         }
+    //       }
+    //     }
+    //   }
+    //
+    // For a simpler setup (no auth) you can set ".read": true, ".write": true for now.
+    //
+    // Leave FIREBASE_CONFIG as null to stay in localStorage-only mode (single-device demo).
+    const FIREBASE_CONFIG = null;
+    /* Example config:
+    const FIREBASE_CONFIG = {
+        apiKey: "AIza...",
+        authDomain: "your-proj.firebaseapp.com",
+        databaseURL: "https://your-proj-default-rtdb.firebaseio.com",
+        projectId: "your-proj",
+        storageBucket: "your-proj.appspot.com",
+        messagingSenderId: "12345",
+        appId: "1:1234:web:abc"
+    };
+    */
+
     const ChatStore = (function(){
-        const KEY = 'kmm_chat_threads_v1';
+        const KEY = 'kmm_chat_threads_v2';
         const ADMIN_KEY = 'kmm_chat_admin_session';
         const PW_KEY = 'kmm_admin_pw_hash';
+        const VIS_KEY = 'kmm_vis_v1';
         const DEFAULT_PASSWORD = 'kyle2026';
-        // Simple hash (djb2) — not crypto-strong, just avoids plaintext in storage
+        const FB_PATH = 'kmm_threads';
+        let fbDb = null;
+        let fbConnected = false;
+        let listeners = new Set();
+
         function hash(s){ let h=5381; for(let i=0;i<s.length;i++){ h=((h<<5)+h)+s.charCodeAt(i); h|=0;} return 'h_'+h.toString(36); }
         function getPwHash(){ return localStorage.getItem(PW_KEY) || hash(DEFAULT_PASSWORD); }
-        function setPassword(newPw){ localStorage.setItem(PW_KEY, hash(newPw)); }
-        function read() { try { return JSON.parse(localStorage.getItem(KEY)||'{}'); } catch(e){ return {}; } }
-        function write(d) { localStorage.setItem(KEY, JSON.stringify(d)); }
-        function uid() { return 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
-        function getOrCreateThread() {
-            let tid = sessionStorage.getItem('kmm_chat_tid');
-            const all = read();
-            if (tid && all[tid]) return tid;
-            tid = uid();
-            sessionStorage.setItem('kmm_chat_tid', tid);
-            all[tid] = {
-                id: tid,
-                name: 'Guest',
-                createdAt: Date.now(),
-                unread: 0,
-                messages: [{ from:'admin', text:'Hi there! Type your message below and I\'ll get back to you as soon as I can.', ts:Date.now() }]
+        function setPassword(n){ localStorage.setItem(PW_KEY, hash(n)); }
+        function uid(){ return 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+        function readLocal(){ try{return JSON.parse(localStorage.getItem(KEY)||'{}');}catch(e){return{};} }
+        function writeLocal(d){ localStorage.setItem(KEY, JSON.stringify(d)); }
+
+        function onChange(fn){ listeners.add(fn); return ()=>listeners.delete(fn); }
+        function fireChange(){ listeners.forEach(fn=>{ try{fn();}catch(e){} }); }
+
+        /* ── Firebase init (async) ── */
+        (function initFb(){
+            if(!FIREBASE_CONFIG || !FIREBASE_CONFIG.databaseURL) return;
+            if(typeof firebase !== 'undefined') { doInit(firebase); return; }
+            const s = document.createElement('script');
+            s.src = 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js';
+            s.onload = () => {
+                const s2 = document.createElement('script');
+                s2.src = 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js';
+                s2.onload = () => { if(typeof firebase !== 'undefined') doInit(firebase); };
+                document.head.appendChild(s2);
             };
-            write(all);
+            document.head.appendChild(s);
+            function doInit(fb){
+                try{
+                    fb.initializeApp(FIREBASE_CONFIG);
+                    fbDb = fb.database();
+                    fbConnected = true;
+                    // Subscribe to remote changes and merge into local
+                    fbDb.ref(FB_PATH).on('value', snap => {
+                        const remote = snap.val() || {};
+                        const local = readLocal();
+                        const merged = { ...local };
+                        let changed = false;
+                        Object.keys(remote).forEach(id => {
+                            const r = remote[id], l = local[id];
+                            if(!l || (r.lastAt||r.createdAt||0) !== (l.lastAt||l.createdAt||0) || (r.messages||[]).length !== (l.messages||[]).length){
+                                merged[id] = r;
+                                changed = true;
+                            }
+                        });
+                        if(changed){ writeLocal(merged); fireChange(); }
+                    });
+                }catch(e){ console.warn('Firebase init failed:', e); fbDb=null; fbConnected=false; }
+            }
+        })();
+
+        function pushFb(tid, thread){
+            if(!fbDb || !fbConnected) return;
+            try { fbDb.ref(FB_PATH+'/'+tid).set(thread); } catch(e){}
+        }
+
+        function getVisitorInfo(){
+            try {
+                const v = JSON.parse(localStorage.getItem(VIS_KEY)||'null');
+                if(v && v.tid) return v;
+            } catch(e){}
+            return null;
+        }
+        function setVisitorInfo(info){ localStorage.setItem(VIS_KEY, JSON.stringify(info)); }
+
+        function getOrCreateThread() {
+            let v = getVisitorInfo();
+            const all = readLocal();
+            if(v && v.tid && all[v.tid]) {
+                // refresh IP (best-effort, async)
+                fetchIp().then(ip=>{
+                    if(ip && all[v.tid]){
+                        const old = all[v.tid].ip;
+                        if(!old || old !== ip.ip){
+                            all[v.tid].ip = ip.ip;
+                            all[v.tid].country = ip.country||'';
+                            all[v.tid].city = ip.city||'';
+                            all[v.tid].ipHistory = all[v.tid].ipHistory||[];
+                            if(old && old !== ip.ip) all[v.tid].ipHistory.push({ip:old,at:Date.now()});
+                            writeLocal(all);
+                            pushFb(v.tid, all[v.tid]);
+                        }
+                    }
+                }).catch(()=>{});
+                return v.tid;
+            }
+            const tid = uid();
+            const now = Date.now();
+            const thread = {
+                id: tid,
+                name: '',
+                email: '',
+                ip: '', country:'', city:'', ipHistory:[],
+                ua: navigator.userAgent||'',
+                createdAt: now,
+                lastAt: now,
+                unread: 0,
+                messages: [{ from:'admin', text:"Hi! I'd love to help. Before we start, could you share your name and email so I can follow up properly?", ts:now }]
+            };
+            all[tid] = thread;
+            writeLocal(all);
+            setVisitorInfo({ tid, createdAt: now });
+            pushFb(tid, thread);
+            // Attach IP async
+            fetchIp().then(ip=>{
+                const a = readLocal();
+                if(a[tid] && ip){
+                    a[tid].ip = ip.ip||'';
+                    a[tid].country = ip.country||'';
+                    a[tid].city = ip.city||'';
+                    a[tid].ua = ip.ua||a[tid].ua;
+                    writeLocal(a);
+                    pushFb(tid, a[tid]);
+                    fireChange();
+                }
+            }).catch(()=>{});
             return tid;
         }
-        function loadMsgs(tid) { return (read()[tid] && read()[tid].messages) || []; }
-        function saveMsg(tid, text) {
-            const all = read();
-            if (!all[tid]) return;
-            all[tid].messages.push({ from:'visitor', text, ts:Date.now() });
-            all[tid].unread = (all[tid].unread||0) + 1;
-            all[tid].lastAt = Date.now();
-            write(all);
+        function fetchIp(){
+            return fetch('/api/visitor', {cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
         }
-        function saveReply(tid, text) {
-            const all = read();
-            if (!all[tid]) return;
+        function setVisitorContact(tid, name, email){
+            const all = readLocal();
+            if(!all[tid]) return;
+            all[tid].name = name||'';
+            all[tid].email = email||'';
+            all[tid].lastAt = Date.now();
+            writeLocal(all);
+            pushFb(tid, all[tid]);
+            // Update visitor session
+            const v = getVisitorInfo() || {tid, createdAt: all[tid].createdAt};
+            v.name = name; v.email = email;
+            setVisitorInfo(v);
+        }
+        function loadMsgs(tid){ return (readLocal()[tid] && readLocal()[tid].messages) || []; }
+        function getThread(tid){ return readLocal()[tid] || null; }
+        function saveMsg(tid, text){
+            const all = readLocal();
+            if(!all[tid]) return;
+            all[tid].messages.push({ from:'visitor', text, ts:Date.now() });
+            all[tid].unread = (all[tid].unread||0)+1;
+            all[tid].lastAt = Date.now();
+            writeLocal(all);
+            pushFb(tid, all[tid]);
+            fireChange();
+        }
+        function saveReply(tid, text){
+            const all = readLocal();
+            if(!all[tid]) return;
             all[tid].messages.push({ from:'admin', text, ts:Date.now() });
             all[tid].unread = 0;
             all[tid].lastAt = Date.now();
-            write(all);
+            writeLocal(all);
+            pushFb(tid, all[tid]);
+            fireChange();
         }
         function deleteThread(tid){
-            const all = read();
-            delete all[tid];
-            write(all);
+            const all = readLocal();
+            delete all[tid]; writeLocal(all);
+            if(fbDb && fbConnected){ try{ fbDb.ref(FB_PATH+'/'+tid).remove(); }catch(e){} }
+            fireChange();
         }
-        function allThreads() {
-            const all = read();
-            return Object.values(all).sort((a,b) => (b.lastAt||b.createdAt) - (a.lastAt||a.createdAt));
+        function markRead(tid){
+            const all = readLocal();
+            if(all[tid] && all[tid].unread){ all[tid].unread=0; writeLocal(all); pushFb(tid,all[tid]); fireChange(); }
         }
-        function markRead(tid) {
-            const all = read();
-            if (all[tid]) { all[tid].unread = 0; write(all); }
+        function allThreads(){
+            const all = readLocal();
+            return Object.values(all).sort((a,b)=>(b.lastAt||b.createdAt)-(a.lastAt||a.createdAt));
         }
-        function totalUnread() {
-            return Object.values(read()).reduce((s,t) => s + (t.unread||0), 0);
+        function totalUnread(){
+            return Object.values(readLocal()).reduce((s,t)=>s+(t.unread||0),0);
         }
-        function adminLogin(pw) {
-            if (hash(pw) === getPwHash()) { sessionStorage.setItem(ADMIN_KEY, '1'); return true; }
-            return false;
+        function adminLogin(pw){ if(hash(pw)===getPwHash()){sessionStorage.setItem(ADMIN_KEY,'1');return true;} return false; }
+        function adminChangePassword(cur,nw){
+            if(hash(cur)!==getPwHash()) return {ok:false,err:'Current password is incorrect.'};
+            if(!nw||nw.length<4) return {ok:false,err:'Password must be at least 4 characters.'};
+            setPassword(nw); return {ok:true};
         }
-        function adminChangePassword(currentPw, newPw) {
-            if (hash(currentPw) !== getPwHash()) return { ok:false, err:'Current password is incorrect.' };
-            if (!newPw || newPw.length < 4) return { ok:false, err:'New password must be at least 4 characters.' };
-            setPassword(newPw);
-            return { ok:true };
-        }
-        function adminIsAuthed() { return sessionStorage.getItem(ADMIN_KEY) === '1'; }
-        function adminLogout() { sessionStorage.removeItem(ADMIN_KEY); }
-        return { getOrCreateThread, loadMsgs, saveMsg, saveReply, deleteThread, allThreads, markRead, totalUnread, adminLogin, adminIsAuthed, adminLogout, adminChangePassword };
+        function adminIsAuthed(){ return sessionStorage.getItem(ADMIN_KEY)==='1'; }
+        function adminLogout(){ sessionStorage.removeItem(ADMIN_KEY); }
+        function isFbConnected(){ return fbConnected; }
+        return { getOrCreateThread, setVisitorContact, getVisitorInfo, loadMsgs, getThread, saveMsg, saveReply, deleteThread, allThreads, markRead, totalUnread, adminLogin, adminIsAuthed, adminLogout, adminChangePassword, onChange, isFbConnected };
     })();
 
-    /* ---- Visitor chat widget ---- */
+    /* ── VISITOR CHAT WIDGET ── */
     (function(){
         const btn = document.getElementById('messengerBtn');
         const chat = document.getElementById('messengerChat');
         const closeBtn = document.getElementById('chatClose');
+        const body = document.getElementById('chatBody');
         const input = document.getElementById('chatInput');
         const sendBtn = document.getElementById('chatSend');
-        const body = document.getElementById('chatBody');
         const badge = document.getElementById('msgBadge');
-        if (!btn || !chat || !input || !sendBtn || !body) return;
+        if(!btn || !chat || !body || !input || !sendBtn) return;
 
-        const tid = ChatStore.getOrCreateThread();
         let isOpen = false;
+        let contactSet = false;
+        const tid = ChatStore.getOrCreateThread();
+        const v = ChatStore.getVisitorInfo() || {};
+        if(v.name && v.email) contactSet = true;
 
-        function render() {
-            // Render only visitor's conversation in the widget
+        function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+        function appendMsg(who, text, scroll=true){
+            const el = document.createElement('div');
+            el.className = 'chat-msg ' + (who==='admin'?'bot':'user');
+            el.textContent = text;
+            body.appendChild(el);
+            if(scroll) body.scrollTop = body.scrollHeight;
+        }
+        function render(){
             body.innerHTML = '';
-            ChatStore.loadMsgs(tid).forEach(m => appendMsg(m.from, m.text, false));
+            const t = ChatStore.getThread(tid);
+            const msgs = t ? t.messages : ChatStore.loadMsgs(tid);
+            // If contact not set, show contact form before message input
+            msgs.forEach(m => appendMsg(m.from, m.text, false));
+            if(!contactSet){
+                const form = document.createElement('div');
+                form.className = 'chat-contact-form';
+                form.innerHTML = `
+                    <input type="text" class="chat-contact-input" id="chatName" placeholder="Your name" maxlength="60" aria-label="Your name">
+                    <input type="email" class="chat-contact-input" id="chatEmail" placeholder="Your email" maxlength="120" aria-label="Your email">
+                    <button class="chat-contact-btn" id="chatContactBtn" disabled>Continue →</button>
+                    <div class="chat-contact-note">I'll only use this to reply to you.</div>`;
+                body.appendChild(form);
+                const nameI = form.querySelector('#chatName');
+                const emailI = form.querySelector('#chatEmail');
+                const submit = form.querySelector('#chatContactBtn');
+                function validate(){ submit.disabled = !(nameI.value.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailI.value.trim())); }
+                nameI.addEventListener('input', validate);
+                emailI.addEventListener('input', validate);
+                function submitContact(){
+                    if(submit.disabled) return;
+                    const name = nameI.value.trim();
+                    const email = emailI.value.trim();
+                    ChatStore.setVisitorContact(tid, name, email);
+                    contactSet = true;
+                    // Remove form and system msg
+                    form.remove();
+                    appendMsg('admin', 'Thanks ' + name.split(' ')[0] + '! What can I help you with today?');
+                    input.focus();
+                }
+                submit.addEventListener('click', submitContact);
+                [nameI, emailI].forEach(i => i.addEventListener('keydown', e=>{ if(e.key==='Enter') submitContact(); }));
+                // Prefill if we have partial info
+                if(v.name) nameI.value = v.name;
+                if(v.email) emailI.value = v.email;
+                validate();
+                setTimeout(()=>nameI.focus(), 250);
+            }
             body.scrollTop = body.scrollHeight;
-            updateBadge();
         }
-        function appendMsg(from, text, scroll=true) {
-            const div = document.createElement('div');
-            div.className = 'chat-msg ' + (from === 'admin' ? 'bot' : 'user');
-            div.textContent = text;
-            body.appendChild(div);
-            if (scroll) body.scrollTop = body.scrollHeight;
-        }
-        function updateBadge() {
-            if (!badge) return;
+        function updateBadge(){
             const all = ChatStore.totalUnread();
-            if (all > 0) {
+            if(all > 0){
                 badge.style.display = 'flex';
                 badge.textContent = all > 9 ? '9+' : all;
             } else {
                 badge.style.display = 'none';
             }
         }
-        function openChat() {
+        function openChat(){
             isOpen = true;
             chat.classList.add('open');
             btn.classList.add('open');
-            btn.setAttribute('aria-expanded', 'true');
-            chat.setAttribute('aria-hidden', 'false');
+            btn.setAttribute('aria-expanded','true');
+            chat.setAttribute('aria-hidden','false');
             ChatStore.markRead(tid);
             updateBadge();
-            setTimeout(() => { input.focus(); render(); }, 200);
+            setTimeout(()=>{ render(); if(contactSet) input.focus(); }, 200);
         }
-        function closeChat() {
+        function closeChat(){
             isOpen = false;
             chat.classList.remove('open');
             btn.classList.remove('open');
-            btn.setAttribute('aria-expanded', 'false');
-            chat.setAttribute('aria-hidden', 'true');
+            btn.setAttribute('aria-expanded','false');
+            chat.setAttribute('aria-hidden','true');
         }
-        function sendMsg() {
+        function sendMsg(){
             const text = input.value.trim();
-            if (!text) return;
+            if(!text) return;
+            if(!contactSet) return;
             ChatStore.saveMsg(tid, text);
             appendMsg('visitor', text);
             input.value = '';
             sendBtn.disabled = true;
-            setTimeout(() => {
-                appendMsg('admin', 'Thanks! Your message is received. I\'ll reply here — check back in a bit.');
-            }, 600);
+            setTimeout(()=>{
+                appendMsg('admin', 'Thanks! Your message is received. I\'ll get back to you as soon as I can.');
+            }, 700);
         }
 
-        btn.addEventListener('click', () => { isOpen ? closeChat() : openChat(); });
+        btn.addEventListener('click', ()=>{ isOpen ? closeChat() : openChat(); });
         closeBtn.addEventListener('click', closeChat);
-        input.addEventListener('input', () => { sendBtn.disabled = !input.value.trim(); });
-        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMsg(); });
+        input.addEventListener('input', ()=>{ sendBtn.disabled = !input.value.trim() || !contactSet; });
+        input.addEventListener('keydown', e=>{ if(e.key==='Enter') sendMsg(); });
         sendBtn.addEventListener('click', sendMsg);
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen) closeChat(); });
+        document.addEventListener('keydown', e=>{ if(e.key==='Escape' && isOpen) closeChat(); });
 
-        // Watch for admin replies from other tabs/windows
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'kmm_chat_threads_v1') {
-                if (isOpen) render();
-                updateBadge();
+        // Live updates: replies from admin in other tabs/windows/devices
+        function syncIncoming(){
+            const t = ChatStore.getThread(tid);
+            if(!t) return;
+            if(isOpen){
+                const msgs = body.querySelectorAll('.chat-msg');
+                const currentCount = msgs.length;
+                if(t.messages.length !== currentCount){
+                    // Append new messages
+                    t.messages.slice(currentCount).forEach(m => appendMsg(m.from, m.text));
+                }
             }
-        });
+            updateBadge();
+        }
+        window.addEventListener('storage', syncIncoming);
+        ChatStore.onChange(syncIncoming);
         render();
+        updateBadge();
     })();
 
     /* ---- Admin panel ---- */
@@ -2326,11 +2538,18 @@
                 wrap.className = 'admin-thread';
                 const unreadBadge = t.unread ? '<span class="unread">'+t.unread+' new</span>' : '';
                 const when = new Date(t.createdAt).toLocaleString();
+                const nameDisplay = t.name ? escapeHtml(t.name) : '<em style="color:var(--text-4);font-weight:400;">(no name yet)</em>';
+                const emailLine = t.email ? `<a href="mailto:${escapeHtml(t.email)}" style="color:var(--gold);text-decoration:none;">${escapeHtml(t.email)}</a>` : '<span style="color:var(--text-4);">no email</span>';
+                const ipLine = t.ip ? `${escapeHtml(t.ip)}${t.city ? ' · '+escapeHtml(t.city) : ''}${t.country ? ', '+escapeHtml(t.country) : ''}` : '<span style="color:var(--text-4);">IP pending…</span>';
                 wrap.innerHTML = `
                     <div class="admin-thread-head">
                         <div>
-                            <div class="name">${escapeHtml(t.name)} ${unreadBadge}</div>
+                            <div class="name">${nameDisplay} ${unreadBadge}</div>
                             <div class="meta">${when} · ${t.messages.length} msgs</div>
+                            <div class="admin-contact">
+                                <span title="Email">✉ ${emailLine}</span>
+                                <span title="IP / location">📍 ${ipLine}</span>
+                            </div>
                         </div>
                         <button class="admin-delete" data-tid="${t.id}" title="Delete thread" aria-label="Delete thread">🗑</button>
                     </div>
@@ -2458,12 +2677,10 @@
         }
         window.addEventListener('hashchange', routeHash);
         routeHash();
-        // Check for new messages every 2s (covers same-tab saves) and on storage events (cross-tab)
-        setInterval(checkNewMessages, 2000);
-        window.addEventListener('storage', () => {
-            lastUnreadCount = ChatStore.totalUnread();
-            checkNewMessages();
-        });
+        // Live updates: storage (cross-tab) + ChatStore.onChange (Firebase pushes)
+        setInterval(checkNewMessages, 1500);
+        window.addEventListener('storage', () => { lastUnreadCount = ChatStore.totalUnread(); checkNewMessages(); });
+        ChatStore.onChange(() => { lastUnreadCount = ChatStore.totalUnread(); checkNewMessages(); });
         document.addEventListener('visibilitychange', () => { if (!document.hidden) checkNewMessages(); });
     }
     // Init admin (panel is in DOM above this script)
