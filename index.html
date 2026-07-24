@@ -1684,6 +1684,9 @@
     </div>
 </footer>
 
+<!-- Admin panel (access via #admin) -->
+<div class="admin-panel" id="adminPanel" role="dialog" aria-label="Admin panel"></div>
+
 <!-- SCROLL TOP -->
 <button class="scroll-top" id="scrollTop" aria-label="Scroll to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="18 15 12 9 6 15"/></svg>
@@ -2225,7 +2228,7 @@
     })();
 
     /* ---- Admin panel ---- */
-    (function(){
+    function initAdmin() {
         const panel = document.getElementById('adminPanel');
         if (!panel) return;
 
@@ -2329,7 +2332,11 @@
         routeHash();
         // Storage events re-render admin live when messages come in from other tabs
         window.addEventListener('storage', () => { if (panel.classList.contains('active')) render(); });
-    })();
+    }
+    // Init admin (panel is in DOM above this script)
+    initAdmin();
+    // Also re-run on DOMContentLoaded as a safety net
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initAdmin);
 
     if(document.readyState === 'complete') initThree();
     else window.addEventListener('load', initThree);
@@ -2435,9 +2442,6 @@
     })();
 })();
 </script>
-
-<!-- Admin panel (access via #admin) -->
-<div class="admin-panel" id="adminPanel" role="dialog" aria-label="Admin panel"></div>
 
 <script>
 // Register service worker for PWA installability
