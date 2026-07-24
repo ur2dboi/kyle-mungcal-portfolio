@@ -127,12 +127,16 @@ async function updateContact(id,name,email){
 async function sendMsg(id,text){
   const t=await sbGet(id); if(!t) return badRequest('Thread not found',404);
   t.messages.push({from:'visitor',text:String(text||'').slice(0,2000),ts:Date.now()});
+  // Auto-acknowledgement: add a placeholder bot message; admin replies will remove it.
+  t.messages.push({from:'admin',text:"Thanks! Kyle will get back to you shortly.",ts:Date.now()+1,_auto:true});
   t.unread=(t.unread||0)+1; t.lastAt=Date.now();
   await sbUp(t); return {thread:t};
 }
 async function reply(id,text,params){
   if(!isAdmin(params)) return badRequest('Unauthorized',401);
   const t=await sbGet(id); if(!t) return badRequest('Thread not found',404);
+  // Remove any auto-ack placeholder messages before adding real admin reply
+  t.messages = t.messages.filter(m=>!(m._auto));
   t.messages.push({from:'admin',text:String(text||'').slice(0,2000),ts:Date.now()});
   t.unread=0; t.lastAt=Date.now();
   await sbUp(t); return {thread:t};

@@ -2247,9 +2247,11 @@
         function loadMsgs(tid){ return (cache[tid]&&cache[tid].messages)||[]; }
         function getThread(tid){ return cache[tid]||null; }
         async function saveMsg(tid, text){
-            // Optimistic UI
+            const ts = Date.now();
+            // Optimistic UI — include auto-ack so it appears instantly
             if(cache[tid]){
-                cache[tid].messages.push({from:'visitor',text,ts:Date.now()});
+                cache[tid].messages.push({from:'visitor',text,ts});
+                cache[tid].messages.push({from:'admin',text:"Thanks! Kyle will get back to you shortly.",ts:ts+1,_auto:true});
                 cache[tid].unread=(cache[tid].unread||0)+1;
                 cache[tid].lastAt=Date.now();
                 writeCache(cache);
@@ -2334,7 +2336,7 @@
         // Polling for real-time updates (cheap — single GET per poll)
         function startPolling(){
             if(pollTimer) return;
-            pollTimer = setInterval(pollOnce, 2000);
+            pollTimer = setInterval(pollOnce, 900);
             pollOnce();
         }
         function stopPolling(){
@@ -2405,9 +2407,9 @@
         } else if(adminIsAuthed()){
             startPolling();
         }
-        // For visitor: start polling if we have a thread
+        // For visitor: start polling if we have a thread (faster interval for near-instant replies)
         if(getVis() && getVis().tid){
-            setInterval(pollOnce, 2500);
+            setInterval(pollOnce, 900);
             setTimeout(pollOnce, 300);
         }
         // Also listen to storage (cross-tab same-device)
@@ -2517,7 +2519,6 @@
             await ChatStore.saveMsg(tid, text);
             // Notify tracking that visitor sent first message
             try{ window.dispatchEvent(new CustomEvent('kmm:messaged',{detail:{tid}})); }catch(e){}
-            setTimeout(()=>appendMsg('admin','Thanks! Your message is received — I\'ll get back to you here as soon as I can.'),600);
         }
 
         btn.addEventListener('click', ()=>{ isOpen ? closeChat() : openChat(); });
@@ -2740,7 +2741,7 @@
                         <button>Send</button>
                     </div>`;
                 const msgsEl = wrap.querySelector('.admin-msgs');
-                t.messages.forEach(m => {
+                t.messages.filter(m=>!m._auto).forEach(m => {
                     const mEl = document.createElement('div');
                     mEl.className = 'admin-msg ' + (m.from === 'admin' ? 'admin' : 'visitor');
                     mEl.innerHTML = `<div class="who">${m.from === 'admin' ? 'You (admin)' : 'Visitor'} · ${new Date(m.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div><div class="body"></div>`;

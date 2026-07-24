@@ -239,7 +239,7 @@ async function poll(){
   }
   updateSync();
 }
-function startPoll(){if(pollTimer)return;pollTimer=setInterval(poll,1500);poll();}
+function startPoll(){if(pollTimer)return;pollTimer=setInterval(poll,800);poll();}
 function stopPoll(){if(pollTimer){clearInterval(pollTimer);pollTimer=null;}}
 
 /* Render */
@@ -335,7 +335,7 @@ function render(){
           <button class="del" data-del="${t.id}" aria-label="Delete">🗑</button>
         </div>
         <div class="msgs">`;
-      t.messages.slice(-30).forEach(m=>{
+      t.messages.filter(m=>!m._auto).slice(-30).forEach(m=>{
         h+=`<div class="msg ${m.from}"><div class="who">${m.from==='admin'?'You':'Visitor'} · ${fmtTime(m.ts)}</div><div class="body">${escapeHtml(m.text)}</div></div>`;
       });
       h+=`</div><div class="reply"><input type="text" placeholder="Write a reply…" maxlength="500"><button>Send</button></div></div>`;
