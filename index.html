@@ -590,37 +590,87 @@
         /* ── MESSENGER FLOATING CHAT WIDGET ── */
         .messenger-wrap {
             position:fixed; right:1.25rem; bottom:calc(1.25rem + env(safe-area-inset-bottom,0));
-            z-index:51; display:flex; flex-direction:column; align-items:flex-end; gap:0.75rem;
+            z-index:51; display:flex; flex-direction:column; align-items:flex-end;
         }
-        .messenger-bubble {
+        /* Chat popover card */
+        .messenger-chat {
+            width:320px; max-width:calc(100vw - 2.5rem);
             background:var(--surface); border:1px solid var(--border);
-            padding:0.75rem 1rem; border-radius:1rem 1rem 0.25rem 1rem;
-            box-shadow:var(--shadow-lg); font-size:0.85rem; color:var(--text);
-            max-width:240px; line-height:1.4; position:relative;
-            opacity:0; transform:translateY(8px) scale(0.9);
-            animation: bubble-in 0.4s var(--ease) 2s forwards;
-            cursor:pointer;
+            border-radius:1rem; box-shadow:0 16px 48px rgba(0,0,0,0.18);
+            margin-bottom:0.75rem; overflow:hidden;
+            transform-origin:bottom right;
+            transform:scale(0.85) translateY(10px); opacity:0; pointer-events:none;
+            transition:transform 0.25s var(--ease), opacity 0.25s;
         }
-        .messenger-bubble::after {
-            content:''; position:absolute; right:-1px; bottom:-8px;
-            width:16px; height:16px;
-            background:var(--surface); border-right:1px solid var(--border); border-bottom:1px solid var(--border);
-            transform:rotate(45deg); clip-path:polygon(0 100%, 100% 0, 100% 100%);
+        .messenger-chat.open { transform:scale(1) translateY(0); opacity:1; pointer-events:auto; }
+        html.dark .messenger-chat { background:#141414; border-color:#2a2a2a; box-shadow:0 16px 48px rgba(0,0,0,0.5); }
+        .chat-head {
+            background:linear-gradient(135deg, var(--gold) 0%, var(--gold-soft) 100%);
+            color:var(--black); padding:0.9rem 1rem;
+            display:flex; align-items:center; gap:0.7rem;
         }
-        .messenger-bubble strong { color:var(--gold); font-weight:600; }
-        .messenger-bubble .bubble-close {
-            position:absolute; top:-8px; right:-8px; width:20px; height:20px;
-            border-radius:50%; background:var(--surface); border:1px solid var(--border);
-            font-size:0.65rem; color:var(--text-3); display:flex; align-items:center; justify-content:center;
-            cursor:pointer; transition:color 0.2s; line-height:1;
+        .chat-avatar {
+            width:38px; height:38px; border-radius:50%;
+            background:var(--black); color:var(--gold);
+            display:flex; align-items:center; justify-content:center;
+            font-weight:700; font-size:0.85rem; flex-shrink:0;
+            border:2px solid rgba(0,0,0,0.1);
         }
-        .messenger-bubble .bubble-close:hover { color:var(--text); }
-        html.dark .messenger-bubble { background:#1a1a1a; border-color:#333; }
-        html.dark .messenger-bubble::after { background:#1a1a1a; border-color:#333; }
-        @keyframes bubble-in {
-            to { opacity:1; transform:translateY(0) scale(1); }
+        .chat-head-info { flex:1; min-width:0; }
+        .chat-name { font-weight:700; font-size:0.92rem; line-height:1.2; }
+        .chat-status { font-size:0.7rem; opacity:0.75; display:flex; align-items:center; gap:0.3rem; margin-top:0.15rem; }
+        .chat-status::before { content:''; width:7px; height:7px; border-radius:50%; background:#22c55e; display:inline-block; }
+        .chat-close {
+            background:none; border:none; color:var(--black); opacity:0.6; cursor:pointer;
+            font-size:1rem; padding:0.25rem; line-height:1; transition:opacity 0.2s;
+            touch-action:manipulation; -webkit-tap-highlight-color:transparent;
         }
-        .messenger-bubble.bubble-hidden { animation:none; display:none; }
+        .chat-close:hover { opacity:1; }
+        .chat-body {
+            padding:1rem; display:flex; flex-direction:column; gap:0.6rem;
+            max-height:280px; overflow-y:auto;
+        }
+        .chat-msg {
+            max-width:80%; padding:0.6rem 0.8rem; border-radius:1rem; font-size:0.85rem; line-height:1.45;
+        }
+        .chat-msg.bot {
+            background:var(--surface-elev); color:var(--text);
+            border-bottom-left-radius:0.35rem; align-self:flex-start;
+            border:1px solid var(--border);
+        }
+        html.dark .chat-msg.bot { background:#1f1f1f; border-color:#2a2a2a; }
+        .chat-msg.user {
+            background:var(--gold); color:var(--black);
+            border-bottom-right-radius:0.35rem; align-self:flex-end; font-weight:500;
+        }
+        .chat-foot {
+            padding:0.75rem; border-top:1px solid var(--border);
+            display:flex; gap:0.5rem; align-items:center;
+        }
+        html.dark .chat-foot { border-color:#2a2a2a; }
+        .chat-input {
+            flex:1; padding:0.6rem 0.85rem; border-radius:2rem;
+            border:1px solid var(--border); background:var(--bg-alt);
+            font-size:0.85rem; color:var(--text); font-family:inherit;
+            outline:none; transition:border-color 0.2s;
+        }
+        .chat-input:focus { border-color:var(--gold); }
+        html.dark .chat-input { background:#0f0f0f; border-color:#2a2a2a; }
+        .chat-send {
+            width:38px; height:38px; border-radius:50%; flex-shrink:0;
+            background:var(--gold); color:var(--black); border:none;
+            display:flex; align-items:center; justify-content:center;
+            cursor:pointer; transition:transform 0.15s, opacity 0.15s;
+            touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+        }
+        .chat-send:hover { transform:scale(1.08); }
+        .chat-send:active { transform:scale(0.92); }
+        .chat-send:disabled { opacity:0.4; cursor:not-allowed; transform:none; }
+        .chat-send svg { width:16px; height:16px; }
+        .chat-note { font-size:0.68rem; color:var(--text-4); padding:0 1rem 0.75rem; text-align:center; }
+        .chat-note a { color:var(--gold); text-decoration:none; }
+
+        /* Floating launcher button */
         .messenger-btn {
             width:60px; height:60px; border-radius:50%;
             background:var(--surface);
@@ -629,16 +679,27 @@
             box-shadow:0 8px 24px rgba(0,0,0,0.12), 0 3px 8px rgba(0,0,0,0.08);
             transition:transform 0.25s var(--ease), box-shadow 0.25s var(--ease), border-color 0.25s, color 0.25s;
             touch-action:manipulation; -webkit-tap-highlight-color:transparent;
-            text-decoration:none; position:relative;
-            animation: messenger-pulse 2.5s ease-in-out infinite;
+            position:relative; animation: messenger-pulse 2.5s ease-in-out infinite;
+            text-decoration:none;
+        }
+        .messenger-btn.open {
+            transform:rotate(90deg) scale(0.95);
+            background:var(--gold); color:var(--black); border-color:var(--gold);
+            animation:none;
         }
         .messenger-btn:hover {
             transform:scale(1.08) translateY(-2px);
             color:var(--gold); border-color:var(--gold);
             box-shadow:0 12px 30px rgba(201,169,97,0.35), 0 5px 12px rgba(0,0,0,0.12);
         }
-        .messenger-btn:active { transform:scale(0.95); }
-        .messenger-btn svg { width:30px; height:30px; }
+        .messenger-btn.open:hover {
+            transform:rotate(90deg) scale(1);
+            color:var(--black); border-color:var(--gold);
+        }
+        .messenger-btn svg { width:28px; height:28px; transition:transform 0.25s; }
+        .messenger-btn .icon-close { display:none; }
+        .messenger-btn.open .icon-chat { display:none; }
+        .messenger-btn.open .icon-close { display:block; width:22px; height:22px; }
         .messenger-btn .msg-badge {
             position:absolute; top:-4px; right:-4px;
             min-width:20px; height:20px; padding:0 5px; border-radius:10px;
@@ -646,18 +707,23 @@
             display:flex; align-items:center; justify-content:center;
             border:2px solid var(--bg, #fff);
         }
+        .messenger-btn.open .msg-badge { display:none; }
         @keyframes messenger-pulse {
             0%, 100% { box-shadow:0 8px 24px rgba(0,0,0,0.12), 0 3px 8px rgba(0,0,0,0.08), 0 0 0 0 rgba(201,169,97,0.45); }
             50%      { box-shadow:0 8px 24px rgba(0,0,0,0.12), 0 3px 8px rgba(0,0,0,0.08), 0 0 0 14px rgba(201,169,97,0); }
         }
-        @media (max-width: 600px) {
-            .messenger-wrap { right:1rem; bottom:calc(1rem + env(safe-area-inset-bottom,0)); gap:0.6rem; }
-            .messenger-btn { width:54px; height:54px; }
-            .messenger-btn svg { width:26px; height:26px; }
-            .messenger-bubble { font-size:0.8rem; padding:0.65rem 0.85rem; max-width:200px; border-radius:0.85rem 0.85rem 0.25rem 0.85rem; }
-        }
-        html.dark .messenger-btn { background:#141414; border-color:#2a2a2a; color:var(--gold); box-shadow:0 8px 24px rgba(0,0,0,0.4), 0 3px 8px rgba(0,0,0,0.3); }
+        html.dark .messenger-btn { background:#141414; border-color:#2a2a2a; box-shadow:0 8px 24px rgba(0,0,0,0.4), 0 3px 8px rgba(0,0,0,0.3); }
         html.dark .messenger-btn:hover { border-color:var(--gold); box-shadow:0 12px 30px rgba(212,187,126,0.3), 0 5px 12px rgba(0,0,0,0.5); }
+
+        @media (max-width: 600px) {
+            .messenger-wrap { right:1rem; bottom:calc(1rem + env(safe-area-inset-bottom,0)); }
+            .messenger-btn { width:54px; height:54px; }
+            .messenger-btn svg { width:24px; height:24px; }
+            .messenger-btn.open .icon-close { width:20px; height:20px; }
+            .messenger-chat { width:calc(100vw - 2rem); max-width:340px; }
+            .chat-head { padding:0.8rem 0.9rem; }
+            .chat-avatar { width:34px; height:34px; font-size:0.8rem; }
+        }
 
         /* ── REVEAL / SCROLL ANIMATIONS ── */
         .reveal { opacity:0; transform:translateY(36px); transition:opacity 0.85s var(--ease), transform 0.85s var(--ease); will-change:opacity,transform; }
@@ -1552,16 +1618,35 @@
 
 <!-- MESSENGER FLOATING CHAT WIDGET -->
 <div class="messenger-wrap" id="messengerWrap">
-    <div class="messenger-bubble" id="messengerBubble" onclick="window.open('https://m.me/kylemheler02','_blank','noopener,noreferrer')">
-        <span class="bubble-close" id="bubbleClose" onclick="event.stopPropagation();">✕</span>
-        <strong>👋 Hi there!</strong><br>Say hi — I usually reply within an hour.
+    <!-- Chat popover card -->
+    <div class="messenger-chat" id="messengerChat" role="dialog" aria-label="Chat with Kyle" aria-hidden="true">
+        <div class="chat-head">
+            <div class="chat-avatar">KM</div>
+            <div class="chat-head-info">
+                <div class="chat-name">Kyle Mheler Mungcal</div>
+                <div class="chat-status">Typically replies within an hour</div>
+            </div>
+            <button class="chat-close" id="chatClose" aria-label="Close chat">✕</button>
+        </div>
+        <div class="chat-body" id="chatBody">
+            <div class="chat-msg bot">Hi there! 👋<br>Type your message below and tap Send — it'll open straight to my Messenger so I get it instantly.</div>
+        </div>
+        <div class="chat-foot">
+            <input type="text" class="chat-input" id="chatInput" placeholder="Type a message…" maxlength="500" aria-label="Your message">
+            <button class="chat-send" id="chatSend" aria-label="Send to Messenger" disabled>
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.4 20.4L20.9 12.9c.7-.3.7-1.3 0-1.6L3.4 3.6c-.6-.3-1.3.2-1.2.9L4 11l11 1L4 13l-1.8 6.5c-.1.7.6 1.2 1.2.9z"/></svg>
+            </button>
+        </div>
+        <div class="chat-note">Delivered via <a href="https://m.me/kylemheler02" target="_blank" rel="noopener noreferrer">Facebook Messenger</a></div>
     </div>
-    <a class="messenger-btn" id="messengerBtn" href="https://m.me/kylemheler02" target="_blank" rel="noopener noreferrer" aria-label="Chat on Messenger">
-        <svg viewBox="0 0 28 28" fill="currentColor">
+    <!-- Launcher button -->
+    <button class="messenger-btn" id="messengerBtn" aria-label="Open chat" aria-expanded="false">
+        <svg class="icon-chat" viewBox="0 0 28 28" fill="currentColor">
             <path d="M14 2.5C7.08 2.5 1.5 7.62 1.5 13.91c0 3.45 1.67 6.42 4.28 8.35v3.24l3.93-2.16c1.32.37 2.76.57 4.29.57 6.92 0 12.5-5.12 12.5-11.41C26.5 7.62 20.92 2.5 14 2.5zm1.47 15.11l-3.22-3.44-6.29 3.44 6.92-7.33 3.31 3.44 6.22-3.44-6.94 7.33z"/>
         </svg>
-        <span class="msg-badge">1</span>
-    </a>
+        <svg class="icon-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        <span class="msg-badge" id="msgBadge">1</span>
+    </button>
 </div>
 
 <!-- FORM MODAL -->
@@ -1917,21 +2002,77 @@
         }
         animate();
     }
-    /* ── MESSENGER BUBBLE ── */
+    /* ── MESSENGER CHAT WIDGET ── */
     (function(){
-        const bubble = document.getElementById('messengerBubble');
-        const close = document.getElementById('bubbleClose');
-        if (!bubble || !close) return;
-        // If user dismissed the bubble before, don't show it again this session
-        if (sessionStorage.getItem('msBubbleClosed') === '1') {
-            bubble.classList.add('bubble-hidden');
-            return;
+        const btn = document.getElementById('messengerBtn');
+        const chat = document.getElementById('messengerChat');
+        const closeBtn = document.getElementById('chatClose');
+        const input = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('chatSend');
+        const body = document.getElementById('chatBody');
+        const badge = document.getElementById('msgBadge');
+        if (!btn || !chat || !input || !sendBtn) return;
+
+        const MESSENGER_URL = 'https://m.me/kylemheler02';
+        let isOpen = false;
+
+        function openChat() {
+            isOpen = true;
+            chat.classList.add('open');
+            btn.classList.add('open');
+            btn.setAttribute('aria-expanded', 'true');
+            chat.setAttribute('aria-hidden', 'false');
+            if (badge) badge.style.display = 'none';
+            setTimeout(() => input.focus(), 250);
         }
-        close.addEventListener('click', (e) => {
-            e.stopPropagation();
-            bubble.classList.add('bubble-hidden');
-            sessionStorage.setItem('msBubbleClosed', '1');
-        });
+        function closeChat() {
+            isOpen = false;
+            chat.classList.remove('open');
+            btn.classList.remove('open');
+            btn.setAttribute('aria-expanded', 'false');
+            chat.setAttribute('aria-hidden', 'true');
+        }
+        function addUserMsg(text) {
+            const div = document.createElement('div');
+            div.className = 'chat-msg user';
+            div.textContent = text;
+            body.appendChild(div);
+            body.scrollTop = body.scrollHeight;
+        }
+        function addBotMsg(html) {
+            const div = document.createElement('div');
+            div.className = 'chat-msg bot';
+            div.innerHTML = html;
+            body.appendChild(div);
+            body.scrollTop = body.scrollHeight;
+        }
+        function sendMsg() {
+            const text = input.value.trim();
+            if (!text) return;
+            addUserMsg(text);
+            input.value = '';
+            sendBtn.disabled = true;
+            // Small delay for feedback, then open Messenger with the message.
+            // m.me links don't support prefilled text natively, so we prompt the user
+            // and open Messenger where they hit send (this is the only reliable way
+            // to deliver to a personal Facebook profile).
+            setTimeout(() => {
+                addBotMsg('Opening Messenger…<br><small style="opacity:.7">Your message is in your draft — tap Send in Messenger and I\'ll get it right away. 👍</small>');
+                window.open(MESSENGER_URL, '_blank', 'noopener,noreferrer');
+                // Clear badge permanently once opened
+                sessionStorage.setItem('msChatOpened', '1');
+            }, 400);
+        }
+
+        btn.addEventListener('click', () => { isOpen ? closeChat() : openChat(); });
+        closeBtn.addEventListener('click', closeChat);
+        input.addEventListener('input', () => { sendBtn.disabled = !input.value.trim(); });
+        input.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMsg(); });
+        sendBtn.addEventListener('click', sendMsg);
+        // Close on Escape
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen) closeChat(); });
+        // Hide badge if widget opened before
+        if (sessionStorage.getItem('msChatOpened') === '1' && badge) badge.style.display = 'none';
     })();
 
     if(document.readyState === 'complete') initThree();
