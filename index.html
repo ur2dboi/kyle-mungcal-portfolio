@@ -1533,7 +1533,7 @@
     };
 
     /* ── 3D TILT CARDS ── */
-    document.querySelectorAll('.service-card, .expertise-card, .process-step, .project-card, .testimonial-card, .contact-wrap, .highlight-card, .gallery-item').forEach(card => {
+    document.querySelectorAll('.service-card, .expertise-card, .process-step, .project-card, .testimonial-card, .highlight-card, .gallery-item').forEach(card => {
         card.classList.add('tilt-card');
         card.style.position = card.style.position || 'relative';
         const shine = document.createElement('div');
@@ -1567,8 +1567,9 @@
         /* --- BG canvas: gold particle dots only (no shapes) --- */
         const bgCanvas = document.getElementById('bg-canvas');
         const bgScene = new THREE.Scene();
-        const bgCam = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 500);
-        bgCam.position.set(0, 0, 30);
+        // Use a generous far plane so all page dots stay within frustum
+        const bgCam = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 2000);
+        bgCam.position.set(0, 0, 40);
         bgCam.lookAt(0, 0, 0);
         const bgRen = new THREE.WebGLRenderer({ canvas: bgCanvas, antialias:!isMobile, alpha:true });
         bgRen.setPixelRatio(Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2));
@@ -1578,40 +1579,42 @@
         const isDark = () => document.documentElement.classList.contains('dark');
         const goldHex = () => isDark() ? 0xd4bb7e : 0xc9a961;
 
-        // Dense gold dot field covering the full page height so dots exist in every section.
-        // Strategy:
-        //   - World Y=0 is hero top, Y negative = further down the page.
-        //   - Camera Y follows scroll so the viewport always shows the current section's dots.
-        //   - Dots drift upward; when they leave the top of world space they respawn at the bottom.
-        const PARTICLES = isMobile ? 380 : 1000;
+        // Gold dot field — dots distributed across the full page height,
+        // and the camera follows scroll so every section shows dots.
+        // World coordinate mapping: 1px = 0.01 world units on Y.
+        // At scrollY=0, camera Y=0 (top of page). At scrollY=pageH, camera Y = -pageH*0.01.
+        const WY = 0.01; // world units per pixel
+        function pageWorldH(){ return Math.max(document.body.scrollHeight, window.innerHeight*2) * WY; }
+        let worldH = pageWorldH();
+
+        const PARTICLES = isMobile ? 500 : 1400;
         const pGeo = new THREE.BufferGeometry();
         const pPos = new Float32Array(PARTICLES*3);
         const pVel = new Float32Array(PARTICLES*3);
-        // Page height in world units (camera Y zoom factor 0.03)
-        function pageWorldH(){ return Math.max(document.body.scrollHeight, window.innerHeight*4) * 0.03; }
-        let worldH = pageWorldH();
-        function spawnDot(i, atTop=false) {
-            pPos[i*3]   = (Math.random()-0.5)*60;
-            pPos[i*3+1] = atTop ? (-worldH + Math.random()*6) : (-Math.random()*worldH + 6);
-            pPos[i*3+2] = (Math.random()-0.5)*30 - 12;
-            pVel[i*3]   = (Math.random()-0.5)*0.004;
-            pVel[i*3+1] = 0.010 + Math.random()*0.020;
-            pVel[i*3+2] = (Math.random()-0.5)*0.004;
+
+        function spawnDot(i, forcedY) {
+            pPos[i*3]   = (Math.random()-0.5) * 80;                       // x spread
+            pPos[i*3+1] = (forcedY !== undefined) ? forcedY
+                         : -(Math.random() * worldH) + 6;                 // y: 6 (above) down to -worldH (bottom of page)
+            pPos[i*3+2] = (Math.random()-0.5) * 50 - 15;                  // z depth
+            pVel[i*3]   = (Math.random()-0.5) * 0.004;
+            pVel[i*3+1] = 0.008 + Math.random() * 0.018;                  // drift upward (+Y)
+            pVel[i*3+2] = (Math.random()-0.5) * 0.004;
         }
         for (let i=0;i<PARTICLES;i++) spawnDot(i);
         pGeo.setAttribute('position', new THREE.BufferAttribute(pPos,3));
         const pMat = new THREE.PointsMaterial({
             color: goldHex(),
-            size: 0.11,
+            size: 0.16,
             transparent: true,
-            opacity: isMobile ? 0.6 : 0.85,
+            opacity: isMobile ? 0.65 : 0.9,
             sizeAttenuation: true,
             depthWrite: false,
             blending: THREE.AdditiveBlending
         });
         const particles = new THREE.Points(pGeo, pMat);
-        // Anchor particle field so world Y=0 is top of page (no scroll offset on the object itself)
         particles.position.set(0, 0, 0);
+        particles.frustumCulled = false; // never cull — dots move with camera
         bgScene.add(particles);
         bgScene.add(new THREE.AmbientLight(0xffffff, 1));
 
@@ -1663,19 +1666,6 @@
         let scrollY = 0, scrollT = 0;
         window.addEventListener('scroll', () => { scrollY = window.scrollY; }, {passive:true});
 
-        /* --- Resize --- */
-        function resize(){
-            const w=window.innerWidth, h=window.innerHeight;
-            bgCam.aspect=w/h; bgCam.updateProjectionMatrix();
-            bgRen.setSize(w,h);
-            worldH = pageWorldH();
-            if(heroRen && heroCanvas){
-                const hw=heroCanvas.clientWidth, hh=heroCanvas.clientHeight;
-                if(hw>0 && hh>0){ heroCam.aspect=hw/hh; heroCam.updateProjectionMatrix(); heroRen.setSize(hw,hh,false); }
-            }
-        }
-        window.addEventListener('resize', resize);
-
         /* --- Theme updates --- */
         const tog = document.getElementById('modeToggle');
         if(tog) tog.addEventListener('click', () => setTimeout(() => {
@@ -1688,29 +1678,40 @@
         function refreshPageH() { worldH = pageWorldH(); }
         setTimeout(refreshPageH, 300);
         setTimeout(refreshPageH, 1200);
-        window.addEventListener('resize', refreshPageH);
+        setTimeout(refreshPageH, 2500);
+        window.addEventListener('resize', () => {
+            refreshPageH();
+            const w=window.innerWidth, h=window.innerHeight;
+            bgCam.aspect=w/h; bgCam.updateProjectionMatrix();
+            bgRen.setSize(w,h);
+            if(heroRen && heroCanvas){
+                const hw=heroCanvas.clientWidth, hh=heroCanvas.clientHeight;
+                if(hw>0 && hh>0){ heroCam.aspect=hw/hh; heroCam.updateProjectionMatrix(); heroRen.setSize(hw,hh,false); }
+            }
+        });
 
         const clock = new THREE.Clock();
         function animate(){
             requestAnimationFrame(animate);
             const t = clock.getElapsedTime();
 
-            // Smooth scroll value; convert to world units (negative = down)
-            scrollT += (scrollY - scrollT)*0.1;
-            const camY = -scrollT * 0.03;
+            // Smooth scroll; convert pixels -> world units (WY = 0.01); negative = down
+            scrollT += (scrollY - scrollT)*0.12;
+            const camY = -scrollT * WY;
 
-            // Particle drift — dots float upward (positive Y direction in world space)
+            // Particle drift — dots float upward (+Y) and recycle when they pass above view
             const pa = pGeo.attributes.position.array;
+            const viewTop = camY + 25;     // above-camera threshold
+            const viewRange = worldH + 50; // how far below camera to respawn
             for(let i=0;i<PARTICLES;i++){
                 pa[i*3]   += pVel[i*3] + Math.sin(t*0.6 + i)*0.0004;
                 pa[i*3+1] += pVel[i*3+1];
                 pa[i*3+2] += pVel[i*3+2];
-                // Recycle when dot has floated above the camera's near view
-                if(pa[i*3+1] > camY + 20) {
-                    // Send it back to the bottom of the world (below current page end)
-                    pa[i*3+1] = camY - worldH - Math.random()*6;
-                    pa[i*3]   = (Math.random()-0.5)*60;
-                    pa[i*3+2] = (Math.random()-0.5)*30 - 12;
+                if(pa[i*3+1] > viewTop) {
+                    // respawn at bottom of world range
+                    pa[i*3+1] = camY - viewRange + Math.random()*20;
+                    pa[i*3]   = (Math.random()-0.5)*80;
+                    pa[i*3+2] = (Math.random()-0.5)*50 - 15;
                 }
             }
             pGeo.attributes.position.needsUpdate = true;
@@ -1734,8 +1735,8 @@
             // Camera follows scroll with subtle mouse parallax
             mx += (mxT-mx)*0.04;
             my += (myT-my)*0.04;
-            bgCam.position.x = mx*2;
-            bgCam.position.y = camY - my*1.0;
+            bgCam.position.x = mx*1.5;
+            bgCam.position.y = camY - my*0.8;
             bgCam.lookAt(0, camY, 0);
 
             if(heroRen && heroCam) {
