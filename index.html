@@ -115,6 +115,59 @@
             background:rgba(255,255,255,0.85);
         }
         html.dark nav { background:rgba(10,10,10,0.85); }
+
+        /* ── SECTION COLOR VARIANTS ── */
+        /* Default = white bg. Variants below: */
+        .section-gray   { background:var(--bg-alt); }
+        .section-gold   { background:var(--gold-bg); }
+        .section-dark   { background:var(--black); color:#fafafa; }
+        .section-dark .section-title,
+        .section-dark h2, .section-dark h3, .section-dark h4 { color:#fafafa; }
+        .section-dark .section-lede,
+        .section-dark p { color:#d4d4d4; }
+        .section-dark .section-label { color:var(--gold); }
+        .section-dark .service-card,
+        .section-dark .expertise-card,
+        .section-dark .process-step,
+        .section-dark .contact-wrap,
+        .section-dark .highlight-card,
+        .section-dark .project-card { background:#141414; border-color:#262626; }
+        .section-dark .service-card h4,
+        .section-dark .expertise-card h4,
+        .section-dark .process-step h4,
+        .section-dark .project-body h4,
+        .section-dark .highlight-num,
+        .section-dark .contact-wrap h2 { color:#fafafa; }
+        .section-dark .tag { background:#1a1a1a; color:#a3a3a3; }
+        .section-dark .perk { border-color:#333; color:#d4d4d4; }
+        .section-dark .project-status { color:#737373; }
+        .section-dark .contact-info { border-color:#262626; }
+        .section-dark .service-icon { background:rgba(212,187,126,0.12); color:var(--gold); }
+        .section-dark .expertise-num { color:var(--gold); }
+        .section-dark .project-domain { color:var(--gold); }
+        .section-dark .project-status::before { background:#22c55e; }
+        html.dark .section-dark { background:#000; }
+        /* CTA buttons in dark section (in light mode) should be gold — like dark mode */
+        .section-dark .btn-primary { background:var(--gold); color:var(--black); border-color:var(--gold); }
+        .section-dark .btn-primary:hover { background:var(--gold-soft); }
+        .section-dark .btn-secondary { color:#fafafa; border-color:#333; }
+        .section-dark .btn-secondary:hover { border-color:var(--gold); color:var(--gold); background:rgba(212,187,126,0.08); }
+        .section-dark .form-submit { background:var(--gold); color:var(--black); border-color:var(--gold); }
+        /* Project cards in default white sections stay as-is; add subtle bottom border only on adjacent variants */
+        .section-gray + section, .section-gold + section { border-top:1px solid var(--border); }
+
+        /* Full-bleed section utility — when bg variant is used, break out of 1200px max-width */
+        section[class*="section-"] {
+            max-width:none; padding-left:0; padding-right:0;
+            border-top:1px solid var(--border);
+        }
+        section[class*="section-"] > * {
+            max-width:1200px; margin-left:auto; margin-right:auto;
+            padding-left:2rem; padding-right:2rem;
+        }
+        /* Dark section border must be visible on dark bg */
+        .section-dark { border-top-color:#1a1a1a; }
+        html.dark .section-dark { border-top-color:#0f0f0f; }
         .nav-inner {
             max-width:1200px; margin:0 auto; padding:0 2rem; height:72px;
             display:flex; align-items:center; justify-content:space-between;
@@ -282,8 +335,6 @@
         .service-card p { font-size:0.92rem; color:var(--text-2); line-height:1.7; }
 
         /* ── EXPERTISE ── */
-        #expertise { background:var(--bg-alt); border-top:1px solid var(--border); border-bottom:1px solid var(--border); max-width:none; padding-left:0; padding-right:0; }
-        #expertise > * { max-width:1200px; margin-left:auto; margin-right:auto; padding-left:2rem; padding-right:2rem; }
         .expertise-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; }
         .expertise-card {
             padding:2.5rem 2rem; background:var(--surface); border:1px solid var(--border);
@@ -341,8 +392,6 @@
         .project-body p { font-size:0.9rem; color:var(--text-2); line-height:1.65; }
 
         /* ── PROCESS ── */
-        #process { background:var(--bg-alt); border-top:1px solid var(--border); border-bottom:1px solid var(--border); max-width:none; padding-left:0; padding-right:0; }
-        #process > * { max-width:1200px; margin-left:auto; margin-right:auto; padding-left:2rem; padding-right:2rem; }
         .process-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1.5rem; counter-reset:step; }
         .process-step {
             padding:2rem 1.5rem; background:var(--surface); border:1px solid var(--border);
@@ -458,16 +507,36 @@
         .scroll-top.visible { opacity:1; visibility:visible; transform:translateY(0); }
         .scroll-top:hover { color:var(--gold); border-color:var(--gold); }
 
-        /* ── REVEAL ── */
-        .reveal { opacity:0; transform:translateY(30px); transition:all 0.8s var(--ease); }
+        /* ── REVEAL / SCROLL ANIMATIONS ── */
+        .reveal { opacity:0; transform:translateY(36px); transition:opacity 0.85s var(--ease), transform 0.85s var(--ease); will-change:opacity,transform; }
         .reveal.visible { opacity:1; transform:translateY(0); }
-        .stagger > * { opacity:0; transform:translateY(20px); transition:all 0.6s var(--ease); }
-        .stagger.visible > * { opacity:1; transform:translateY(0); }
-        .stagger.visible > *:nth-child(1){transition-delay:0s} .stagger.visible > *:nth-child(2){transition-delay:0.1s}
-        .stagger.visible > *:nth-child(3){transition-delay:0.2s} .stagger.visible > *:nth-child(4){transition-delay:0.3s}
-        .stagger.visible > *:nth-child(5){transition-delay:0.4s} .stagger.visible > *:nth-child(6){transition-delay:0.5s}
-        .stagger.visible > *:nth-child(7){transition-delay:0.6s} .stagger.visible > *:nth-child(8){transition-delay:0.7s}
-        .stagger.visible > *:nth-child(9){transition-delay:0.8s}
+        /* Cards: start slightly smaller + faded, pop up */
+        .stagger > * { opacity:0; transform:translateY(28px) scale(0.97); transition:opacity 0.7s var(--ease), transform 0.7s var(--ease); will-change:opacity,transform; }
+        .stagger.visible > * { opacity:1; transform:translateY(0) scale(1); }
+        .stagger.visible > *:nth-child(1){transition-delay:0.05s} .stagger.visible > *:nth-child(2){transition-delay:0.15s}
+        .stagger.visible > *:nth-child(3){transition-delay:0.25s} .stagger.visible > *:nth-child(4){transition-delay:0.35s}
+        .stagger.visible > *:nth-child(5){transition-delay:0.45s} .stagger.visible > *:nth-child(6){transition-delay:0.55s}
+        .stagger.visible > *:nth-child(7){transition-delay:0.65s} .stagger.visible > *:nth-child(8){transition-delay:0.75s}
+        .stagger.visible > *:nth-child(9){transition-delay:0.85s}
+        /* Gold accent line in section labels — grows from 0 to full width when parent section-head reveals */
+        .section-label { overflow:visible; }
+        .section-label::after { transform:scaleX(0); transform-origin:left; transition:transform 1s var(--ease) 0.3s; }
+        .reveal.visible .section-label::after,
+        .section-label.visible::after { transform:scaleX(1); }
+        /* Hero eyebrow gold line — same grow animation */
+        .hero-eyebrow::before { transform:scaleX(0); transform-origin:left; transition:transform 1s var(--ease) 0.2s; }
+        .hero-eyebrow.visible::before,
+        .reveal.visible .hero-eyebrow::before { transform:scaleX(1); }
+        /* Dark section card hover — gold glow */
+        .section-dark .service-card:hover,
+        .section-dark .process-step:hover,
+        .section-dark .highlight-card:hover { box-shadow:0 10px 40px rgba(212,187,126,0.12); }
+        /* Reduced motion: disable transforms/transitions */
+        @media (prefers-reduced-motion: reduce) {
+            .reveal, .stagger > * { opacity:1 !important; transform:none !important; transition:none !important; }
+            .section-label::after, .hero-eyebrow::before { transform:scaleX(1) !important; transition:none !important; }
+            html { scroll-behavior:auto; }
+        }
 
         /* ── RESPONSIVE ── */
         @media (max-width: 1024px) {
@@ -500,7 +569,7 @@
             .hamburger { display:flex; }
             .nav-logo .nav-name { display:none; } /* (legacy — logo-img handles logo now) */
             section { padding:4rem 1.25rem; }
-            #expertise > *, #process > * { padding-left:1.25rem; padding-right:1.25rem; }
+            section[class*="section-"] > * { padding-left:1.25rem; padding-right:1.25rem; }
             .hero { padding:6rem 1.25rem 3rem; min-height:auto; }
             .hero-content { grid-template-columns:1fr; gap:2.5rem; text-align:center; }
             .hero-text { max-width:none; }
@@ -597,7 +666,7 @@
 </section>
 
 <!-- ABOUT -->
-<section id="about">
+<section id="about" class="section-gold">
     <div class="about-grid">
         <div class="about-intro">
             <div class="section-head reveal" style="margin-bottom:1.5rem;">
@@ -633,7 +702,7 @@
 </section>
 
 <!-- SERVICES -->
-<section id="services">
+<section id="services" class="section-gray">
     <div class="section-head reveal">
         <div class="section-label">Services</div>
         <h2 class="section-title">What I <em>do</em> best.</h2>
@@ -664,7 +733,7 @@
 </section>
 
 <!-- EXPERTISE -->
-<section id="expertise">
+<section id="expertise" class="section-dark">
     <div class="section-head reveal">
         <div class="section-label">Expertise</div>
         <h2 class="section-title">Platforms I <em>specialize</em> in.</h2>
@@ -810,7 +879,7 @@
 </section>
 
 <!-- PROCESS -->
-<section id="process">
+<section id="process" class="section-gray">
     <div class="section-head reveal">
         <div class="section-label">Process</div>
         <h2 class="section-title">A simple, proven <em>workflow</em>.</h2>
@@ -841,7 +910,7 @@
 </section>
 
 <!-- CONTACT -->
-<section id="contact">
+<section id="contact" class="section-dark">
     <div class="contact-wrap reveal">
         <div class="section-head">
             <div class="section-label">Contact</div>
@@ -948,9 +1017,14 @@
 
     /* Scroll reveal */
     const io = new IntersectionObserver((entries) => {
-        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
-    }, { threshold:0.1, rootMargin:'0px 0px -50px 0px' });
-    document.querySelectorAll('.reveal, .stagger').forEach(el => io.observe(el));
+        entries.forEach(e => {
+            if (e.isIntersecting) {
+                e.target.classList.add('visible');
+                io.unobserve(e.target);
+            }
+        });
+    }, { threshold:0.12, rootMargin:'0px 0px -60px 0px' });
+    document.querySelectorAll('.reveal, .stagger, .section-label').forEach(el => io.observe(el));
 
     /* Scroll top button */
     const st = document.getElementById('scrollTop');
