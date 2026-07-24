@@ -1844,87 +1844,93 @@
         if (!grid) return;
         const items = Array.from(grid.querySelectorAll('.gallery-item'));
         let curIdx = 0;
-        let programmaticScroll = false;
 
-        // Build dot indicators
+        // Build dots
         items.forEach((_, i) => {
             const b = document.createElement('button');
+            b.type = 'button';
             b.setAttribute('aria-label', 'Go to slide ' + (i+1));
-            b.addEventListener('click', () => { scrollToItem(i); });
+            b.addEventListener('click', (e) => { e.preventDefault(); goTo(i); });
             dotsWrap.appendChild(b);
         });
         const dots = Array.from(dotsWrap.querySelectorAll('button'));
 
-        function scrollToItem(i) {
+        function goTo(i) {
             curIdx = Math.max(0, Math.min(items.length - 1, i));
-            const item = items[curIdx];
-            // Compute how far to scroll to center this item in the grid
-            const gridRect = grid.getBoundingClientRect();
-            const itemRect = item.getBoundingClientRect();
-            const currentScroll = grid.scrollLeft;
-            const itemCenterInGrid = itemRect.left - gridRect.left + itemRect.width/2;
-            const delta = itemCenterInGrid - gridRect.width/2;
-            programmaticScroll = true;
-            grid.scrollBy({ left: delta, behavior:'smooth' });
-            setTimeout(() => { programmaticScroll = false; updateCaption(); }, 500);
-            updateCaption();
+            // Calculate scrollLeft so the target item is centered in the grid
+            const target = items[curIdx];
+            const targetLeft = target.offsetLeft;
+            const targetWidth = target.offsetWidth;
+            const gridWidth = grid.clientWidth;
+            const scrollTo = targetLeft - (gridWidth / 2) + (targetWidth / 2);
+            grid.scrollTo({ left: scrollTo, behavior: 'smooth' });
+            update();
         }
 
-        function updateCaption() {
+        function update() {
             const item = items[curIdx];
             if (!item) return;
             const t = item.getAttribute('data-title') || '';
             const s = item.getAttribute('data-sub') || '';
             caption.innerHTML = '<div class="g-m-title">'+t+'</div><div class="g-m-sub">'+s+'</div>';
-            dots.forEach((d,di) => d.classList.toggle('active', di===curIdx));
-            // Disable prev/next at ends
-            prev.style.opacity = curIdx === 0 ? '0.4' : '1';
-            prev.style.pointerEvents = curIdx === 0 ? 'none' : 'auto';
-            next.style.opacity = curIdx === items.length-1 ? '0.4' : '1';
-            next.style.pointerEvents = curIdx === items.length-1 ? 'none' : 'auto';
+            dots.forEach((d, di) => d.classList.toggle('active', di === curIdx));
+            if (prev) { prev.style.opacity = curIdx === 0 ? '0.35' : '1'; prev.style.pointerEvents = curIdx === 0 ? 'none' : 'auto'; }
+            if (next) { next.style.opacity = curIdx === items.length-1 ? '0.35' : '1'; next.style.pointerEvents = curIdx === items.length-1 ? 'none' : 'auto'; }
         }
 
-        function detectActive() {
-            if (programmaticScroll) return;
-            const gridRect = grid.getBoundingClientRect();
-            const center = gridRect.left + gridRect.width/2;
-            let best = 0, bestDist = Infinity;
-            items.forEach((it,i) => {
-                const r = it.getBoundingClientRect();
-                const itemCenter = r.left + r.width/2;
-                const dist = Math.abs(itemCenter - center);
-                if (dist < bestDist) { bestDist = dist; best = i; }
-            });
-            if (best !== curIdx) { curIdx = best; updateCaption(); }
-        }
-
-        prev.addEventListener('click', (e) => { e.preventDefault(); scrollToItem(curIdx - 1); });
-        next.addEventListener('click', (e) => { e.preventDefault(); scrollToItem(curIdx + 1); });
-
-        let scrollT;
-        grid.addEventListener('scroll', () => {
-            clearTimeout(scrollT);
-            scrollT = setTimeout(detectActive, 60);
-        }, {passive:true});
-
-        window.addEventListener('resize', () => {
-            setTimeout(detectActive, 150);
-        });
-
-        // Initialize on load + after the reveal animation makes the grid measurable
-        function init() {
-            updateCaption();
-            detectActive();
-        }
-        setTimeout(init, 100);
-        setTimeout(init, 500);
-        setTimeout(init, 1200);
-        // Also init when gallery section becomes visible
+        // Detect active item via IntersectionObserver (most reliable with scroll-snap)
         if ('IntersectionObserver' in window) {
             const io = new IntersectionObserver(entries => {
+                entries.forEach(en => {
+                    if (en.isIntersecting && en.intersectionRatio >= 0.6) {
+                        const idx = items.indexOf(en.target);
+                        if (idx !== -1 && idx !== curIdx) { curIdx = idx; update(); }
+                    }
+                });
+            }, { root: grid, threshold: [0.5, 0.6, 0.75], rootMargin: '0px' });
+            items.forEach(it => io.observe(it));
+        } else {
+            // Fallback: scroll-based detection
+            let scrollT;
+            grid.addEventListener('scroll', () => {
+                clearTimeout(scrollT);
+                scrollT = setTimeout(() => {
+                    const gridRect = grid.getBoundingClientRect();
+                    const center = gridRect.left + gridRect.width/2;
+                    let best = 0, bestDist = Infinity;
+                    items.forEach((it,i) => {
+                        const r = it.getBoundingClientRect();
+                        const dist = Math.abs((r.left + r.width/2) - center);
+                        if (dist < bestDist) { bestDist = dist; best = i; }
+                    });
+                    if (best !== curIdx) { curIdx = best; update(); }
+                }, 80);
+            }, {passive:true});
+        }
+
+        prev.addEventListener('click', (e) => { e.preventDefault(); goTo(curIdx - 1); });
+        next.addEventListener('click', (e) => { e.preventDefault(); goTo(curIdx + 1); });
+
+        // Keyboard arrows when gallery is focused
+        grid.setAttribute('tabindex', '0');
+        grid.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') { e.preventDefault(); goTo(curIdx - 1); }
+            if (e.key === 'ArrowRight') { e.preventDefault(); goTo(curIdx + 1); }
+        });
+
+        function init() { update(); }
+        // Multiple init passes so it works even if layout isn't settled yet
+        setTimeout(init, 50);
+        setTimeout(init, 300);
+        setTimeout(init, 800);
+        setTimeout(init, 1500);
+        window.addEventListener('resize', () => setTimeout(init, 200));
+        // Re-init when gallery scrolls into view
+        if ('IntersectionObserver' in window) {
+            const vis = new IntersectionObserver(entries => {
                 entries.forEach(en => { if (en.isIntersecting) setTimeout(init, 100); });
-            }, { threshold:0.2 });
-            io.observe(grid);
+            }, { threshold:0.1 });
+            vis.observe(grid);
         }
     })();
 })();
