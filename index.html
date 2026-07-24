@@ -244,23 +244,21 @@
         .section-lede { font-size:1.05rem; color:var(--text-2); line-height:1.75; }
 
         /* ── ABOUT ── */
-        .about-grid { max-width:100%; }
-        .about-intro { max-width:720px; margin:0 auto; text-align:center; }
-        .about-intro .section-head { text-align:center; }
-        .about-intro .section-label { justify-content:center; }
-        .about-intro .section-label::after { display:none; }
+        .about-grid { display:grid; grid-template-columns:1.2fr 1fr; gap:5rem; align-items:center; max-width:100%; }
+        .about-intro .section-head { margin-bottom:1.5rem; }
+        .about-intro .section-label::after { flex:0 0 40px; }
         .about-intro p { font-size:1.05rem; color:var(--text-2); line-height:1.8; margin-bottom:1.25rem; }
         .about-intro p strong { color:var(--text); font-weight:600; }
-        .about-highlights { display:grid; grid-template-columns:repeat(4,1fr); gap:1.25rem; margin-top:3rem; text-align:left; }
+        .about-highlights { display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-top:0; }
         .highlight-card {
-            padding:1.75rem 1.4rem; border:1px solid var(--border); border-radius:var(--radius);
+            padding:1.5rem 1.25rem; border:1px solid var(--border); border-radius:var(--radius);
             background:var(--surface); transition:all 0.25s var(--ease);
         }
         .highlight-card:hover { border-color:var(--gold); transform:translateY(-3px); box-shadow:var(--shadow); }
         .highlight-num { font-family:'Inter', sans-serif; font-size:1.35rem; font-weight:700;
-            color:var(--gold); margin-bottom:0.4rem; line-height:1; letter-spacing:-0.01em; }
-        .highlight-lbl { font-size:0.75rem; color:var(--text-3); text-transform:uppercase; letter-spacing:0.12em; font-weight:600; margin-bottom:0.6rem; }
-        .highlight-desc { font-size:0.85rem; color:var(--text-2); margin-top:0; line-height:1.6; }
+            color:var(--gold); margin-bottom:0.35rem; line-height:1; letter-spacing:-0.01em; }
+        .highlight-lbl { font-size:0.72rem; color:var(--text-3); text-transform:uppercase; letter-spacing:0.12em; font-weight:600; margin-bottom:0.5rem; }
+        .highlight-desc { font-size:0.83rem; color:var(--text-2); margin-top:0; line-height:1.55; }
 
         /* ── SERVICES ── */
         .services-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1.25rem; }
@@ -471,7 +469,7 @@
             .expertise-grid { grid-template-columns:1fr; }
             .projects-grid { grid-template-columns:repeat(2,1fr); }
             .process-grid { grid-template-columns:repeat(2,1fr); }
-            .about-highlights { grid-template-columns:repeat(2,1fr); }
+            .about-grid { gap:3rem; }
         }
         @media (max-width: 768px) {
             .nav-inner { padding:0 1.25rem; height:64px; }
@@ -510,14 +508,14 @@
             section { padding:3.5rem 1.25rem; }
             .section-title { font-size:1.6rem; }
             .section-lede { font-size:0.98rem; }
-            .about-intro { text-align:left; }
-            .about-intro .section-head { text-align:left; margin-bottom:1.25rem !important; }
+            .about-grid { grid-template-columns:1fr; gap:2rem; }
+            .about-intro .section-head { margin-bottom:1.25rem; }
             .about-intro .section-label { justify-content:flex-start; }
             .about-intro p { font-size:0.97rem; }
             .service-card p, .process-step p { font-size:0.9rem; }
             .expertise-card p { font-size:0.92rem; }
             .project-body p { font-size:0.88rem; }
-            .about-highlights { margin-top:2rem; }
+            .about-highlights { margin-top:1.5rem; }
             .services-grid { grid-template-columns:1fr 1fr; gap:1rem; }
             .service-card { padding:1.5rem 1.25rem; }
             .projects-grid { grid-template-columns:1fr; gap:1.25rem; }
