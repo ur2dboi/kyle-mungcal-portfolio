@@ -2148,6 +2148,14 @@
     const ADMIN_KEY = 'kmm_chat_admin_session';
     const VIS_KEY = 'kmm_vis_v3';
     const PW_KEY = 'kmm_admin_pw_hash_v3';
+    const TOK_KEY = 'kmm_admin_tok';
+    const REMEMBER_KEY = 'kmm_admin_remember';
+
+    // Admin session storage: localStorage if "remember me" checked, sessionStorage otherwise
+    function adminStore(){ return localStorage.getItem(REMEMBER_KEY)==='1' ? localStorage : sessionStorage; }
+    function adminSet(k, v){ const s=adminStore(); if(v===null||v===undefined) s.removeItem(k); else s.setItem(k, String(v)); }
+    function adminGet(k){ return adminStore().getItem(k); }
+    function adminClear(){ ['sessionStorage','localStorage'].forEach(n => { try{ window[n].removeItem(ADMIN_KEY); window[n].removeItem(TOK_KEY); }catch(e){} }); }
 
     function hash(s){ let h=5381; for(let i=0;i<s.length;i++){ h=((h<<5)+h)+s.charCodeAt(i); h|=0;} return 'h_'+h.toString(36); }
     function uid(){ return 'c_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
@@ -2188,13 +2196,25 @@
         // Visitor thread
         async function getOrCreateThread() {
             const v = getVis();
-            if(v && v.tid && cache[v.tid]) return v.tid;
-            // Check if cached thread is in store
+            // If we have a stored thread id, always fetch latest from server (returns full message history)
             if(v && v.tid){
                 const fresh = await apiGet('?tid='+encodeURIComponent(v.tid));
-                if(fresh && fresh.thread){ cache[v.tid]=fresh.thread; writeCache(cache); supabaseOn=!!fresh.supabase; return v.tid; }
+                if(fresh && fresh.thread){
+                    // Merge local name/email if the server has blank (from returning visitor cookie)
+                    if(v.name && !fresh.thread.name) fresh.thread.name = v.name;
+                    if(v.email && !fresh.thread.email) fresh.thread.email = v.email;
+                    // If we had local contact info that differs, push up
+                    if(v.name && v.email && (fresh.thread.name !== v.name || fresh.thread.email !== v.email)){
+                        api({action:'_updateContact', tid:v.tid, name:v.name, email:v.email}).catch(()=>{});
+                    }
+                    cache[v.tid]=fresh.thread;
+                    writeCache(cache);
+                    supabaseOn=!!fresh.supabase;
+                    return v.tid;
+                }
+                // Server returned no thread (maybe deleted) — fall through to create new
             }
-            // Create new thread; we don't yet have name/email — those get attached on contact submit.
+            // Create new thread
             const r = await api({action:'createThread'});
             if(r && r.thread){
                 cache[r.thread.id]=r.thread; writeCache(cache);
@@ -2203,7 +2223,7 @@
                 notify();
                 return r.thread.id;
             }
-            // Offline fallback: create a local-only thread
+            // Offline fallback
             const id = uid();
             const now = Date.now();
             cache[id] = {id,name:'',email:'',ip:'',country:'',region:'',city:'',ua:navigator.userAgent,createdAt:now,lastAt:now,unread:0,messages:[{from:'admin',text:"Hi! I'd love to help — send me your question below and I'll get back to you shortly.",ts:now}]};
@@ -2218,8 +2238,6 @@
                 cache[tid].lastAt = Date.now();
                 writeCache(cache);
             }
-            // Push to server — also sends name/email so server updates its record
-            // (sendMsg with an update is cleanest; we'll add a field)
             const v = getVis()||{tid};
             v.name = name; v.email = email;
             setVis(v);
@@ -2245,18 +2263,18 @@
                 cache[tid].messages.push({from:'admin',text,ts:Date.now()});
                 cache[tid].unread=0; cache[tid].lastAt=Date.now(); writeCache(cache); notify();
             }
-            const tok = sessionStorage.getItem('kmm_admin_tok') || '';
+            const tok = adminGet(TOK_KEY) || '';
             const r = await api({action:'reply', tid, text, token:tok});
-            if(r && r.thread){ cache[tid]=r.thread; if(r.token) sessionStorage.setItem('kmm_admin_tok',r.token); writeCache(cache); notify(); }
+            if(r && r.thread){ cache[tid]=r.thread; if(r.token) adminSet(TOK_KEY,r.token); writeCache(cache); notify(); }
         }
         async function deleteThread(tid){
             delete cache[tid]; writeCache(cache); notify();
-            const tok = sessionStorage.getItem('kmm_admin_tok') || '';
+            const tok = adminGet(TOK_KEY) || '';
             await api({action:'deleteThread', tid, token:tok});
         }
         async function markRead(tid){
             if(cache[tid]){ cache[tid].unread=0; writeCache(cache); notify(); }
-            const tok = sessionStorage.getItem('kmm_admin_tok') || '';
+            const tok = adminGet(TOK_KEY) || '';
             await api({action:'markRead', tid, token:tok}).catch(()=>{});
         }
         function allThreads(){
@@ -2268,43 +2286,42 @@
         async function adminLogin(pw){
             const r = await api({action:'login', pw});
             if(r && r.ok){
-                sessionStorage.setItem(ADMIN_KEY,'1');
-                if(r.token) sessionStorage.setItem('kmm_admin_tok', r.token);
+                adminSet(ADMIN_KEY,'1');
+                if(r.token) adminSet(TOK_KEY, r.token);
                 if(r.pwHash){ localStorage.setItem(PW_KEY, r.pwHash); serverPwHash = r.pwHash; }
-                const tok = sessionStorage.getItem('kmm_admin_tok') || '';
+                const tok = adminGet(TOK_KEY) || '';
                 const all = await apiGet('?admin=1&token='+encodeURIComponent(tok));
                 if(all && all.threads){
                     cache = {};
                     all.threads.forEach(t=>cache[t.id]=t);
                     writeCache(cache);
                     supabaseOn = !!all.supabase;
-                    if(all.token) sessionStorage.setItem('kmm_admin_tok', all.token);
+                    if(all.token) adminSet(TOK_KEY, all.token);
                 }
                 startPolling();
                 notify();
                 return true;
             }
             if(hash(pw) === serverPwHash){
-                sessionStorage.setItem(ADMIN_KEY,'1');
+                adminSet(ADMIN_KEY,'1');
                 startPolling();
                 notify();
                 return true;
             }
             return false;
         }
-        function adminIsAuthed(){ return sessionStorage.getItem(ADMIN_KEY)==='1'; }
+        function adminIsAuthed(){ return adminGet(ADMIN_KEY)==='1'; }
         function adminLogout(){
-            sessionStorage.removeItem(ADMIN_KEY);
-            sessionStorage.removeItem('kmm_admin_tok');
+            adminClear();
             stopPolling();
         }
         async function adminChangePassword(cur, nw){
-            const tok = sessionStorage.getItem('kmm_admin_tok') || '';
+            const tok = adminGet(TOK_KEY) || '';
             const r = await api({action:'changePassword', current:cur, next:nw, token:tok, pw:cur});
             if(r && r.ok){
                 serverPwHash = hash(nw);
                 localStorage.setItem(PW_KEY, serverPwHash);
-                if(r.token) sessionStorage.setItem('kmm_admin_tok', r.token);
+                if(r.token) adminSet(TOK_KEY, r.token);
                 return {ok:true};
             }
             if(r && r.error) return {ok:false, err:r.error};
@@ -2331,28 +2348,48 @@
                 if(r && r.thread){
                     const old = cache[v.tid];
                     const oldLen = old ? old.messages.length : 0;
-                    const newLen = r.thread.messages.length;
-                    cache[v.tid] = r.thread; writeCache(cache);
+                    // Merge: server is authoritative, but keep the higher message count if local is ahead (offline send race)
+                    const merged = r.thread;
+                    if(old && old.messages.length > merged.messages.length){
+                        // Keep local messages that aren't on server yet
+                        const serverIds = new Set(merged.messages.map(m=>m.ts+'|'+m.from+'|'+m.text.slice(0,20)));
+                        old.messages.forEach(m=>{
+                            const k = m.ts+'|'+m.from+'|'+m.text.slice(0,20);
+                            if(!serverIds.has(k)) merged.messages.push(m);
+                        });
+                        merged.messages.sort((a,b)=>a.ts-b.ts);
+                    }
+                    cache[v.tid] = merged; writeCache(cache);
                     supabaseOn = !!r.supabase;
-                    if(newLen !== oldLen) notify();
+                    if(merged.messages.length !== oldLen) notify();
                 }
             }
             // Admin: poll all threads
             if(adminIsAuthed()){
-                const tok = sessionStorage.getItem('kmm_admin_tok')||'';
+                const tok = adminGet(TOK_KEY)||'';
                 const r = await apiGet('?admin=1&token='+encodeURIComponent(tok)+'&_='+Date.now()).catch(()=>null);
                 if(r && r.threads){
                     let changed = false;
                     const next = {};
                     r.threads.forEach(t=>{
-                        next[t.id]=t;
                         const old = cache[t.id];
-                        if(!old || (old.messages.length !== t.messages.length) || (t.lastAt !== old.lastAt) || (t.unread||0) !== (old.unread||0) || t.name!==old.name || t.email!==old.email) changed=true;
+                        // Merge messages: server is authoritative, but preserve in-flight local admin replies
+                        const merged = JSON.parse(JSON.stringify(t));
+                        if(old && old.messages.length > t.messages.length){
+                            const srvKeys = new Set(t.messages.map(m=>m.ts+'|'+m.from+'|'+m.text.slice(0,20)));
+                            old.messages.forEach(m=>{
+                                const k=m.ts+'|'+m.from+'|'+m.text.slice(0,20);
+                                if(!srvKeys.has(k)) merged.messages.push(m);
+                            });
+                            merged.messages.sort((a,b)=>a.ts-b.ts);
+                        }
+                        next[t.id]=merged;
+                        if(!old || (old.messages.length !== merged.messages.length) || (merged.lastAt !== old.lastAt) || (merged.unread||0) !== (old.unread||0) || merged.name!==old.name || merged.email!==old.email) changed=true;
                     });
                     if(Object.keys(cache).length !== Object.keys(next).length) changed=true;
                     cache = next; writeCache(cache);
                     supabaseOn = !!r.supabase;
-                    if(r.token) sessionStorage.setItem('kmm_admin_tok', r.token);
+                    if(r.token) adminSet(TOK_KEY, r.token);
                     if(changed) notify();
                 } else if(r && r.error && r.error === 'Unauthorized'){
                     // Token expired/reset
@@ -2363,8 +2400,8 @@
         }
 
         // If admin session exists but no token (after code upgrade), log out to force fresh login
-        if(adminIsAuthed() && !sessionStorage.getItem('kmm_admin_tok')){
-            sessionStorage.removeItem(ADMIN_KEY);
+        if(adminIsAuthed() && !adminGet(TOK_KEY)){
+            adminClear();
         } else if(adminIsAuthed()){
             startPolling();
         }
@@ -2397,8 +2434,10 @@
         let tid = null;
         ChatStore.getOrCreateThread().then(id => {
             tid = id;
+            // Determine contactSet from BOTH local storage and server cache
             const v = getVis() || {};
-            contactSet = !!(v.name && v.email);
+            const t = ChatStore.getThread(tid);
+            contactSet = !!(v.name && v.email) || !!(t && t.name && t.email);
             render();
             updateBadge();
         });
@@ -2419,7 +2458,7 @@
             const msgs = t ? t.messages : [];
             msgs.forEach(m => appendMsg(m.from, m.text, false));
             const v = getVis()||{};
-            contactSet = !!(v.name && v.email);
+            contactSet = !!(v.name && v.email) || !!(t && t.name && t.email);
             if(!contactSet){
                 const form = document.createElement('div');
                 form.className = 'chat-contact-form';
@@ -2520,6 +2559,10 @@
                         <h3>Kyle, sign in</h3>
                         <p>Enter your password to view and reply to messages.</p>
                         <input type="password" id="adminPw" placeholder="Password" autocomplete="current-password">
+                        <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.8rem;color:var(--text-2);margin:0.25rem 0 0.75rem;cursor:pointer;user-select:none;">
+                            <input type="checkbox" id="adminRemember" ${localStorage.getItem(REMEMBER_KEY)==='1'?'checked':''} style="width:16px;height:16px;accent-color:var(--gold);cursor:pointer;">
+                            Remember me on this device
+                        </label>
                         <button id="adminLoginBtn">Sign in</button>
                         <div class="err" id="adminErr"></div>
                     </div>
@@ -2533,7 +2576,9 @@
             const pwEl = document.getElementById('adminPw');
             const err = document.getElementById('adminErr');
             const btn = document.getElementById('adminLoginBtn');
+            const remember = document.getElementById('adminRemember');
             const pw = pwEl.value;
+            localStorage.setItem(REMEMBER_KEY, remember && remember.checked ? '1' : '0');
             if (btn) { btn.disabled = true; btn.textContent = 'Signing in…'; }
             const ok = await ChatStore.adminLogin(pw);
             if (btn) { btn.disabled = false; btn.textContent = 'Sign in'; }
