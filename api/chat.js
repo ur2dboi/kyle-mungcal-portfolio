@@ -20,9 +20,12 @@
 
 export const config = { runtime: 'edge' };
 
-const SB_URL = globalThis.process?.env?.SUPABASE_URL || globalThis.SUPABASE_URL || '';
-const SB_KEY = globalThis.process?.env?.SUPABASE_SERVICE_ROLE_KEY || globalThis.SUPABASE_SERVICE_ROLE_KEY || '';
-const ADMIN_SECRET = globalThis.process?.env?.ADMIN_SECRET || globalThis.ADMIN_SECRET || ('kmm-secret-'+((Date.now()/86400000)|0));
+// Supabase config — hardcoded fallback for instant zero-setup persistence.
+// Server-only: never sent to browser (edge function runs on Vercel backend).
+// Override via Vercel env vars SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY if needed.
+const SB_URL = globalThis.process?.env?.SUPABASE_URL || globalThis.SUPABASE_URL || 'https://gdpcgtxyfbttsaascomw.supabase.co';
+const SB_KEY = globalThis.process?.env?.SUPABASE_SERVICE_ROLE_KEY || globalThis.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkcGNndHh5ZmJ0dHNhYXNjb213Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NDkyMTI0NCwiZXhwIjoyMTAwNDk3MjQ0fQ.6KgaRQ4uFdKyxeYgTRhd0T-gM7FWvByR8u5VwSgR9rM';
+const ADMIN_SECRET = globalThis.process?.env?.ADMIN_SECRET || globalThis.ADMIN_SECRET || 'kmm-admin-secret-2026-gdpcgtx';
 
 function hash(s){ let h=5381; for(let i=0;i<s.length;i++){ h=((h<<5)+h)+s.charCodeAt(i); h|=0;} return 'h_'+h.toString(36); }
 function uid(){ return 'c_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
