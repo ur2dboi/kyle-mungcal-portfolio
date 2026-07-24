@@ -578,7 +578,7 @@
 
         /* ── SCROLL TOP ── */
         .scroll-top {
-            position:fixed; right:1.5rem; bottom:calc(1.5rem + env(safe-area-inset-bottom,0));
+            position:fixed; left:1.5rem; bottom:calc(1.5rem + env(safe-area-inset-bottom,0));
             width:42px; height:42px; border-radius:50%; background:var(--surface);
             border:1px solid var(--border); display:flex; align-items:center; justify-content:center;
             color:var(--text-2); opacity:0; visibility:hidden; transform:translateY(10px);
@@ -586,6 +586,45 @@
         }
         .scroll-top.visible { opacity:1; visibility:visible; transform:translateY(0); }
         .scroll-top:hover { color:var(--gold); border-color:var(--gold); }
+
+        /* ── MESSENGER FLOATING CHAT BUTTON ── */
+        .messenger-btn {
+            position:fixed; right:1.25rem; bottom:calc(1.25rem + env(safe-area-inset-bottom,0));
+            width:56px; height:56px; border-radius:50%;
+            background:linear-gradient(135deg, #0084FF 0%, #00C6FF 100%);
+            color:#fff; display:flex; align-items:center; justify-content:center;
+            border:none; cursor:pointer; z-index:51;
+            box-shadow:0 6px 20px rgba(0,132,255,0.35), 0 2px 6px rgba(0,0,0,0.15);
+            transition:transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
+            touch-action:manipulation; -webkit-tap-highlight-color:transparent;
+            text-decoration:none;
+            animation: messenger-pulse 2.5s ease-in-out infinite;
+        }
+        .messenger-btn:hover {
+            transform:scale(1.08) translateY(-2px);
+            box-shadow:0 10px 26px rgba(0,132,255,0.45), 0 4px 10px rgba(0,0,0,0.2);
+        }
+        .messenger-btn:active { transform:scale(0.95); }
+        .messenger-btn svg { width:28px; height:28px; }
+        .messenger-btn .ms-label {
+            position:absolute; right:calc(100% + 10px); top:50%; transform:translateY(-50%);
+            background:var(--surface); color:var(--text); padding:0.55rem 0.85rem;
+            border-radius:var(--radius-sm); font-size:0.8rem; font-weight:600;
+            white-space:nowrap; box-shadow:var(--shadow); border:1px solid var(--border);
+            opacity:0; pointer-events:none; transition:opacity 0.2s;
+        }
+        .messenger-btn:hover .ms-label { opacity:1; }
+        @keyframes messenger-pulse {
+            0%, 100% { box-shadow:0 6px 20px rgba(0,132,255,0.35), 0 2px 6px rgba(0,0,0,0.15), 0 0 0 0 rgba(0,132,255,0.45); }
+            50%      { box-shadow:0 6px 20px rgba(0,132,255,0.35), 0 2px 6px rgba(0,0,0,0.15), 0 0 0 12px rgba(0,132,255,0); }
+        }
+        html.dark .messenger-btn .ms-label { background:#1a1a1a; border-color:#333; color:#fafafa; }
+        @media (max-width: 600px) {
+            .messenger-btn { width:52px; height:52px; right:1rem; bottom:calc(1rem + env(safe-area-inset-bottom,0)); }
+            .messenger-btn svg { width:26px; height:26px; }
+            .scroll-top { left:1rem; bottom:calc(1rem + env(safe-area-inset-bottom,0)); width:40px; height:40px; }
+            .messenger-btn .ms-label { display:none; }
+        }
 
         /* ── REVEAL / SCROLL ANIMATIONS ── */
         .reveal { opacity:0; transform:translateY(36px); transition:opacity 0.85s var(--ease), transform 0.85s var(--ease); will-change:opacity,transform; }
@@ -929,7 +968,7 @@
             .form-group input, .form-group textarea, .form-group select { padding:0.7rem 0.9rem; font-size:16px; } /* 16px prevents iOS zoom */
             .form-submit { padding:0.85rem; min-height:48px; }
             /* Scroll top */
-            .scroll-top { right:1rem; bottom:calc(1rem + env(safe-area-inset-bottom,0)); width:44px; height:44px; }
+            .scroll-top { left:1rem; bottom:calc(1rem + env(safe-area-inset-bottom,0)); width:44px; height:44px; }
         }
         @media (max-width: 480px) {
             .hero-portrait-wrap { max-width:180px; }
@@ -1477,6 +1516,14 @@
 <button class="scroll-top" id="scrollTop" aria-label="Scroll to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="18 15 12 9 6 15"/></svg>
 </button>
+
+<!-- MESSENGER FLOATING CHAT BUTTON -->
+<a class="messenger-btn" id="messengerBtn" href="https://m.me/kylemheler02" target="_blank" rel="noopener noreferrer" aria-label="Chat on Messenger">
+    <svg viewBox="0 0 28 28" fill="currentColor">
+        <path d="M14 2.5C7.08 2.5 1.5 7.62 1.5 13.91c0 3.45 1.67 6.42 4.28 8.35v3.24l3.93-2.16c1.32.37 2.76.57 4.29.57 6.92 0 12.5-5.12 12.5-11.41C26.5 7.62 20.92 2.5 14 2.5zm1.47 15.11l-3.22-3.44-6.29 3.44 6.92-7.33 3.31 3.44 6.22-3.44-6.94 7.33z"/>
+    </svg>
+    <span class="ms-label">Chat with me</span>
+</a>
 
 <!-- FORM MODAL -->
 <div class="form-overlay" id="formOverlay" onclick="if(event.target===this)closeForm()">
