@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="light">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +8,8 @@
     <meta name="keywords" content="Kyle Mheler Mungcal, web developer Philippines, full stack developer, Shopify developer, WordPress developer, UI/UX designer, SEO specialist, freelance web developer Manila, custom website development, e-commerce developer, frontend developer, web designer Philippines">
     <meta name="author" content="Kyle Mheler Mungcal">
     <meta name="robots" content="index, follow">
-    <meta name="theme-color" content="#0a0a0a">
+    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
     <link rel="canonical" href="https://www.connectsociety.cc/">
     <meta property="og:type" content="website">
     <meta property="og:title" content="Kyle Mheler Mungcal — Full Stack Web Developer Portfolio">
@@ -1320,11 +1321,11 @@
 (function() {
     'use strict';
 
-    /* Theme toggle */
+    /* Theme toggle — default dark */
     const root = document.documentElement;
     const toggle = document.getElementById('modeToggle');
     const saved = localStorage.getItem('kmm_theme_pro');
-    if (saved === 'dark') root.classList.replace('light','dark');
+    if (saved === 'light') root.classList.replace('dark','light');
     if (toggle) toggle.addEventListener('click', () => {
         if (root.classList.contains('dark')) {
             root.classList.replace('dark','light');
