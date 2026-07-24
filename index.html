@@ -587,43 +587,73 @@
         .scroll-top.visible { opacity:1; visibility:visible; transform:translateY(0); }
         .scroll-top:hover { color:var(--gold); border-color:var(--gold); }
 
-        /* ── MESSENGER FLOATING CHAT BUTTON ── */
-        .messenger-btn {
+        /* ── MESSENGER FLOATING CHAT WIDGET ── */
+        .messenger-wrap {
             position:fixed; right:1.25rem; bottom:calc(1.25rem + env(safe-area-inset-bottom,0));
-            width:56px; height:56px; border-radius:50%;
+            z-index:51; display:flex; flex-direction:column; align-items:flex-end; gap:0.75rem;
+        }
+        .messenger-bubble {
+            background:var(--surface); border:1px solid var(--border);
+            padding:0.75rem 1rem; border-radius:1rem 1rem 0.25rem 1rem;
+            box-shadow:var(--shadow-lg); font-size:0.85rem; color:var(--text);
+            max-width:240px; line-height:1.4; position:relative;
+            opacity:0; transform:translateY(8px) scale(0.9);
+            animation: bubble-in 0.4s var(--ease) 2s forwards;
+            cursor:pointer;
+        }
+        .messenger-bubble::after {
+            content:''; position:absolute; right:-1px; bottom:-8px;
+            width:16px; height:16px;
+            background:var(--surface); border-right:1px solid var(--border); border-bottom:1px solid var(--border);
+            transform:rotate(45deg); clip-path:polygon(0 100%, 100% 0, 100% 100%);
+        }
+        .messenger-bubble strong { color:var(--gold); font-weight:600; }
+        .messenger-bubble .bubble-close {
+            position:absolute; top:-8px; right:-8px; width:20px; height:20px;
+            border-radius:50%; background:var(--surface); border:1px solid var(--border);
+            font-size:0.65rem; color:var(--text-3); display:flex; align-items:center; justify-content:center;
+            cursor:pointer; transition:color 0.2s; line-height:1;
+        }
+        .messenger-bubble .bubble-close:hover { color:var(--text); }
+        html.dark .messenger-bubble { background:#1a1a1a; border-color:#333; }
+        html.dark .messenger-bubble::after { background:#1a1a1a; border-color:#333; }
+        @keyframes bubble-in {
+            to { opacity:1; transform:translateY(0) scale(1); }
+        }
+        .messenger-bubble.bubble-hidden { animation:none; display:none; }
+        .messenger-btn {
+            width:60px; height:60px; border-radius:50%;
             background:linear-gradient(135deg, #0084FF 0%, #00C6FF 100%);
             color:#fff; display:flex; align-items:center; justify-content:center;
-            border:none; cursor:pointer; z-index:51;
-            box-shadow:0 6px 20px rgba(0,132,255,0.35), 0 2px 6px rgba(0,0,0,0.15);
+            border:none; cursor:pointer;
+            box-shadow:0 8px 24px rgba(0,132,255,0.4), 0 3px 8px rgba(0,0,0,0.2);
             transition:transform 0.25s var(--ease), box-shadow 0.25s var(--ease);
             touch-action:manipulation; -webkit-tap-highlight-color:transparent;
-            text-decoration:none;
+            text-decoration:none; position:relative;
             animation: messenger-pulse 2.5s ease-in-out infinite;
         }
         .messenger-btn:hover {
             transform:scale(1.08) translateY(-2px);
-            box-shadow:0 10px 26px rgba(0,132,255,0.45), 0 4px 10px rgba(0,0,0,0.2);
+            box-shadow:0 12px 30px rgba(0,132,255,0.5), 0 5px 12px rgba(0,0,0,0.25);
         }
         .messenger-btn:active { transform:scale(0.95); }
-        .messenger-btn svg { width:28px; height:28px; }
-        .messenger-btn .ms-label {
-            position:absolute; right:calc(100% + 10px); top:50%; transform:translateY(-50%);
-            background:var(--surface); color:var(--text); padding:0.55rem 0.85rem;
-            border-radius:var(--radius-sm); font-size:0.8rem; font-weight:600;
-            white-space:nowrap; box-shadow:var(--shadow); border:1px solid var(--border);
-            opacity:0; pointer-events:none; transition:opacity 0.2s;
+        .messenger-btn svg { width:30px; height:30px; }
+        .messenger-btn .msg-badge {
+            position:absolute; top:-4px; right:-4px;
+            min-width:20px; height:20px; padding:0 5px; border-radius:10px;
+            background:#FA3C4C; color:#fff; font-size:0.7rem; font-weight:700;
+            display:flex; align-items:center; justify-content:center;
+            border:2px solid var(--bg, #fff);
         }
-        .messenger-btn:hover .ms-label { opacity:1; }
         @keyframes messenger-pulse {
-            0%, 100% { box-shadow:0 6px 20px rgba(0,132,255,0.35), 0 2px 6px rgba(0,0,0,0.15), 0 0 0 0 rgba(0,132,255,0.45); }
-            50%      { box-shadow:0 6px 20px rgba(0,132,255,0.35), 0 2px 6px rgba(0,0,0,0.15), 0 0 0 12px rgba(0,132,255,0); }
+            0%, 100% { box-shadow:0 8px 24px rgba(0,132,255,0.4), 0 3px 8px rgba(0,0,0,0.2), 0 0 0 0 rgba(0,132,255,0.5); }
+            50%      { box-shadow:0 8px 24px rgba(0,132,255,0.4), 0 3px 8px rgba(0,0,0,0.2), 0 0 0 14px rgba(0,132,255,0); }
         }
-        html.dark .messenger-btn .ms-label { background:#1a1a1a; border-color:#333; color:#fafafa; }
         @media (max-width: 600px) {
-            .messenger-btn { width:52px; height:52px; right:1rem; bottom:calc(1rem + env(safe-area-inset-bottom,0)); }
+            .messenger-wrap { right:1rem; bottom:calc(1rem + env(safe-area-inset-bottom,0)); gap:0.6rem; }
+            .messenger-btn { width:54px; height:54px; }
             .messenger-btn svg { width:26px; height:26px; }
-            .scroll-top { left:1rem; bottom:calc(1rem + env(safe-area-inset-bottom,0)); width:40px; height:40px; }
-            .messenger-btn .ms-label { display:none; }
+            .messenger-bubble { font-size:0.8rem; padding:0.65rem 0.85rem; max-width:200px; border-radius:0.85rem 0.85rem 0.25rem 0.85rem; }
         }
 
         /* ── REVEAL / SCROLL ANIMATIONS ── */
@@ -1517,13 +1547,19 @@
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="18 15 12 9 6 15"/></svg>
 </button>
 
-<!-- MESSENGER FLOATING CHAT BUTTON -->
-<a class="messenger-btn" id="messengerBtn" href="https://m.me/kylemheler02" target="_blank" rel="noopener noreferrer" aria-label="Chat on Messenger">
-    <svg viewBox="0 0 28 28" fill="currentColor">
-        <path d="M14 2.5C7.08 2.5 1.5 7.62 1.5 13.91c0 3.45 1.67 6.42 4.28 8.35v3.24l3.93-2.16c1.32.37 2.76.57 4.29.57 6.92 0 12.5-5.12 12.5-11.41C26.5 7.62 20.92 2.5 14 2.5zm1.47 15.11l-3.22-3.44-6.29 3.44 6.92-7.33 3.31 3.44 6.22-3.44-6.94 7.33z"/>
-    </svg>
-    <span class="ms-label">Chat with me</span>
-</a>
+<!-- MESSENGER FLOATING CHAT WIDGET -->
+<div class="messenger-wrap" id="messengerWrap">
+    <div class="messenger-bubble" id="messengerBubble" onclick="window.open('https://m.me/kylemheler02','_blank','noopener,noreferrer')">
+        <span class="bubble-close" id="bubbleClose" onclick="event.stopPropagation();">✕</span>
+        <strong>👋 Hi there!</strong><br>Say hi — I usually reply within an hour.
+    </div>
+    <a class="messenger-btn" id="messengerBtn" href="https://m.me/kylemheler02" target="_blank" rel="noopener noreferrer" aria-label="Chat on Messenger">
+        <svg viewBox="0 0 28 28" fill="currentColor">
+            <path d="M14 2.5C7.08 2.5 1.5 7.62 1.5 13.91c0 3.45 1.67 6.42 4.28 8.35v3.24l3.93-2.16c1.32.37 2.76.57 4.29.57 6.92 0 12.5-5.12 12.5-11.41C26.5 7.62 20.92 2.5 14 2.5zm1.47 15.11l-3.22-3.44-6.29 3.44 6.92-7.33 3.31 3.44 6.22-3.44-6.94 7.33z"/>
+        </svg>
+        <span class="msg-badge">1</span>
+    </a>
+</div>
 
 <!-- FORM MODAL -->
 <div class="form-overlay" id="formOverlay" onclick="if(event.target===this)closeForm()">
@@ -1878,6 +1914,23 @@
         }
         animate();
     }
+    /* ── MESSENGER BUBBLE ── */
+    (function(){
+        const bubble = document.getElementById('messengerBubble');
+        const close = document.getElementById('bubbleClose');
+        if (!bubble || !close) return;
+        // If user dismissed the bubble before, don't show it again this session
+        if (sessionStorage.getItem('msBubbleClosed') === '1') {
+            bubble.classList.add('bubble-hidden');
+            return;
+        }
+        close.addEventListener('click', (e) => {
+            e.stopPropagation();
+            bubble.classList.add('bubble-hidden');
+            sessionStorage.setItem('msBubbleClosed', '1');
+        });
+    })();
+
     if(document.readyState === 'complete') initThree();
     else window.addEventListener('load', initThree);
 
