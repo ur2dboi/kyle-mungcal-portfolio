@@ -583,18 +583,19 @@
         }
         .marquee-item {
             display:flex; align-items:center; justify-content:center; flex-shrink:0; position:relative;
-            transition: opacity 0.3s, filter 0.3s; opacity:0.7;
+            transition: filter 0.3s;
         }
-        .marquee-item:hover { opacity:1; }
+        .marquee-item:hover { filter:brightness(1.05); }
         .marquee-item img {
             height:42px; width:auto; max-width:280px; object-fit:contain;
-            opacity:0.6;
-            transition: opacity 0.3s, filter 0.3s;
+            opacity:1;
+            filter: drop-shadow(0 0 4px rgba(201,169,97,0.18));
+            transition: filter 0.3s;
         }
-        .marquee-item:hover img { opacity:1; filter: drop-shadow(0 0 8px rgba(201,169,97,0.35)); }
+        .marquee-item:hover img { filter: drop-shadow(0 0 10px rgba(201,169,97,0.5)); }
         /* Dark mode uses separate white-text/gold-underline PNG variants */
-        html.dark .marquee-item img { opacity:0.65; }
-        html.dark .marquee-item:hover img { opacity:1; filter: drop-shadow(0 0 10px rgba(212,187,126,0.4)); }
+        html.dark .marquee-item img { opacity:1; filter: drop-shadow(0 0 4px rgba(212,187,126,0.22)); }
+        html.dark .marquee-item:hover img { filter: drop-shadow(0 0 12px rgba(212,187,126,0.55)); }
         .marquee-item .logo-dark { display:none; }
         html.dark .marquee-item .logo-light { display:none; }
         html.dark .marquee-item .logo-dark { display:inline-block; }
