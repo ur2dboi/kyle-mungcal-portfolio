@@ -2100,232 +2100,259 @@
        Admin panel is at #admin (password-protected).
        To connect a real backend (Firebase, etc.), replace loadMsgs/saveMsg/saveReply
        with API calls. The UI is fully built. */
-    /* ── Firebase Realtime Database (optional cross-device sync) ── */
-    // To enable real-time cross-device sync, create a free Firebase project at
-    // https://console.firebase.google.com → Add Web App → copy the config object below.
-    // Then in Firebase console → Build → Realtime Database → Create DB (start in locked mode
-    // and use these rules so only admin can read everything; visitors can only write their own thread):
+    /* ── Supabase-backed real-time chat (server API handles persistence) ── */
     //
-    //   {
-    //     "rules": {
-    //       "kmm_threads": {
-    //         ".read": "auth != null && auth.uid === 'admin',",
-    //         "$tid": {
-    //           ".read": true,
-    //           ".write": "newData.exists()",
-    //           "messages": { ".validate": "newData.hasChildren(['from','text','ts'])" }
-    //         }
-    //       }
-    //     }
-    //   }
+    // To enable real cross-device sync:
+    //   1. Go to https://supabase.com/dashboard → New project (free)
+    //   2. Go to Project Settings → API → copy "Project URL" and "service_role" (secret!) key
+    //   3. On Vercel → Project → Settings → Environment Variables:
+    //        SUPABASE_URL             = https://xxxx.supabase.co
+    //        SUPABASE_SERVICE_ROLE_KEY = xxxx (the service_role, NOT the anon key)
+    //   4. In Supabase SQL Editor, run:
+    //        create table if not exists kmm_threads (
+    //          id text primary key, data jsonb not null, updated_at timestamptz default now()
+    //        );
+    //        alter table kmm_threads enable row level security;
+    //   5. Redeploy. Messages will sync in real-time across all devices.
     //
-    // For a simpler setup (no auth) you can set ".read": true, ".write": true for now.
-    //
-    // Leave FIREBASE_CONFIG as null to stay in localStorage-only mode (single-device demo).
-    const FIREBASE_CONFIG = null;
-    /* Example config:
-    const FIREBASE_CONFIG = {
-        apiKey: "AIza...",
-        authDomain: "your-proj.firebaseapp.com",
-        databaseURL: "https://your-proj-default-rtdb.firebaseio.com",
-        projectId: "your-proj",
-        storageBucket: "your-proj.appspot.com",
-        messagingSenderId: "12345",
-        appId: "1:1234:web:abc"
-    };
-    */
+    // Without these env vars, the server uses in-memory storage (dev/preview only).
+    // Client always caches to localStorage for offline speed.
+    const API = '/api/chat';
+    const KEY = 'kmm_chat_cache_v3';
+    const ADMIN_KEY = 'kmm_chat_admin_session';
+    const VIS_KEY = 'kmm_vis_v3';
+    const PW_KEY = 'kmm_admin_pw_hash_v3';
+
+    function hash(s){ let h=5381; for(let i=0;i<s.length;i++){ h=((h<<5)+h)+s.charCodeAt(i); h|=0;} return 'h_'+h.toString(36); }
+    function uid(){ return 'c_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+    function readCache(){ try{return JSON.parse(localStorage.getItem(KEY)||'{}');}catch(e){return{};} }
+    function writeCache(d){ localStorage.setItem(KEY, JSON.stringify(d)); }
+    function getVis(){ try{return JSON.parse(localStorage.getItem(VIS_KEY)||'null');}catch(e){return null;} }
+    function setVis(v){ localStorage.setItem(VIS_KEY, JSON.stringify(v)); }
 
     const ChatStore = (function(){
-        const KEY = 'kmm_chat_threads_v2';
-        const ADMIN_KEY = 'kmm_chat_admin_session';
-        const PW_KEY = 'kmm_admin_pw_hash';
-        const VIS_KEY = 'kmm_vis_v1';
-        const DEFAULT_PASSWORD = 'kyle2026';
-        const FB_PATH = 'kmm_threads';
-        let fbDb = null;
-        let fbConnected = false;
-        let listeners = new Set();
+        let cache = readCache();
+        const listeners = new Set();
+        let pollTimer = null;
+        let serverPwHash = localStorage.getItem(PW_KEY) || hash('kyle2026');
+        let supabaseOn = false;
 
-        function hash(s){ let h=5381; for(let i=0;i<s.length;i++){ h=((h<<5)+h)+s.charCodeAt(i); h|=0;} return 'h_'+h.toString(36); }
-        function getPwHash(){ return localStorage.getItem(PW_KEY) || hash(DEFAULT_PASSWORD); }
-        function setPassword(n){ localStorage.setItem(PW_KEY, hash(n)); }
-        function uid(){ return 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
-
-        function readLocal(){ try{return JSON.parse(localStorage.getItem(KEY)||'{}');}catch(e){return{};} }
-        function writeLocal(d){ localStorage.setItem(KEY, JSON.stringify(d)); }
-
+        function notify(){ listeners.forEach(fn=>{try{fn();}catch(e){}}); }
         function onChange(fn){ listeners.add(fn); return ()=>listeners.delete(fn); }
-        function fireChange(){ listeners.forEach(fn=>{ try{fn();}catch(e){} }); }
 
-        /* ── Firebase init (async) ── */
-        (function initFb(){
-            if(!FIREBASE_CONFIG || !FIREBASE_CONFIG.databaseURL) return;
-            if(typeof firebase !== 'undefined') { doInit(firebase); return; }
-            const s = document.createElement('script');
-            s.src = 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js';
-            s.onload = () => {
-                const s2 = document.createElement('script');
-                s2.src = 'https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js';
-                s2.onload = () => { if(typeof firebase !== 'undefined') doInit(firebase); };
-                document.head.appendChild(s2);
-            };
-            document.head.appendChild(s);
-            function doInit(fb){
-                try{
-                    fb.initializeApp(FIREBASE_CONFIG);
-                    fbDb = fb.database();
-                    fbConnected = true;
-                    // Subscribe to remote changes and merge into local
-                    fbDb.ref(FB_PATH).on('value', snap => {
-                        const remote = snap.val() || {};
-                        const local = readLocal();
-                        const merged = { ...local };
-                        let changed = false;
-                        Object.keys(remote).forEach(id => {
-                            const r = remote[id], l = local[id];
-                            if(!l || (r.lastAt||r.createdAt||0) !== (l.lastAt||l.createdAt||0) || (r.messages||[]).length !== (l.messages||[]).length){
-                                merged[id] = r;
-                                changed = true;
-                            }
-                        });
-                        if(changed){ writeLocal(merged); fireChange(); }
-                    });
-                }catch(e){ console.warn('Firebase init failed:', e); fbDb=null; fbConnected=false; }
+        async function api(params){
+            try{
+                const r = await fetch(API,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(params)});
+                const j = await r.json();
+                if(j.error) throw new Error(j.error);
+                if(j.thread){ cache[j.thread.id] = j.thread; writeCache(cache); }
+                return j;
+            }catch(e){
+                console.warn('API call failed, using cache:', params.action, e);
+                return null;
             }
-        })();
-
-        function pushFb(tid, thread){
-            if(!fbDb || !fbConnected) return;
-            try { fbDb.ref(FB_PATH+'/'+tid).set(thread); } catch(e){}
+        }
+        async function apiGet(url){
+            try{
+                const r = await fetch(API+url,{cache:'no-store'});
+                return await r.json();
+            }catch(e){ return null; }
         }
 
-        function getVisitorInfo(){
-            try {
-                const v = JSON.parse(localStorage.getItem(VIS_KEY)||'null');
-                if(v && v.tid) return v;
-            } catch(e){}
-            return null;
-        }
-        function setVisitorInfo(info){ localStorage.setItem(VIS_KEY, JSON.stringify(info)); }
-
-        function getOrCreateThread() {
-            let v = getVisitorInfo();
-            const all = readLocal();
-            if(v && v.tid && all[v.tid]) {
-                // refresh IP (best-effort, async)
-                fetchIp().then(ip=>{
-                    if(ip && all[v.tid]){
-                        const old = all[v.tid].ip;
-                        if(!old || old !== ip.ip){
-                            all[v.tid].ip = ip.ip;
-                            all[v.tid].country = ip.country||'';
-                            all[v.tid].city = ip.city||'';
-                            all[v.tid].ipHistory = all[v.tid].ipHistory||[];
-                            if(old && old !== ip.ip) all[v.tid].ipHistory.push({ip:old,at:Date.now()});
-                            writeLocal(all);
-                            pushFb(v.tid, all[v.tid]);
-                        }
-                    }
-                }).catch(()=>{});
-                return v.tid;
+        // Visitor thread
+        async function getOrCreateThread() {
+            const v = getVis();
+            if(v && v.tid && cache[v.tid]) return v.tid;
+            // Check if cached thread is in store
+            if(v && v.tid){
+                const fresh = await apiGet('?tid='+encodeURIComponent(v.tid));
+                if(fresh && fresh.thread){ cache[v.tid]=fresh.thread; writeCache(cache); supabaseOn=!!fresh.supabase; return v.tid; }
             }
-            const tid = uid();
+            // Create new thread; we don't yet have name/email — those get attached on contact submit.
+            const r = await api({action:'createThread'});
+            if(r && r.thread){
+                cache[r.thread.id]=r.thread; writeCache(cache);
+                setVis({tid:r.thread.id, createdAt:r.thread.createdAt});
+                supabaseOn = !!r.supabase;
+                notify();
+                return r.thread.id;
+            }
+            // Offline fallback: create a local-only thread
+            const id = uid();
             const now = Date.now();
-            const thread = {
-                id: tid,
-                name: '',
-                email: '',
-                ip: '', country:'', city:'', ipHistory:[],
-                ua: navigator.userAgent||'',
-                createdAt: now,
-                lastAt: now,
-                unread: 0,
-                messages: [{ from:'admin', text:"Hi! I'd love to help. Before we start, could you share your name and email so I can follow up properly?", ts:now }]
-            };
-            all[tid] = thread;
-            writeLocal(all);
-            setVisitorInfo({ tid, createdAt: now });
-            pushFb(tid, thread);
-            // Attach IP async
-            fetchIp().then(ip=>{
-                const a = readLocal();
-                if(a[tid] && ip){
-                    a[tid].ip = ip.ip||'';
-                    a[tid].country = ip.country||'';
-                    a[tid].city = ip.city||'';
-                    a[tid].ua = ip.ua||a[tid].ua;
-                    writeLocal(a);
-                    pushFb(tid, a[tid]);
-                    fireChange();
-                }
-            }).catch(()=>{});
-            return tid;
+            cache[id] = {id,name:'',email:'',ip:'',country:'',region:'',city:'',ua:navigator.userAgent,createdAt:now,lastAt:now,unread:0,messages:[{from:'admin',text:"Hi! I'd love to help — send me your question below and I'll get back to you shortly.",ts:now}]};
+            writeCache(cache); setVis({tid:id,createdAt:now});
+            notify();
+            return id;
         }
-        function fetchIp(){
-            return fetch('/api/visitor', {cache:'no-store'}).then(r=>r.ok?r.json():null).catch(()=>null);
-        }
-        function setVisitorContact(tid, name, email){
-            const all = readLocal();
-            if(!all[tid]) return;
-            all[tid].name = name||'';
-            all[tid].email = email||'';
-            all[tid].lastAt = Date.now();
-            writeLocal(all);
-            pushFb(tid, all[tid]);
-            // Update visitor session
-            const v = getVisitorInfo() || {tid, createdAt: all[tid].createdAt};
+        async function setVisitorContact(tid, name, email){
+            if(cache[tid]){
+                cache[tid].name = name||'';
+                cache[tid].email = email||'';
+                cache[tid].lastAt = Date.now();
+                writeCache(cache);
+            }
+            // Push to server — also sends name/email so server updates its record
+            // (sendMsg with an update is cleanest; we'll add a field)
+            const v = getVis()||{tid};
             v.name = name; v.email = email;
-            setVisitorInfo(v);
+            setVis(v);
+            await api({action:'_updateContact', tid, name, email}).catch(()=>{});
+            notify();
         }
-        function loadMsgs(tid){ return (readLocal()[tid] && readLocal()[tid].messages) || []; }
-        function getThread(tid){ return readLocal()[tid] || null; }
-        function saveMsg(tid, text){
-            const all = readLocal();
-            if(!all[tid]) return;
-            all[tid].messages.push({ from:'visitor', text, ts:Date.now() });
-            all[tid].unread = (all[tid].unread||0)+1;
-            all[tid].lastAt = Date.now();
-            writeLocal(all);
-            pushFb(tid, all[tid]);
-            fireChange();
+        function loadMsgs(tid){ return (cache[tid]&&cache[tid].messages)||[]; }
+        function getThread(tid){ return cache[tid]||null; }
+        async function saveMsg(tid, text){
+            // Optimistic UI
+            if(cache[tid]){
+                cache[tid].messages.push({from:'visitor',text,ts:Date.now()});
+                cache[tid].unread=(cache[tid].unread||0)+1;
+                cache[tid].lastAt=Date.now();
+                writeCache(cache);
+                notify();
+            }
+            const r = await api({action:'sendMsg', tid, text});
+            if(r && r.thread){ cache[tid]=r.thread; writeCache(cache); notify(); }
         }
-        function saveReply(tid, text){
-            const all = readLocal();
-            if(!all[tid]) return;
-            all[tid].messages.push({ from:'admin', text, ts:Date.now() });
-            all[tid].unread = 0;
-            all[tid].lastAt = Date.now();
-            writeLocal(all);
-            pushFb(tid, all[tid]);
-            fireChange();
+        async function saveReply(tid, text){
+            if(cache[tid]){
+                cache[tid].messages.push({from:'admin',text,ts:Date.now()});
+                cache[tid].unread=0; cache[tid].lastAt=Date.now(); writeCache(cache); notify();
+            }
+            const tok = sessionStorage.getItem('kmm_admin_tok') || '';
+            const r = await api({action:'reply', tid, text, token:tok});
+            if(r && r.thread){ cache[tid]=r.thread; if(r.token) sessionStorage.setItem('kmm_admin_tok',r.token); writeCache(cache); notify(); }
         }
-        function deleteThread(tid){
-            const all = readLocal();
-            delete all[tid]; writeLocal(all);
-            if(fbDb && fbConnected){ try{ fbDb.ref(FB_PATH+'/'+tid).remove(); }catch(e){} }
-            fireChange();
+        async function deleteThread(tid){
+            delete cache[tid]; writeCache(cache); notify();
+            const tok = sessionStorage.getItem('kmm_admin_tok') || '';
+            await api({action:'deleteThread', tid, token:tok});
         }
-        function markRead(tid){
-            const all = readLocal();
-            if(all[tid] && all[tid].unread){ all[tid].unread=0; writeLocal(all); pushFb(tid,all[tid]); fireChange(); }
+        async function markRead(tid){
+            if(cache[tid]){ cache[tid].unread=0; writeCache(cache); notify(); }
+            const tok = sessionStorage.getItem('kmm_admin_tok') || '';
+            await api({action:'markRead', tid, token:tok}).catch(()=>{});
         }
         function allThreads(){
-            const all = readLocal();
-            return Object.values(all).sort((a,b)=>(b.lastAt||b.createdAt)-(a.lastAt||a.createdAt));
+            return Object.values(cache).sort((a,b)=>(b.lastAt||b.createdAt)-(a.lastAt||a.createdAt));
         }
         function totalUnread(){
-            return Object.values(readLocal()).reduce((s,t)=>s+(t.unread||0),0);
+            return Object.values(cache).reduce((s,t)=>s+(t.unread||0),0);
         }
-        function adminLogin(pw){ if(hash(pw)===getPwHash()){sessionStorage.setItem(ADMIN_KEY,'1');return true;} return false; }
-        function adminChangePassword(cur,nw){
-            if(hash(cur)!==getPwHash()) return {ok:false,err:'Current password is incorrect.'};
-            if(!nw||nw.length<4) return {ok:false,err:'Password must be at least 4 characters.'};
-            setPassword(nw); return {ok:true};
+        async function adminLogin(pw){
+            const r = await api({action:'login', pw});
+            if(r && r.ok){
+                sessionStorage.setItem(ADMIN_KEY,'1');
+                if(r.token) sessionStorage.setItem('kmm_admin_tok', r.token);
+                if(r.pwHash){ localStorage.setItem(PW_KEY, r.pwHash); serverPwHash = r.pwHash; }
+                const tok = sessionStorage.getItem('kmm_admin_tok') || '';
+                const all = await apiGet('?admin=1&token='+encodeURIComponent(tok));
+                if(all && all.threads){
+                    cache = {};
+                    all.threads.forEach(t=>cache[t.id]=t);
+                    writeCache(cache);
+                    supabaseOn = !!all.supabase;
+                    if(all.token) sessionStorage.setItem('kmm_admin_tok', all.token);
+                }
+                startPolling();
+                notify();
+                return true;
+            }
+            if(hash(pw) === serverPwHash){
+                sessionStorage.setItem(ADMIN_KEY,'1');
+                startPolling();
+                notify();
+                return true;
+            }
+            return false;
         }
         function adminIsAuthed(){ return sessionStorage.getItem(ADMIN_KEY)==='1'; }
-        function adminLogout(){ sessionStorage.removeItem(ADMIN_KEY); }
-        function isFbConnected(){ return fbConnected; }
-        return { getOrCreateThread, setVisitorContact, getVisitorInfo, loadMsgs, getThread, saveMsg, saveReply, deleteThread, allThreads, markRead, totalUnread, adminLogin, adminIsAuthed, adminLogout, adminChangePassword, onChange, isFbConnected };
+        function adminLogout(){
+            sessionStorage.removeItem(ADMIN_KEY);
+            sessionStorage.removeItem('kmm_admin_tok');
+            stopPolling();
+        }
+        async function adminChangePassword(cur, nw){
+            const tok = sessionStorage.getItem('kmm_admin_tok') || '';
+            const r = await api({action:'changePassword', current:cur, next:nw, token:tok, pw:cur});
+            if(r && r.ok){
+                serverPwHash = hash(nw);
+                localStorage.setItem(PW_KEY, serverPwHash);
+                if(r.token) sessionStorage.setItem('kmm_admin_tok', r.token);
+                return {ok:true};
+            }
+            if(r && r.error) return {ok:false, err:r.error};
+            if(hash(cur)!==serverPwHash) return {ok:false, err:'Current password is incorrect.'};
+            if(!nw||nw.length<4) return {ok:false,err:'Password must be at least 4 characters.'};
+            serverPwHash = hash(nw); localStorage.setItem(PW_KEY, serverPwHash);
+            return {ok:true};
+        }
+
+        // Polling for real-time updates (cheap — single GET per poll)
+        function startPolling(){
+            if(pollTimer) return;
+            pollTimer = setInterval(pollOnce, 2000);
+            pollOnce();
+        }
+        function stopPolling(){
+            if(pollTimer){ clearInterval(pollTimer); pollTimer=null; }
+        }
+        async function pollOnce(){
+            // Visitor: poll own thread
+            const v = getVis();
+            if(v && v.tid){
+                const r = await apiGet('?tid='+encodeURIComponent(v.tid)+'&_='+Date.now()).catch(()=>null);
+                if(r && r.thread){
+                    const old = cache[v.tid];
+                    const oldLen = old ? old.messages.length : 0;
+                    const newLen = r.thread.messages.length;
+                    cache[v.tid] = r.thread; writeCache(cache);
+                    supabaseOn = !!r.supabase;
+                    if(newLen !== oldLen) notify();
+                }
+            }
+            // Admin: poll all threads
+            if(adminIsAuthed()){
+                const tok = sessionStorage.getItem('kmm_admin_tok')||'';
+                const r = await apiGet('?admin=1&token='+encodeURIComponent(tok)+'&_='+Date.now()).catch(()=>null);
+                if(r && r.threads){
+                    let changed = false;
+                    const next = {};
+                    r.threads.forEach(t=>{
+                        next[t.id]=t;
+                        const old = cache[t.id];
+                        if(!old || (old.messages.length !== t.messages.length) || (t.lastAt !== old.lastAt) || (t.unread||0) !== (old.unread||0) || t.name!==old.name || t.email!==old.email) changed=true;
+                    });
+                    if(Object.keys(cache).length !== Object.keys(next).length) changed=true;
+                    cache = next; writeCache(cache);
+                    supabaseOn = !!r.supabase;
+                    if(r.token) sessionStorage.setItem('kmm_admin_tok', r.token);
+                    if(changed) notify();
+                } else if(r && r.error && r.error === 'Unauthorized'){
+                    // Token expired/reset
+                    adminLogout();
+                    notify();
+                }
+            }
+        }
+
+        // If admin session exists but no token (after code upgrade), log out to force fresh login
+        if(adminIsAuthed() && !sessionStorage.getItem('kmm_admin_tok')){
+            sessionStorage.removeItem(ADMIN_KEY);
+        } else if(adminIsAuthed()){
+            startPolling();
+        }
+        // For visitor: start polling if we have a thread
+        if(getVis() && getVis().tid){
+            setInterval(pollOnce, 2500);
+            setTimeout(pollOnce, 300);
+        }
+        // Also listen to storage (cross-tab same-device)
+        window.addEventListener('storage', e=>{
+            if(e.key===KEY){ cache=readCache(); notify(); }
+        });
+
+        return { getOrCreateThread, setVisitorContact, loadMsgs, getThread, saveMsg, saveReply, deleteThread, allThreads, markRead, totalUnread, adminLogin, adminIsAuthed, adminLogout, adminChangePassword, onChange, supabaseEnabled:()=>supabaseOn };
     })();
 
     /* ── VISITOR CHAT WIDGET ── */
@@ -2341,9 +2368,14 @@
 
         let isOpen = false;
         let contactSet = false;
-        const tid = ChatStore.getOrCreateThread();
-        const v = ChatStore.getVisitorInfo() || {};
-        if(v.name && v.email) contactSet = true;
+        let tid = null;
+        ChatStore.getOrCreateThread().then(id => {
+            tid = id;
+            const v = getVis() || {};
+            contactSet = !!(v.name && v.email);
+            render();
+            updateBadge();
+        });
 
         function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
@@ -2355,11 +2387,13 @@
             if(scroll) body.scrollTop = body.scrollHeight;
         }
         function render(){
+            if(!tid) return;
             body.innerHTML = '';
             const t = ChatStore.getThread(tid);
-            const msgs = t ? t.messages : ChatStore.loadMsgs(tid);
-            // If contact not set, show contact form before message input
+            const msgs = t ? t.messages : [];
             msgs.forEach(m => appendMsg(m.from, m.text, false));
+            const v = getVis()||{};
+            contactSet = !!(v.name && v.email);
             if(!contactSet){
                 const form = document.createElement('div');
                 form.className = 'chat-contact-form';
@@ -2367,7 +2401,7 @@
                     <input type="text" class="chat-contact-input" id="chatName" placeholder="Your name" maxlength="60" aria-label="Your name">
                     <input type="email" class="chat-contact-input" id="chatEmail" placeholder="Your email" maxlength="120" aria-label="Your email">
                     <button class="chat-contact-btn" id="chatContactBtn" disabled>Continue →</button>
-                    <div class="chat-contact-note">I'll only use this to reply to you.</div>`;
+                    <div class="chat-contact-note">I'll only use this to follow up with you.</div>`;
                 body.appendChild(form);
                 const nameI = form.querySelector('#chatName');
                 const emailI = form.querySelector('#chatEmail');
@@ -2375,22 +2409,20 @@
                 function validate(){ submit.disabled = !(nameI.value.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailI.value.trim())); }
                 nameI.addEventListener('input', validate);
                 emailI.addEventListener('input', validate);
-                function submitContact(){
+                async function submitContact(){
                     if(submit.disabled) return;
-                    const name = nameI.value.trim();
-                    const email = emailI.value.trim();
-                    ChatStore.setVisitorContact(tid, name, email);
+                    const name = nameI.value.trim(), email = emailI.value.trim();
+                    await ChatStore.setVisitorContact(tid, name, email);
                     contactSet = true;
-                    // Remove form and system msg
                     form.remove();
-                    appendMsg('admin', 'Thanks ' + name.split(' ')[0] + '! What can I help you with today?');
+                    appendMsg('admin', 'Thanks '+name.split(' ')[0]+'! What can I help you with today?');
                     input.focus();
+                    sendBtn.disabled = !input.value.trim();
                 }
                 submit.addEventListener('click', submitContact);
                 [nameI, emailI].forEach(i => i.addEventListener('keydown', e=>{ if(e.key==='Enter') submitContact(); }));
-                // Prefill if we have partial info
-                if(v.name) nameI.value = v.name;
-                if(v.email) emailI.value = v.email;
+                if(v.name) nameI.value=v.name;
+                if(v.email) emailI.value=v.email;
                 validate();
                 setTimeout(()=>nameI.focus(), 250);
             }
@@ -2398,41 +2430,27 @@
         }
         function updateBadge(){
             const all = ChatStore.totalUnread();
-            if(all > 0){
-                badge.style.display = 'flex';
-                badge.textContent = all > 9 ? '9+' : all;
-            } else {
-                badge.style.display = 'none';
-            }
+            if(all > 0){ badge.style.display='flex'; badge.textContent = all>9?'9+':all; }
+            else badge.style.display='none';
         }
         function openChat(){
-            isOpen = true;
-            chat.classList.add('open');
-            btn.classList.add('open');
-            btn.setAttribute('aria-expanded','true');
-            chat.setAttribute('aria-hidden','false');
-            ChatStore.markRead(tid);
+            isOpen=true; chat.classList.add('open'); btn.classList.add('open');
+            btn.setAttribute('aria-expanded','true'); chat.setAttribute('aria-hidden','false');
+            if(tid) ChatStore.markRead(tid);
             updateBadge();
             setTimeout(()=>{ render(); if(contactSet) input.focus(); }, 200);
         }
         function closeChat(){
-            isOpen = false;
-            chat.classList.remove('open');
-            btn.classList.remove('open');
-            btn.setAttribute('aria-expanded','false');
-            chat.setAttribute('aria-hidden','true');
+            isOpen=false; chat.classList.remove('open'); btn.classList.remove('open');
+            btn.setAttribute('aria-expanded','false'); chat.setAttribute('aria-hidden','true');
         }
-        function sendMsg(){
-            const text = input.value.trim();
-            if(!text) return;
-            if(!contactSet) return;
-            ChatStore.saveMsg(tid, text);
+        async function sendMsg(){
+            const text=input.value.trim();
+            if(!text||!tid||!contactSet) return;
             appendMsg('visitor', text);
-            input.value = '';
-            sendBtn.disabled = true;
-            setTimeout(()=>{
-                appendMsg('admin', 'Thanks! Your message is received. I\'ll get back to you as soon as I can.');
-            }, 700);
+            input.value=''; sendBtn.disabled=true;
+            await ChatStore.saveMsg(tid, text);
+            setTimeout(()=>appendMsg('admin','Thanks! Your message is received — I\'ll get back to you here as soon as I can.'),600);
         }
 
         btn.addEventListener('click', ()=>{ isOpen ? closeChat() : openChat(); });
@@ -2440,26 +2458,18 @@
         input.addEventListener('input', ()=>{ sendBtn.disabled = !input.value.trim() || !contactSet; });
         input.addEventListener('keydown', e=>{ if(e.key==='Enter') sendMsg(); });
         sendBtn.addEventListener('click', sendMsg);
-        document.addEventListener('keydown', e=>{ if(e.key==='Escape' && isOpen) closeChat(); });
+        document.addEventListener('keydown', e=>{ if(e.key==='Escape'&&isOpen) closeChat(); });
 
-        // Live updates: replies from admin in other tabs/windows/devices
-        function syncIncoming(){
-            const t = ChatStore.getThread(tid);
-            if(!t) return;
+        ChatStore.onChange(()=>{
             if(isOpen){
+                const t = ChatStore.getThread(tid);
                 const msgs = body.querySelectorAll('.chat-msg');
-                const currentCount = msgs.length;
-                if(t.messages.length !== currentCount){
-                    // Append new messages
-                    t.messages.slice(currentCount).forEach(m => appendMsg(m.from, m.text));
+                if(t && t.messages.length !== msgs.length){
+                    t.messages.slice(msgs.length).forEach(m=>appendMsg(m.from,m.text));
                 }
             }
             updateBadge();
-        }
-        window.addEventListener('storage', syncIncoming);
-        ChatStore.onChange(syncIncoming);
-        render();
-        updateBadge();
+        });
     })();
 
     /* ---- Admin panel ---- */
@@ -2490,12 +2500,18 @@
             panel.querySelector('#adminPw').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
             setTimeout(()=>panel.querySelector('#adminPw')?.focus(), 50);
         }
-        function doLogin() {
-            const pw = document.getElementById('adminPw').value;
-            if (ChatStore.adminLogin(pw)) { render(); }
+        async function doLogin() {
+            const pwEl = document.getElementById('adminPw');
+            const err = document.getElementById('adminErr');
+            const btn = document.getElementById('adminLoginBtn');
+            const pw = pwEl.value;
+            if (btn) { btn.disabled = true; btn.textContent = 'Signing in…'; }
+            const ok = await ChatStore.adminLogin(pw);
+            if (btn) { btn.disabled = false; btn.textContent = 'Sign in'; }
+            if (ok) { render(); }
             else {
-                const err = document.getElementById('adminErr');
                 if (err) err.textContent = 'Incorrect password.';
+                pwEl.select();
             }
         }
         function logout() { ChatStore.adminLogout(); location.hash=''; loginView(); }
@@ -2568,15 +2584,20 @@
                 });
                 const inp = wrap.querySelector('input');
                 const btn = wrap.querySelector('button');
-                function reply(){
+                async function reply(){
                     const v = inp.value.trim(); if (!v) return;
-                    ChatStore.saveReply(t.id, v); render();
+                    btn.disabled = true; inp.disabled = true;
+                    inp.value = '';
+                    await ChatStore.saveReply(t.id, v);
+                    btn.disabled = false; inp.disabled = false;
+                    render();
+                    inp && inp.focus && inp.focus();
                 }
                 btn.addEventListener('click', reply);
                 inp.addEventListener('keydown', e => { if(e.key==='Enter') reply(); });
-                wrap.querySelector('.admin-delete').addEventListener('click', () => {
+                wrap.querySelector('.admin-delete').addEventListener('click', async () => {
                     if (confirm('Delete this conversation? This cannot be undone.')) {
-                        ChatStore.deleteThread(t.id); render();
+                        await ChatStore.deleteThread(t.id); render();
                     }
                 });
                 list.appendChild(wrap);
@@ -2594,12 +2615,12 @@
             el.style.display = 'block';
             setTimeout(()=>{ el.style.display='none'; }, 4000);
         }
-        function showChangePw(){
+        async function showChangePw(){
             const current = prompt('Enter current password:');
             if (current === null) return;
             const newPw = prompt('Enter new password (min 4 characters):');
             if (newPw === null) return;
-            const res = ChatStore.adminChangePassword(current, newPw);
+            const res = await ChatStore.adminChangePassword(current, newPw);
             if (res.ok) showStatus('Password changed successfully.');
             else showStatus(res.err, true);
         }
