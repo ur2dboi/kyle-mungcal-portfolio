@@ -1,0 +1,28 @@
+{
+  "name": "Kyle Mheler Mungcal — Full Stack Web Developer",
+  "short_name": "Kyle Mheler",
+  "description": "Full Stack Web Developer based in Manila, Philippines. Shopify, WordPress, UI/UX, SEO, and custom web development.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0a0a0a",
+  "theme_color": "#c9a961",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["business", "productivity"],
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

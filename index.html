@@ -46,6 +46,10 @@
     <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
     <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Kyle Mheler">
     <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1087,6 +1091,75 @@
             .contact-wrap { padding:1.75rem 1rem; }
             .btn-primary, .btn-secondary { padding:0.9rem 1.25rem; }
         }
+        /* ── ADMIN PANEL (accessible via #admin) ── */
+        .admin-panel {
+            position:fixed; inset:0; z-index:200; background:var(--bg);
+            overflow-y:auto; display:none; padding:2rem 1.25rem;
+        }
+        .admin-panel.active { display:block; }
+        .admin-inner { max-width:800px; margin:0 auto; }
+        .admin-head {
+            display:flex; justify-content:space-between; align-items:center;
+            padding-bottom:1.25rem; border-bottom:1px solid var(--border); margin-bottom:1.5rem;
+        }
+        .admin-head h2 { font-size:1.4rem; margin:0; }
+        .admin-close {
+            background:var(--surface); border:1px solid var(--border);
+            width:38px; height:38px; border-radius:50%; cursor:pointer; color:var(--text);
+            display:flex; align-items:center; justify-content:center; font-size:1rem;
+            transition:border-color 0.2s, color 0.2s;
+        }
+        .admin-close:hover { border-color:var(--gold); color:var(--gold); }
+        .admin-login {
+            max-width:380px; margin:4rem auto; text-align:center;
+            padding:2rem; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+        }
+        .admin-login h3 { margin:0 0 0.5rem; font-size:1.2rem; }
+        .admin-login p { color:var(--text-3); font-size:0.85rem; margin-bottom:1.25rem; }
+        .admin-login input {
+            width:100%; padding:0.8rem 1rem; border:1px solid var(--border);
+            border-radius:var(--radius-sm); background:var(--bg-alt); color:var(--text);
+            font-size:16px; margin-bottom:0.75rem; font-family:inherit;
+        }
+        .admin-login input:focus { outline:none; border-color:var(--gold); }
+        .admin-login button {
+            width:100%; padding:0.85rem; background:var(--gold); color:var(--black);
+            border:none; border-radius:var(--radius-sm); font-weight:600; cursor:pointer; font-size:0.9rem;
+        }
+        .admin-login .err { color:#ef4444; font-size:0.8rem; margin-top:0.5rem; min-height:1rem; }
+        .admin-thread {
+            background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+            padding:1rem; margin-bottom:1rem;
+        }
+        .admin-thread-head {
+            display:flex; justify-content:space-between; align-items:center;
+            padding-bottom:0.75rem; border-bottom:1px solid var(--border); margin-bottom:0.75rem;
+        }
+        .admin-thread-head .meta { font-size:0.8rem; color:var(--text-3); font-family:'JetBrains Mono',monospace; }
+        .admin-thread-head .name { font-weight:600; color:var(--text); }
+        .admin-thread-head .unread { background:var(--gold); color:var(--black); padding:0.15rem 0.5rem; border-radius:999px; font-size:0.7rem; font-weight:700; }
+        .admin-msg { padding:0.5rem 0; font-size:0.9rem; line-height:1.5; }
+        .admin-msg .who { font-size:0.7rem; font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.15rem; }
+        .admin-msg.visitor .who { color:var(--text-3); }
+        .admin-msg.admin .who { color:var(--gold); }
+        .admin-msg .body { color:var(--text); }
+        .admin-reply { display:flex; gap:0.5rem; margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid var(--border); }
+        .admin-reply input {
+            flex:1; padding:0.65rem 0.85rem; border:1px solid var(--border); border-radius:var(--radius-sm);
+            background:var(--bg-alt); color:var(--text); font-size:16px; font-family:inherit;
+        }
+        .admin-reply input:focus { outline:none; border-color:var(--gold); }
+        .admin-reply button {
+            padding:0 1rem; background:var(--gold); color:var(--black); border:none;
+            border-radius:var(--radius-sm); font-weight:600; cursor:pointer; font-size:0.85rem;
+        }
+        .admin-empty { text-align:center; padding:3rem 1rem; color:var(--text-3); }
+        @media (max-width:600px){
+            .admin-panel { padding:1rem 0.75rem; }
+            .admin-thread { padding:0.85rem; }
+        }
+        html.dark .admin-login input { background:#0a0a0a; }
+        html.dark .admin-reply input { background:#0a0a0a; }
     </style>
 </head>
 <body>
@@ -2002,7 +2075,72 @@
         }
         animate();
     }
-    /* ── MESSENGER CHAT WIDGET ── */
+    /* ── SITE CHAT WIDGET + ADMIN PANEL ── */
+    /* Messages are persisted in localStorage keyed by conversation ID.
+       Admin panel is at #admin (password-protected).
+       To connect a real backend (Firebase, etc.), replace loadMsgs/saveMsg/saveReply
+       with API calls. The UI is fully built. */
+    const ChatStore = (function(){
+        const KEY = 'kmm_chat_threads_v1';
+        const ADMIN_KEY = 'kmm_chat_admin_session';
+        const ADMIN_PASSWORD = 'kyle2026'; // CHANGE THIS to your own password
+        function read() { try { return JSON.parse(localStorage.getItem(KEY)||'{}'); } catch(e){ return {}; } }
+        function write(d) { localStorage.setItem(KEY, JSON.stringify(d)); }
+        function uid() { return 'c_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+        function getOrCreateThread() {
+            let tid = sessionStorage.getItem('kmm_chat_tid');
+            const all = read();
+            if (tid && all[tid]) return tid;
+            tid = uid();
+            sessionStorage.setItem('kmm_chat_tid', tid);
+            all[tid] = {
+                id: tid,
+                name: 'Guest',
+                createdAt: Date.now(),
+                unread: 0,
+                messages: [{ from:'admin', text:'Hi there! Type your message below and I\'ll get back to you as soon as I can.', ts:Date.now() }]
+            };
+            write(all);
+            return tid;
+        }
+        function loadMsgs(tid) { return (read()[tid] && read()[tid].messages) || []; }
+        function saveMsg(tid, text) {
+            const all = read();
+            if (!all[tid]) return;
+            all[tid].messages.push({ from:'visitor', text, ts:Date.now() });
+            all[tid].unread = (all[tid].unread||0) + 1;
+            all[tid].lastAt = Date.now();
+            write(all);
+        }
+        function saveReply(tid, text) {
+            const all = read();
+            if (!all[tid]) return;
+            all[tid].messages.push({ from:'admin', text, ts:Date.now() });
+            all[tid].unread = 0;
+            all[tid].lastAt = Date.now();
+            write(all);
+        }
+        function allThreads() {
+            const all = read();
+            return Object.values(all).sort((a,b) => (b.lastAt||b.createdAt) - (a.lastAt||a.createdAt));
+        }
+        function markRead(tid) {
+            const all = read();
+            if (all[tid]) { all[tid].unread = 0; write(all); }
+        }
+        function totalUnread() {
+            return Object.values(read()).reduce((s,t) => s + (t.unread||0), 0);
+        }
+        function adminLogin(pw) {
+            if (pw === ADMIN_PASSWORD) { sessionStorage.setItem(ADMIN_KEY, '1'); return true; }
+            return false;
+        }
+        function adminIsAuthed() { return sessionStorage.getItem(ADMIN_KEY) === '1'; }
+        function adminLogout() { sessionStorage.removeItem(ADMIN_KEY); }
+        return { getOrCreateThread, loadMsgs, saveMsg, saveReply, allThreads, markRead, totalUnread, adminLogin, adminIsAuthed, adminLogout };
+    })();
+
+    /* ---- Visitor chat widget ---- */
     (function(){
         const btn = document.getElementById('messengerBtn');
         const chat = document.getElementById('messengerChat');
@@ -2011,19 +2149,44 @@
         const sendBtn = document.getElementById('chatSend');
         const body = document.getElementById('chatBody');
         const badge = document.getElementById('msgBadge');
-        if (!btn || !chat || !input || !sendBtn) return;
+        if (!btn || !chat || !input || !sendBtn || !body) return;
 
-        const MESSENGER_URL = 'https://m.me/kylemheler02';
+        const tid = ChatStore.getOrCreateThread();
         let isOpen = false;
 
+        function render() {
+            // Render only visitor's conversation in the widget
+            body.innerHTML = '';
+            ChatStore.loadMsgs(tid).forEach(m => appendMsg(m.from, m.text, false));
+            body.scrollTop = body.scrollHeight;
+            updateBadge();
+        }
+        function appendMsg(from, text, scroll=true) {
+            const div = document.createElement('div');
+            div.className = 'chat-msg ' + (from === 'admin' ? 'bot' : 'user');
+            div.textContent = text;
+            body.appendChild(div);
+            if (scroll) body.scrollTop = body.scrollHeight;
+        }
+        function updateBadge() {
+            if (!badge) return;
+            const all = ChatStore.totalUnread();
+            if (all > 0) {
+                badge.style.display = 'flex';
+                badge.textContent = all > 9 ? '9+' : all;
+            } else {
+                badge.style.display = 'none';
+            }
+        }
         function openChat() {
             isOpen = true;
             chat.classList.add('open');
             btn.classList.add('open');
             btn.setAttribute('aria-expanded', 'true');
             chat.setAttribute('aria-hidden', 'false');
-            if (badge) badge.style.display = 'none';
-            setTimeout(() => input.focus(), 250);
+            ChatStore.markRead(tid);
+            updateBadge();
+            setTimeout(() => { input.focus(); render(); }, 200);
         }
         function closeChat() {
             isOpen = false;
@@ -2032,36 +2195,16 @@
             btn.setAttribute('aria-expanded', 'false');
             chat.setAttribute('aria-hidden', 'true');
         }
-        function addUserMsg(text) {
-            const div = document.createElement('div');
-            div.className = 'chat-msg user';
-            div.textContent = text;
-            body.appendChild(div);
-            body.scrollTop = body.scrollHeight;
-        }
-        function addBotMsg(html) {
-            const div = document.createElement('div');
-            div.className = 'chat-msg bot';
-            div.innerHTML = html;
-            body.appendChild(div);
-            body.scrollTop = body.scrollHeight;
-        }
         function sendMsg() {
             const text = input.value.trim();
             if (!text) return;
-            addUserMsg(text);
+            ChatStore.saveMsg(tid, text);
+            appendMsg('visitor', text);
             input.value = '';
             sendBtn.disabled = true;
-            // Small delay for feedback, then open Messenger with the message.
-            // m.me links don't support prefilled text natively, so we prompt the user
-            // and open Messenger where they hit send (this is the only reliable way
-            // to deliver to a personal Facebook profile).
             setTimeout(() => {
-                addBotMsg('Opening Messenger…<br><small style="opacity:.7">Your message is in your draft — tap Send in Messenger and I\'ll get it right away.</small>');
-                window.open(MESSENGER_URL, '_blank', 'noopener,noreferrer');
-                // Clear badge permanently once opened
-                sessionStorage.setItem('msChatOpened', '1');
-            }, 400);
+                appendMsg('admin', 'Thanks! Your message is received. I\'ll reply here — check back in a bit.');
+            }, 600);
         }
 
         btn.addEventListener('click', () => { isOpen ? closeChat() : openChat(); });
@@ -2069,10 +2212,123 @@
         input.addEventListener('input', () => { sendBtn.disabled = !input.value.trim(); });
         input.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMsg(); });
         sendBtn.addEventListener('click', sendMsg);
-        // Close on Escape
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen) closeChat(); });
-        // Hide badge if widget opened before
-        if (sessionStorage.getItem('msChatOpened') === '1' && badge) badge.style.display = 'none';
+
+        // Watch for admin replies from other tabs/windows
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'kmm_chat_threads_v1') {
+                if (isOpen) render();
+                updateBadge();
+            }
+        });
+        render();
+    })();
+
+    /* ---- Admin panel ---- */
+    (function(){
+        const panel = document.getElementById('adminPanel');
+        if (!panel) return;
+
+        function show() { panel.classList.add('active'); document.body.style.overflow='hidden'; render(); }
+        function hide() { panel.classList.remove('active'); document.body.style.overflow=''; }
+
+        function loginView() {
+            panel.innerHTML = `
+                <div class="admin-inner">
+                    <div class="admin-head">
+                        <h2>Admin Login</h2>
+                        <button class="admin-close" id="adminCloseBtn" aria-label="Close">✕</button>
+                    </div>
+                    <div class="admin-login">
+                        <h3>Kyle, sign in</h3>
+                        <p>Enter your password to view and reply to messages.</p>
+                        <input type="password" id="adminPw" placeholder="Password" autocomplete="current-password">
+                        <button id="adminLoginBtn">Sign in</button>
+                        <div class="err" id="adminErr"></div>
+                    </div>
+                </div>`;
+            panel.querySelector('#adminCloseBtn').addEventListener('click', () => { location.hash = ''; hide(); });
+            panel.querySelector('#adminLoginBtn').addEventListener('click', doLogin);
+            panel.querySelector('#adminPw').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+            setTimeout(()=>panel.querySelector('#adminPw')?.focus(), 50);
+        }
+        function doLogin() {
+            const pw = document.getElementById('adminPw').value;
+            if (ChatStore.adminLogin(pw)) { render(); }
+            else {
+                const err = document.getElementById('adminErr');
+                if (err) err.textContent = 'Incorrect password.';
+            }
+        }
+        function logout() { ChatStore.adminLogout(); location.hash=''; loginView(); }
+        function render() {
+            if (!ChatStore.adminIsAuthed()) { loginView(); return; }
+            const threads = ChatStore.allThreads();
+            panel.innerHTML = `
+                <div class="admin-inner">
+                    <div class="admin-head">
+                        <h2>Messages</h2>
+                        <div style="display:flex;gap:0.5rem;">
+                            <button class="admin-close" id="adminLogout" title="Logout" style="width:auto;padding:0 0.9rem;border-radius:2rem;font-size:0.8rem;font-weight:600;">Logout</button>
+                            <button class="admin-close" id="adminCloseBtn" aria-label="Close">✕</button>
+                        </div>
+                    </div>
+                    <div id="threadList"></div>
+                </div>`;
+            panel.querySelector('#adminCloseBtn').addEventListener('click', () => { location.hash=''; hide(); });
+            panel.querySelector('#adminLogout').addEventListener('click', logout);
+
+            const list = panel.querySelector('#threadList');
+            if (threads.length === 0) {
+                list.innerHTML = '<div class="admin-empty">No messages yet. Visitors will appear here when they chat.</div>';
+                return;
+            }
+            threads.forEach(t => {
+                const wrap = document.createElement('div');
+                wrap.className = 'admin-thread';
+                const unreadBadge = t.unread ? '<span class="unread">'+t.unread+' new</span>' : '';
+                const when = new Date(t.createdAt).toLocaleString();
+                wrap.innerHTML = `
+                    <div class="admin-thread-head">
+                        <div>
+                            <div class="name">${t.name} ${unreadBadge}</div>
+                            <div class="meta">${when} · ${t.messages.length} msgs</div>
+                        </div>
+                    </div>
+                    <div class="admin-msgs"></div>
+                    <div class="admin-reply">
+                        <input type="text" placeholder="Write a reply…" maxlength="500">
+                        <button>Send</button>
+                    </div>`;
+                const msgsEl = wrap.querySelector('.admin-msgs');
+                t.messages.forEach(m => {
+                    const mEl = document.createElement('div');
+                    mEl.className = 'admin-msg ' + (m.from === 'admin' ? 'admin' : 'visitor');
+                    mEl.innerHTML = `<div class="who">${m.from === 'admin' ? 'You (admin)' : 'Visitor'}</div><div class="body"></div>`;
+                    mEl.querySelector('.body').textContent = m.text;
+                    msgsEl.appendChild(mEl);
+                });
+                const inp = wrap.querySelector('input');
+                const btn = wrap.querySelector('button');
+                function reply(){
+                    const v = inp.value.trim(); if (!v) return;
+                    ChatStore.saveReply(t.id, v); render();
+                }
+                btn.addEventListener('click', reply);
+                inp.addEventListener('keydown', e => { if(e.key==='Enter') reply(); });
+                list.appendChild(wrap);
+            });
+            // Mark all as read on open
+            threads.forEach(t => ChatStore.markRead(t.id));
+        }
+        function routeHash() {
+            if (location.hash === '#admin') { show(); render(); }
+            else hide();
+        }
+        window.addEventListener('hashchange', routeHash);
+        routeHash();
+        // Storage events re-render admin live when messages come in from other tabs
+        window.addEventListener('storage', () => { if (panel.classList.contains('active')) render(); });
     })();
 
     if(document.readyState === 'complete') initThree();
@@ -2180,5 +2436,16 @@
 })();
 </script>
 
+<!-- Admin panel (access via #admin) -->
+<div class="admin-panel" id="adminPanel" role="dialog" aria-label="Admin panel"></div>
+
+<script>
+// Register service worker for PWA installability
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {});
+    });
+}
+</script>
 </body>
 </html>
