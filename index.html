@@ -214,9 +214,9 @@
             color:var(--text-2); transition:all 0.2s;
         }
         .mode-toggle:hover { color:var(--gold); border-color:var(--gold); background:var(--gold-bg); }
-        .hamburger { display:none; width:40px; height:40px; flex-direction:column; gap:5px;
+        .hamburger { display:none; width:44px; height:44px; flex-direction:column; gap:5px;
             align-items:center; justify-content:center; border-radius:var(--radius-sm);
-            border:1px solid var(--border); padding:0;
+            border:1px solid var(--border); padding:0; background:transparent;
         }
         .hamburger span { display:block; width:20px; height:2px; background:var(--text); transition:all 0.25s; }
         .hamburger.open span:nth-child(1){ transform:rotate(45deg) translate(5px,5px); }
@@ -649,12 +649,13 @@
             .section-title { font-size:clamp(2rem, 4vw, 2.75rem); }
         }
         @media (max-width: 768px) {
-            .nav-inner { padding:0 1.25rem; height:64px; }
+            .nav-inner { padding:0 1.25rem; height:64px; position:relative; justify-content:center; }
+            .nav-logo { position:absolute; left:50%; transform:translateX(-50%); z-index:2; }
             .nav-links {
                 position:fixed; top:64px; left:1rem; right:1rem;
                 flex-direction:column; gap:0; background:var(--surface);
                 border:1px solid transparent; border-radius:var(--radius);
-                padding:0; box-shadow:none;
+                padding:0; box-shadow:none; z-index:99;
                 max-height:0; overflow:hidden; transition:max-height 0.3s, padding 0.3s, border-color 0.3s, box-shadow 0.3s;
             }
             .nav-links.open { max-height:640px; padding:1rem 0.5rem; border-color:var(--border); box-shadow:var(--shadow-lg); }
@@ -668,7 +669,8 @@
                 border-bottom:1px solid var(--border); margin-bottom:0.25rem; cursor:pointer;
             }
             .nav-cta-wrap-desktop { display:none; }
-            .hamburger { display:flex; }
+            .hamburger { display:flex; position:absolute; left:0; top:50%; transform:translateY(-50%); }
+            .nav-actions { position:absolute; right:0; top:50%; transform:translateY(-50%); gap:0.5rem; justify-content:flex-end; }
             .hamburger { width:44px; height:44px; }
             .hamburger span { width:22px; height:2px; }
             /* Section spacing */
@@ -803,12 +805,12 @@
             <li><a href="#gallery" onclick="closeMenu()">Gallery</a></li>
             <li><a href="#contact" onclick="closeMenu()">Contact</a></li>
         </ul>
+        <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
         <div class="nav-actions">
             <button class="mode-toggle" id="modeToggle" aria-label="Toggle theme">
                 <svg id="modeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
             </button>
             <button class="nav-cta nav-cta-wrap-desktop" onclick="openForm()">Get in Touch</button>
-            <button class="hamburger" id="hamburger" aria-label="Menu"><span></span><span></span><span></span></button>
         </div>
     </div>
 </nav>
