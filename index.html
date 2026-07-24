@@ -51,6 +51,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script async src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
     <style>
         :root {
             --bg: #ffffff;
@@ -227,12 +228,27 @@
         /* ── HERO ── */
         .hero {
             min-height:100vh; min-height:100dvh; display:flex; align-items:center;
-            padding:8rem 2rem 4rem; max-width:1200px; margin:0 auto;
+            padding:8rem 2rem 4rem; max-width:1200px; margin:0 auto; position:relative;
         }
-        .hero-content {
+        /* 3D canvas background layer behind hero content */
+        #hero-canvas {
+            position:absolute; inset:0; width:100%; height:100%; z-index:0;
+            pointer-events:none;
+        }
+        .hero-content { position:relative; z-index:1;
             display:grid; grid-template-columns:1.3fr 1fr; gap:4rem; align-items:center;
             width:100%;
         }
+        /* 3D tilt cards */
+        .tilt-card { transform-style:preserve-3d; transition:transform 0.15s ease-out; will-change:transform; }
+        .tilt-card .tilt-inner { transform:translateZ(20px); }
+        .tilt-shine {
+            position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+            background:linear-gradient(135deg, rgba(255,255,255,0.12) 0%, transparent 50%, transparent 100%);
+            opacity:0; transition:opacity 0.3s;
+        }
+        html.dark .tilt-shine { background:linear-gradient(135deg, rgba(212,187,126,0.08) 0%, transparent 50%, transparent 100%); }
+        .tilt-card:hover .tilt-shine { opacity:1; }
         .hero-text { max-width:640px; }
         .hero-portrait-wrap { position:relative; justify-self:center; width:100%; max-width:360px; }
         .hero-portrait {
@@ -699,11 +715,14 @@
             section[class*="section-"] { padding-left:0; padding-right:0; }
             section[class*="section-"] > * { padding-left:1.25rem; padding-right:1.25rem; }
             /* Hero */
-            .hero { padding:5.5rem 1.25rem 3rem; min-height:auto; }
+            .hero { padding:5.5rem 1.25rem 3rem; min-height:auto; overflow:hidden; }
+            #hero-canvas { opacity:0.3; }
             .hero-content { grid-template-columns:1fr; gap:2rem; text-align:center; }
             .hero-text { max-width:none; }
             .hero-portrait-wrap { max-width:220px; order:-1; margin:0 auto; }
             .hero-portrait-wrap::after { display:none; }
+            .tilt-card { transform:none !important; }
+            .tilt-shine { display:none; }
             .hero-eyebrow { justify-content:center; font-size:0.78rem; margin-bottom:1.25rem; }
             .hero h1 { font-size:2rem; line-height:1.15; margin-bottom:1.25rem; }
             .hero-sub { font-size:1rem; max-width:none; margin-left:auto; margin-right:auto; margin-bottom:2rem; }
@@ -832,6 +851,7 @@
 
 <!-- HERO -->
 <section class="hero" id="home">
+    <canvas id="hero-canvas"></canvas>
     <div class="hero-content">
         <div class="hero-text">
             <div class="hero-eyebrow reveal">Full Stack Web Developer</div>
@@ -1439,7 +1459,169 @@
         return false;
     };
 
-    /* Typing subtitle removed for minimalism — keep it clean */
+    /* ── 3D TILT CARDS ── */
+    document.querySelectorAll('.service-card, .expertise-card, .process-step, .highlight-card, .project-card, .testimonial-card, .contact-wrap').forEach(card => {
+        card.classList.add('tilt-card');
+        card.style.position = card.style.position || 'relative';
+        const shine = document.createElement('div');
+        shine.className = 'tilt-shine';
+        card.appendChild(shine);
+        card.addEventListener('mousemove', (e) => {
+            const r = card.getBoundingClientRect();
+            const x = e.clientX - r.left;
+            const y = e.clientY - r.top;
+            const cx = r.width / 2;
+            const cy = r.height / 2;
+            const rx = ((y - cy) / cy) * -8;
+            const ry = ((x - cx) / cx) * 8;
+            card.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-4px)`;
+        });
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = '';
+        });
+    });
+
+    /* ── THREE.JS 3D HERO SCENE ── */
+    function initThree() {
+        if (typeof THREE === 'undefined') { setTimeout(initThree, 200); return; }
+        // Skip on small mobile for performance
+        if (window.innerWidth < 640) return;
+        const canvas = document.getElementById('hero-canvas');
+        if (!canvas) return;
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(50, canvas.clientWidth/canvas.clientHeight, 0.1, 100);
+        camera.position.z = 6;
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias:true, alpha:true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+        renderer.setClearColor(0x000000, 0);
+
+        const isDark = () => document.documentElement.classList.contains('dark');
+        const goldColor = () => isDark() ? 0xd4bb7e : 0xc9a961;
+
+        // Central KM monogram: build from geometric shapes (stylized K + M)
+        const group = new THREE.Group();
+
+        const mat = () => new THREE.MeshStandardMaterial({
+            color: goldColor(), metalness:0.85, roughness:0.25,
+        });
+
+        // Build a stylized monogram using boxes — K (left stem + two diagonals), M (two stems + middle V)
+        function makeBar(w,h,d,x,y,z,ry=0) {
+            const g = new THREE.BoxGeometry(w,h,d);
+            const m = mat();
+            const mesh = new THREE.Mesh(g,m);
+            mesh.position.set(x,y,z);
+            mesh.rotation.y = ry;
+            return mesh;
+        }
+
+        // K - left stem
+        group.add(makeBar(0.18, 2.2, 0.3, -1.35, 0, 0));
+        // K - upper diagonal
+        const kd1 = makeBar(0.18, 1.4, 0.3, -0.6, 0.55, 0, Math.PI/4);
+        group.add(kd1);
+        // K - lower diagonal
+        const kd2 = makeBar(0.18, 1.4, 0.3, -0.6, -0.55, 0, -Math.PI/4);
+        group.add(kd2);
+        // M - left stem
+        group.add(makeBar(0.18, 2.2, 0.3, 0.2, 0, 0));
+        // M - right stem
+        group.add(makeBar(0.18, 2.2, 0.3, 1.5, 0, 0));
+        // M - left diagonal
+        group.add(makeBar(0.16, 1.25, 0.3, 0.65, 0.3, 0, -Math.PI/3.5));
+        // M - right diagonal
+        group.add(makeBar(0.16, 1.25, 0.3, 1.05, 0.3, 0, Math.PI/3.5));
+
+        // Position the monogram to the right side (over the portrait area)
+        group.position.set(1.8, 0, 0);
+        group.scale.set(0.55, 0.55, 0.55);
+        scene.add(group);
+
+        // Floating gold particles
+        const pCount = 180;
+        const pGeo = new THREE.BufferGeometry();
+        const positions = new Float32Array(pCount*3);
+        const speeds = new Float32Array(pCount);
+        for (let i=0; i<pCount; i++){
+            positions[i*3]   = (Math.random()-0.5)*14;
+            positions[i*3+1] = (Math.random()-0.5)*8;
+            positions[i*3+2] = (Math.random()-0.5)*6 - 2;
+            speeds[i] = 0.2 + Math.random()*0.5;
+        }
+        pGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const pMat = new THREE.PointsMaterial({ color:goldColor(), size:0.04, transparent:true, opacity:0.55 });
+        const particles = new THREE.Points(pGeo, pMat);
+        scene.add(particles);
+
+        // Lights
+        const ambient = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambient);
+        const key = new THREE.DirectionalLight(0xffffff, 1.2);
+        key.position.set(5,5,5);
+        scene.add(key);
+        const rim = new THREE.DirectionalLight(goldColor(), 0.8);
+        rim.position.set(-5,-3,3);
+        scene.add(rim);
+
+        // Mouse parallax
+        let mx=0, my=0, tmx=0, tmy=0;
+        window.addEventListener('mousemove', e => {
+            tmx = (e.clientX/window.innerWidth - 0.5)*2;
+            tmy = (e.clientY/window.innerHeight - 0.5)*2;
+        }, { passive:true });
+
+        // Resize
+        function resize() {
+            const w = canvas.clientWidth;
+            const h = canvas.clientHeight;
+            if (w < 640) return;
+            camera.aspect = w/h;
+            camera.updateProjectionMatrix();
+            renderer.setSize(w, h, false);
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Update material colors when theme toggles
+        const toggle2 = document.getElementById('modeToggle');
+        if (toggle2) toggle2.addEventListener('click', () => {
+            setTimeout(() => {
+                const gc = goldColor();
+                group.traverse(o => { if(o.isMesh && o.material) o.material.color.setHex(gc); });
+                pMat.color.setHex(gc);
+                rim.color.setHex(gc);
+            }, 50);
+        });
+
+        const clock = new THREE.Clock();
+        function animate() {
+            requestAnimationFrame(animate);
+            const t = clock.getElapsedTime();
+            group.rotation.y = Math.sin(t*0.4)*0.3;
+            group.rotation.x = Math.sin(t*0.25)*0.1;
+            // Particles drift upward
+            const pos = pGeo.attributes.position.array;
+            for (let i=0; i<pCount; i++){
+                pos[i*3+1] += speeds[i]*0.003;
+                if (pos[i*3+1] > 4) pos[i*3+1] = -4;
+                pos[i*3] += Math.sin(t+i)*0.0005;
+            }
+            pGeo.attributes.position.needsUpdate = true;
+            particles.rotation.y = t*0.05;
+            // Mouse parallax
+            mx += (tmx-mx)*0.04;
+            my += (tmy-my)*0.04;
+            camera.position.x = mx*0.6;
+            camera.position.y = -my*0.4;
+            camera.lookAt(0,0,0);
+            renderer.render(scene, camera);
+        }
+        animate();
+    }
+    // Start Three after load so it doesn't block first paint
+    if (document.readyState === 'complete') initThree();
+    else window.addEventListener('load', initThree);
 })();
 </script>
 
