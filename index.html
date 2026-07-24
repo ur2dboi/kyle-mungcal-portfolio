@@ -1159,6 +1159,27 @@
         .admin-setup-banner.on  { background:rgba(34,197,94,0.06); color:#86efac; border:1px solid rgba(34,197,94,0.2); }
         .admin-setup-banner b { color:var(--gold); font-weight:600; }
         .admin-setup-banner code { background:rgba(0,0,0,0.35); padding:0.1rem 0.35rem; border-radius:4px; font-size:0.74rem; }
+        .admin-tabs { display:flex; gap:0.25rem; margin-bottom:1rem; padding:0.25rem; background:var(--surface); border:1px solid var(--border); border-radius:999px; }
+        .admin-tab { flex:1; padding:0.55rem 0.75rem; border:none; background:transparent; color:var(--text-3); font-family:inherit; font-size:0.82rem; font-weight:600; border-radius:999px; cursor:pointer; transition:background 0.2s, color 0.2s; }
+        .admin-tab.active { background:var(--gold); color:var(--black); }
+        .admin-tab .tab-badge { display:inline-block; min-width:18px; padding:0 5px; border-radius:999px; font-size:0.7rem; margin-left:0.35rem; line-height:1.4; vertical-align:middle; }
+        .admin-tab:not(.active) .tab-badge { background:var(--surface-elev); color:var(--text-4); }
+        .admin-tab.active .tab-badge { background:rgba(0,0,0,0.25); color:var(--black); }
+        /* Visitor list */
+        .visitors-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:0.5rem; margin-bottom:1rem; }
+        .vis-stat { padding:0.85rem 0.9rem; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-sm); }
+        .vis-stat .n { font-size:1.35rem; font-weight:700; color:var(--gold); font-family:'JetBrains Mono',monospace; line-height:1; }
+        .vis-stat .l { font-size:0.7rem; color:var(--text-4); font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:0.08em; margin-top:0.3rem; }
+        .visitor-row { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:0.5rem; padding:0.75rem 0; border-bottom:1px solid var(--border); align-items:start; font-size:0.85rem; }
+        .visitor-row:last-child { border-bottom:none; }
+        .visitor-row .v-meta { font-family:'JetBrains Mono',monospace; font-size:0.7rem; color:var(--text-3); margin-top:0.2rem; display:flex; flex-wrap:wrap; gap:0.5rem 0.8rem; }
+        .visitor-row .v-meta span { display:inline-flex; align-items:center; gap:0.25rem; }
+        .visitor-row .v-tag { display:inline-block; padding:0.12rem 0.45rem; border-radius:999px; font-size:0.65rem; font-weight:600; font-family:'JetBrains Mono',monospace; text-transform:uppercase; letter-spacing:0.05em; }
+        .v-tag.messaged { background:rgba(34,197,94,0.15); color:#86efac; }
+        .v-tag.visited { background:var(--surface-elev); color:var(--text-4); }
+        .visitor-row .v-ip { font-family:'JetBrains Mono',monospace; color:var(--gold); }
+        .country-flag { font-size:1rem; line-height:1; }
+        @media(max-width:600px){ .visitors-grid{grid-template-columns:repeat(2,1fr);} .vis-stat .n{font-size:1.1rem;} }
         .admin-status.ok { background:rgba(34,197,94,0.1); color:#22c55e; border:1px solid rgba(34,197,94,0.25); }
         .admin-status.err { background:rgba(239,68,68,0.1); color:#ef4444; border:1px solid rgba(239,68,68,0.25); }
         .admin-msg { padding:0.5rem 0; font-size:0.9rem; line-height:1.5; }
@@ -2455,6 +2476,8 @@
             appendMsg('visitor', text);
             input.value=''; sendBtn.disabled=true;
             await ChatStore.saveMsg(tid, text);
+            // Notify tracking that visitor sent first message
+            try{ window.dispatchEvent(new CustomEvent('kmm:messaged',{detail:{tid}})); }catch(e){}
             setTimeout(()=>appendMsg('admin','Thanks! Your message is received — I\'ll get back to you here as soon as I can.'),600);
         }
 
@@ -2478,6 +2501,7 @@
     })();
 
     /* ---- Admin panel ---- */
+    let adminView = 'messages'; // 'messages' | 'visitors'
     function initAdmin() {
         const panel = document.getElementById('adminPanel');
         if (!panel) return;
@@ -2522,16 +2546,26 @@
         function logout() { ChatStore.adminLogout(); location.hash=''; loginView(); }
         function render() {
             if (!ChatStore.adminIsAuthed()) { loginView(); return; }
-            const threads = ChatStore.allThreads();
-            const total = ChatStore.totalUnread();
+            // All items from cache — split into message threads (id starts with 'c_') and visitors (id starts with 'v_')
+            const allItems = ChatStore.allThreads();
+            const threads = allItems.filter(t => !t._type || t._type!=='visitor');
+            const visitors = allItems.filter(t => t._type==='visitor');
+            const unread = ChatStore.totalUnread();
+            const totalVisits = visitors.reduce((s,v)=>s+(v.visits||0),0);
+            const countries = {};
+            visitors.forEach(v=>{ const c=v.country||'Unknown'; countries[c]=(countries[c]||0)+(v.visits||1); });
+            const topCountries = Object.entries(countries).sort((a,b)=>b[1]-a[1]).slice(0,5);
+            const messagedCount = visitors.filter(v=>v.messaged).length;
+            const convRate = visitors.length ? Math.round((messagedCount/visitors.length)*100) : 0;
             const notifPerm = ('Notification' in window) ? Notification.permission : 'unsupported';
+
             panel.innerHTML = `
                 <div class="admin-inner">
                     <div class="admin-head">
-                        <h2>Messages ${total>0?'<span class="unread-badge">'+total+'</span>':''}</h2>
+                        <h2>Dashboard</h2>
                         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;justify-content:flex-end;">
                             <button class="admin-close" id="adminNotifBtn" title="Enable notifications" style="width:auto;padding:0 0.9rem;border-radius:2rem;font-size:0.8rem;font-weight:600;">
-                                ${notifPerm==='granted'?'🔔 On':(notifPerm==='denied'?'🔕 Blocked':'🔔 Enable Alerts')}
+                                ${notifPerm==='granted'?'🔔 On':(notifPerm==='denied'?'🔕 Blocked':'🔔 Alerts')}
                             </button>
                             <button class="admin-close" id="adminPwBtn" title="Change password" style="width:auto;padding:0 0.9rem;border-radius:2rem;font-size:0.8rem;font-weight:600;">🔑 Password</button>
                             <button class="admin-close" id="adminLogout" title="Logout" style="width:auto;padding:0 0.9rem;border-radius:2rem;font-size:0.8rem;font-weight:600;">Logout</button>
@@ -2541,15 +2575,75 @@
                     <div id="adminStatus" class="admin-status" style="display:none;"></div>
                     <div id="adminSetupBanner" class="admin-setup-banner"></div>
                     <p style="font-size:0.78rem;color:var(--text-3);margin:0 0 1rem;font-family:'JetBrains Mono',monospace;">
-                        💡 Install <a href="/admin.html" target="_blank" style="color:var(--gold);">/admin.html</a> on your phone for the Android app experience.<br>
+                        💡 Install <a href="/admin.html" target="_blank" style="color:var(--gold);">/admin.html</a> on your phone for the Android app.<br>
                         <span id="adminSyncStatus" style="color:var(--text-4);"></span>
                     </p>
-                    <div id="threadList"></div>
+                    <div class="admin-tabs">
+                        <button class="admin-tab ${adminView==='messages'?'active':''}" data-view="messages">💬 Messages<span class="tab-badge">${unread}</span></button>
+                        <button class="admin-tab ${adminView==='visitors'?'active':''}" data-view="visitors">👥 Visitors<span class="tab-badge">${visitors.length}</span></button>
+                    </div>
+                    <div id="adminContent"></div>
                 </div>`;
             panel.querySelector('#adminCloseBtn').addEventListener('click', () => { location.hash=''; hide(); });
             panel.querySelector('#adminLogout').addEventListener('click', logout);
             panel.querySelector('#adminPwBtn').addEventListener('click', showChangePw);
             panel.querySelector('#adminNotifBtn').addEventListener('click', requestNotif);
+            panel.querySelectorAll('.admin-tab').forEach(btn=>{
+                btn.addEventListener('click',()=>{ adminView = btn.dataset.view; render(); });
+            });
+
+            const content = panel.querySelector('#adminContent');
+            if(adminView==='visitors'){
+                // VISITORS VIEW
+                let statsHtml = `<div class="visitors-grid">
+                    <div class="vis-stat"><div class="n">${visitors.length}</div><div class="l">Unique visitors</div></div>
+                    <div class="vis-stat"><div class="n">${totalVisits}</div><div class="l">Total page views</div></div>
+                    <div class="vis-stat"><div class="n">${messagedCount}</div><div class="l">Messaged</div></div>
+                    <div class="vis-stat"><div class="n">${convRate}%</div><div class="l">Conversion</div></div>
+                </div>`;
+                if(topCountries.length){
+                    statsHtml += `<div style="font-size:0.75rem;color:var(--text-3);font-family:'JetBrains Mono',monospace;margin-bottom:1rem;padding:0.75rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);">🌍 Top countries: ${topCountries.map(([c,n])=>`${c||'?'} <b style="color:var(--gold)">${n}</b>`).join(' · ')}</div>`;
+                }
+                content.innerHTML = statsHtml + '<div id="visitorList" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:0 1rem;"></div>';
+                const vlist = content.querySelector('#visitorList');
+                if(visitors.length===0){
+                    vlist.innerHTML = '<div class="admin-empty">No visitors tracked yet (data appears after first page view).</div>';
+                } else {
+                    const sorted = visitors.sort((a,b)=>(b.last_seen||0)-(a.last_seen||0));
+                    sorted.forEach(v=>{
+                        const row = document.createElement('div');
+                        row.className='visitor-row';
+                        const loc = [v.city,v.region,v.country].filter(Boolean).join(', ')||'Unknown';
+                        const ls = v.last_seen?new Date(v.last_seen).toLocaleString():'—';
+                        const fs = v.first_seen?new Date(v.first_seen).toLocaleDateString():'—';
+                        const device = (()=>{
+                            const ua = v.ua||'';
+                            if(/Mobile|Android|iPhone|iPad/i.test(ua)) return '📱 Mobile';
+                            if(/Windows|Macintosh|Linux/i.test(ua)) return '💻 Desktop';
+                            return '🌐 Web';
+                        })();
+                        row.innerHTML = `
+                            <div>
+                                <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+                                    <span class="v-tag ${v.messaged?'messaged':'visited'}">${v.messaged?'✓ Messaged':'👁 Visited'}</span>
+                                    <span style="font-weight:600;">${device}</span>
+                                </div>
+                                <div class="v-meta">
+                                    <span class="v-ip">${escapeHtml(v.ip||'unknown')}</span>
+                                    <span>📍 ${escapeHtml(loc)}</span>
+                                    <span>👁 ${v.visits||1} view${(v.visits||1)===1?'':'s'}</span>
+                                    <span>🕒 last: ${ls}</span>
+                                    <span>📅 first: ${fs}</span>
+                                    ${v.last_path?'<span>🔗 '+escapeHtml(v.last_path)+'</span>':''}
+                                </div>
+                            </div>`;
+                        vlist.appendChild(row);
+                    });
+                }
+                return;
+            }
+
+            // MESSAGES VIEW (default)
 
             // Supabase setup banner + sync status
             const banner = panel.querySelector('#adminSetupBanner');
@@ -2569,7 +2663,8 @@
                 syncStatus.innerHTML = '<span style="color:#fbbf24;">● Local mode (messages reset on server restart — connect Supabase for persistence)</span>';
             }
 
-            const list = panel.querySelector('#threadList');
+            content.innerHTML = '<div id="threadList"></div>';
+            const list = content.querySelector('#threadList');
             if (threads.length === 0) {
                 list.innerHTML = '<div class="admin-empty">No messages yet. Visitors will appear here when they chat.</div>';
                 return;
@@ -2846,6 +2941,19 @@ if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('/sw.js').catch(() => {});
     });
 }
+
+// Visitor analytics beacon (non-blocking)
+(function(){
+    const ref = encodeURIComponent(document.referrer||'');
+    const p = encodeURIComponent(location.pathname);
+    const m = /[?&]m=1/.test(location.search)?'1':'0';
+    const img = new Image();
+    img.src = '/api/track?ref='+ref+'&p='+p+'&m='+m;
+    // Mark as messaged when visitor sends a message
+    window.addEventListener('kmm:messaged', ()=>{
+        const i2=new Image(); i2.src='/api/track?ref='+ref+'&p='+p+'&m=1';
+    });
+})();
 </script>
 </body>
 </html>

@@ -94,6 +94,26 @@
     .modal .actions .btn{padding:0.75rem;font-size:0.85rem;}
     .foot{padding:1rem;text-align:center;font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--text-4);letter-spacing:0.08em;text-transform:uppercase;}
     .foot a{color:var(--gold);text-decoration:none;}
+    /* Tabs */
+    .tabs{display:flex;gap:0.25rem;margin-bottom:0.85rem;padding:0.25rem;background:var(--surface);border:1px solid var(--border);border-radius:999px;}
+    .tab{flex:1;padding:0.55rem;border:none;background:transparent;color:var(--text-3);font-family:inherit;font-size:0.8rem;font-weight:600;border-radius:999px;cursor:pointer;}
+    .tab.active{background:var(--gold);color:var(--black);}
+    .tab .b{display:inline-block;min-width:18px;padding:0 5px;border-radius:999px;font-size:0.68rem;margin-left:0.25rem;line-height:1.5;}
+    .tab:not(.active) .b{background:var(--surface-elev);color:var(--text-4);}
+    .tab.active .b{background:rgba(0,0,0,0.2);color:var(--black);}
+    /* Visitor stats */
+    .vgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:0.45rem;margin-bottom:0.85rem;}
+    .vstat{padding:0.7rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);text-align:center;}
+    .vstat .n{font-size:1.15rem;font-weight:700;color:var(--gold);font-family:'JetBrains Mono',monospace;line-height:1;}
+    .vstat .l{font-size:0.6rem;color:var(--text-4);font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.07em;margin-top:0.25rem;}
+    .topc{font-size:0.72rem;color:var(--text-3);font-family:'JetBrains Mono',monospace;margin-bottom:0.85rem;padding:0.7rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);}
+    .vrow{display:grid;grid-template-columns:1fr auto;gap:0.4rem;padding:0.7rem 0;border-bottom:1px solid var(--border);font-size:0.82rem;}
+    .vrow:last-child{border-bottom:none;}
+    .vrow .meta{font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--text-3);margin-top:0.2rem;display:flex;flex-wrap:wrap;gap:0.35rem 0.7rem;}
+    .vtag{display:inline-block;padding:0.1rem 0.4rem;border-radius:999px;font-size:0.62rem;font-weight:600;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.05em;}
+    .vtag.m{background:rgba(34,197,94,0.15);color:#86efac;}
+    .vtag.v{background:var(--surface-elev);color:var(--text-4);}
+    .vip{font-family:'JetBrains Mono',monospace;color:var(--gold);word-break:break-all;}
     @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
     :focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
 </style>
@@ -140,6 +160,7 @@ let cache = JSON.parse(localStorage.getItem(CACHE_KEY)||'{}');
 let supabaseOn=false, pollTimer=null;
 const $ = id=>document.getElementById(id);
 const content=$('content'),bellBtn=$('bellBtn'),keyBtn=$('keyBtn'),logoutBtn=$('logoutBtn'),pwModal=$('pwModal'),syncDot=$('syncDot'),syncLabel=$('syncLabel');
+let adminView = 'messages';
 
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function fmtTime(ts){const d=new Date(ts),n=new Date();return d.toDateString()===n.toDateString()?d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):d.toLocaleDateString([],{month:'short',day:'numeric'})+' '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
@@ -244,9 +265,57 @@ function renderLogin(){
 }
 function render(){
     if(!isAuthed()){renderLogin();return;}
-    const threads=Object.values(cache).sort((a,b)=>(b.lastAt||b.createdAt)-(a.lastAt||a.createdAt));
+    const all=Object.values(cache);
+    const threads=all.filter(t=>!t._type||t._type!=='visitor').sort((a,b)=>(b.lastAt||b.createdAt)-(a.lastAt||a.createdAt));
+    const visitors=all.filter(t=>t._type==='visitor');
     const total=threads.length, unread=threads.reduce((s,t)=>s+(t.unread||0),0);
-    let h=`<div class="stats-row">
+    const totalVisits=visitors.reduce((s,v)=>s+(v.visits||0),0);
+    const countries={};visitors.forEach(v=>{const c=v.country||'?';countries[c]=(countries[c]||0)+(v.visits||1);});
+    const topC=Object.entries(countries).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    const msged=visitors.filter(v=>v.messaged).length;
+    const conv=visitors.length?Math.round((msged/visitors.length)*100):0;
+    let h=`<div class="tabs">
+        <button class="tab ${adminView==='messages'?'active':''}" data-v="messages">💬 Msg<span class="b">${unread}</span></button>
+        <button class="tab ${adminView==='visitors'?'active':''}" data-v="visitors">👥 Vis<span class="b">${visitors.length}</span></button>
+    </div>`;
+    if(adminView==='visitors'){
+        h+=`<div class="vgrid">
+            <div class="vstat"><div class="n">${visitors.length}</div><div class="l">Visitors</div></div>
+            <div class="vstat"><div class="n">${totalVisits}</div><div class="l">Page views</div></div>
+            <div class="vstat"><div class="n">${msged}</div><div class="l">Messaged</div></div>
+            <div class="vstat"><div class="n">${conv}%</div><div class="l">Conversion</div></div>
+        </div>`;
+        if(topC.length) h+=`<div class="topc">🌍 ${topC.map(([c,n])=>c+' <b style="color:var(--gold)">'+n+'</b>').join(' · ')}</div>`;
+        h+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:0 0.9rem;">';
+        if(visitors.length===0) h+='<div class="empty" style="padding:2rem 0"><div class="icon">👀</div><div>No visitors yet.</div></div>';
+        else visitors.sort((a,b)=>(b.last_seen||0)-(a.last_seen||0)).forEach(v=>{
+            const loc=[v.city,v.region,v.country].filter(Boolean).join(', ')||'Unknown';
+            const dev=/Mobile|Android|iPhone|iPad/i.test(v.ua||'')?'📱':(/Windows|Mac|Linux/i.test(v.ua||'')?'💻':'🌐');
+            const ls=v.last_seen?fmtTime(v.last_seen):'—';
+            h+=`<div class="vrow">
+                <div>
+                    <div style="display:flex;gap:0.4rem;align-items:center;flex-wrap:wrap;">
+                        <span class="vtag ${v.messaged?'m':'v'}">${v.messaged?'✓ Msg':'👁 View'}</span>
+                        <span style="font-weight:600;">${dev}</span>
+                    </div>
+                    <div class="meta">
+                        <span class="vip">${escapeHtml(v.ip||'?')}</span>
+                        <span>📍${escapeHtml(loc)}</span>
+                        <span>👁${v.visits||1}</span>
+                        <span>🕒${ls}</span>
+                        ${v.last_path?'<span>🔗'+escapeHtml(v.last_path)+'</span>':''}
+                    </div>
+                </div>
+            </div>`;
+        });
+        h+='</div>';
+        content.innerHTML=h;
+        content.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{adminView=b.dataset.v;render();}));
+        updateBell();updateSync();
+        return;
+    }
+    // Messages view
+    h+=`<div class="stats-row">
         <div class="stat"><div class="n">${unread}</div><div class="l">Unread</div></div>
         <div class="stat"><div class="n">${total}</div><div class="l">Threads</div></div>
     </div>`;
@@ -282,6 +351,7 @@ function render(){
         btn.addEventListener('click',send);inp.addEventListener('keydown',e=>{if(e.key==='Enter')send();});
     });
     threads.forEach(t=>{if(t.unread)api({action:'markRead',tid:t.id,token:token()});});
+    content.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{adminView=b.dataset.v;render();}));
     updateBell();updateSync();
 }
 
