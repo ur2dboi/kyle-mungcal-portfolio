@@ -1,6 +1,6 @@
 // Service worker — cache first for core assets, network first for HTML
 // Supports push notifications (for future FCM integration) and admin console
-const CACHE = 'kmm-portfolio-v3';
+const CACHE = 'kmm-portfolio-v4';
 const CORE = [
   '/',
   '/index.html',
